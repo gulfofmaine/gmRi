@@ -6,6 +6,8 @@
 \alias{gmRi-package}
 \title{gmRi: Utility Functions for GMRI Research Team}
 \description{
+\if{html}{\figure{logo.png}{options: align='right' alt='logo' width='120'}}
+
 Common routines and utilities for performing various 
   research tasks and implementing GMRI branding. Currently this package 
   adds ggplot2 palette tools to access official Gulf of Maine Research 
