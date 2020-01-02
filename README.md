@@ -19,11 +19,10 @@ arrays will make our work take less time and be consistent in-house.
 ## Installation
 
 You can install the development version of gmRi from
-[GitHub](www.github.com)
-with:
+[GitHub](www.github.com) with:
 
 ``` r
-devtools::install_.packages_github("https://github.com/gulfofmaine/gmRi")
+devtools::install_github("https://github.com/gulfofmaine/gmRi")
 ```
 
 ## Example

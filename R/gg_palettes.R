@@ -102,14 +102,14 @@ gmri_pal <- function(palette = "main", reverse = FALSE, ...) {
 #' @export
 #' @examples
 #' #Color by discrete variable using default palette
-#' ggplot2::ggplot(iris, ggplot2::aes(Sepal.Width, Sepal.Length, color = Species)) +
-#'  ggplot2::geom_point(size = 4) +
-#'  scale_color_gmri()
+#' # ggplot2::ggplot(iris, ggplot2::aes(Sepal.Width, Sepal.Length, color = Species)) +
+#' #  ggplot2::geom_point(size = 4) +
+#' #  scale_color_gmri()
 #'
 #' #Color by numeric variable with cool palette
-#' ggplot2::ggplot(iris, ggplot2::aes(Sepal.Width, Sepal.Length, color = Sepal.Length)) +
-#'   ggplot2::geom_point(size = 4, alpha = .6) +
-#'   scale_color_gmri(discrete = FALSE, palette = "cool")
+#' # ggplot2::ggplot(iris, ggplot2::aes(Sepal.Width, Sepal.Length, color = Sepal.Length)) +
+#' #  ggplot2::geom_point(size = 4, alpha = .6) +
+#' #  scale_color_gmri(discrete = FALSE, palette = "cool")
 #'
 scale_color_gmri <- function(palette = "main", discrete = TRUE, reverse = FALSE, ...) {
   pal <- gmri_pal(palette = palette, reverse = reverse)
@@ -135,10 +135,10 @@ scale_color_gmri <- function(palette = "main", discrete = TRUE, reverse = FALSE,
 #' @export
 #' @examples
 #' #Fill by discrete variable with different palette + remove legend (guide)
-#' ggplot2::ggplot(mpg, ggplot2::aes(manufacturer, fill = manufacturer)) +
-#'   ggplot2::geom_bar() +
-#'   ggplot2::theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-#'   scale_fill_gmri(palette = "mixed", guide = "none")
+#' #ggplot2::ggplot(mpg, ggplot2::aes(manufacturer, fill = manufacturer)) +
+#' #  ggplot2::geom_bar() +
+#' #  ggplot2::theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+#' #  scale_fill_gmri(palette = "mixed", guide = "none")
 #'
 scale_fill_gmri <- function(palette = "main", discrete = TRUE, reverse = FALSE, ...) {
   pal <- gmri_pal(palette = palette, reverse = reverse)

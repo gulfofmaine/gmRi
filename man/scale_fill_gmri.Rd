@@ -21,9 +21,9 @@ GMRI-ggplot2 Scale Fill Palettes
 }
 \examples{
 #Fill by discrete variable with different palette + remove legend (guide)
-ggplot2::ggplot(mpg, ggplot2::aes(manufacturer, fill = manufacturer)) +
-  ggplot2::geom_bar() +
-  ggplot2::theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  scale_fill_gmri(palette = "mixed", guide = "none")
+#ggplot2::ggplot(mpg, ggplot2::aes(manufacturer, fill = manufacturer)) +
+#  ggplot2::geom_bar() +
+#  ggplot2::theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+#  scale_fill_gmri(palette = "mixed", guide = "none")
 
 }

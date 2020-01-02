@@ -21,13 +21,13 @@ GMRI-ggplot2 Scale Color Palettes
 }
 \examples{
 #Color by discrete variable using default palette
-ggplot2::ggplot(iris, ggplot2::aes(Sepal.Width, Sepal.Length, color = Species)) +
- ggplot2::geom_point(size = 4) +
- scale_color_gmri()
+# ggplot2::ggplot(iris, ggplot2::aes(Sepal.Width, Sepal.Length, color = Species)) +
+#  ggplot2::geom_point(size = 4) +
+#  scale_color_gmri()
 
 #Color by numeric variable with cool palette
-ggplot2::ggplot(iris, ggplot2::aes(Sepal.Width, Sepal.Length, color = Sepal.Length)) +
-  ggplot2::geom_point(size = 4, alpha = .6) +
-  scale_color_gmri(discrete = FALSE, palette = "cool")
+# ggplot2::ggplot(iris, ggplot2::aes(Sepal.Width, Sepal.Length, color = Sepal.Length)) +
+#  ggplot2::geom_point(size = 4, alpha = .6) +
+#  scale_color_gmri(discrete = FALSE, palette = "cool")
 
 }

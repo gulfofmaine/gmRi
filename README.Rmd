@@ -26,7 +26,7 @@ The goal of gmRi is to consolidate useful reasearch tools under one consistent r
 You can install the development version of gmRi from [GitHub](www.github.com) with:
 
 ``` r
-devtools::install_.packages_github("https://github.com/gulfofmaine/gmRi")
+devtools::install_github("https://github.com/gulfofmaine/gmRi")
 ```
 
 ## Example

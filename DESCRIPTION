@@ -17,4 +17,10 @@ LazyData: true
 RoxygenNote: 7.0.2
 Imports:
   ggplot2 (>= 2.1.1),
-  grDevices (>= 3.0.0)
+  grDevices (>= 3.0.0),
+  dplyr,
+  here,
+  ncdf4,
+  raster,
+  rlang,
+  sp
