@@ -6,7 +6,7 @@
 \usage{
 shared.path(
   os.use = "unix",
-  group = c("RES Data", "Mills Lab"),
+  group = c("RES Data", "Mills Lab", "Climate Change Ecology Lab"),
   folder = "Functions/"
 )
 }
