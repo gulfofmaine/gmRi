@@ -44,9 +44,16 @@ token in your browser at [github](https://github.com/settings/tokens),
 with more detailed instructions at [Happy git with
 R](https://happygitwithr.com/github-pat.html).
 
-Once a new token is generated, you can add it to your R system
-environment by typing: `Sys.setenv(GITHUB_PAT = "my new github access
-token copied from the browser")`
+Once a new token is generated, you will need to add it to your R system
+environment. Typing `usethis::edit_r_environ()` will open a new tab in
+Rstudio called “.Renviron”. In that new file you will assign your
+GITHUB\_PAT by typing:
+
+    GITHUB_PAT=my_new_github_access_token_copied_from_the_browser
+
+Save the .Renviron file, and restart your R session. Your Github
+personal access token should now be visible when you type:
+`Sys.getenv()`.
 
 After the personal access token (PAT) is set you should be able to
 install the package (assuming you have access to the gulfofmaine
