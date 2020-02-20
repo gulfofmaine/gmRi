@@ -2,6 +2,12 @@
 ####  About: https://www.ncdc.noaa.gov/oisst
 
 
+
+
+####______________________________####
+
+
+
 #' @title Longitude 180 to 360
 #'
 #' @description This is a simple function to translate negative longitudes
@@ -12,7 +18,6 @@
 #' @return lon Longitude from 0-360 degrees
 #' @export
 #'
-#' @examples
 #'
 make360 <- function(lon) {
 
@@ -20,6 +25,9 @@ make360 <- function(lon) {
   lon[ind] <- lon[ind] + 360
   return(lon)
 }
+
+
+####______________________________####
 
 
 #' @title Fix Raster
@@ -39,7 +47,6 @@ make360 <- function(lon) {
 #' @return rast.out Correctly trimmed and oriented raster object
 #' @export
 #'
-#' @examples
 #'
 fix_raster <- function(x, lons.use, lats.use, x.min.use, x.max.use, y.min.use, y.max.use) {
 
@@ -49,6 +56,9 @@ fix_raster <- function(x, lons.use, lats.use, x.min.use, x.max.use, y.min.use, y
 
   ## End function
 }
+
+
+####______________________________####
 
 
 #' @title OISST list to Stack
@@ -63,7 +73,6 @@ fix_raster <- function(x, lons.use, lats.use, x.min.use, x.max.use, y.min.use, y
 #' @return rast.temp Raster stack of OI Sea Surface Temperatures
 #' @export
 #'
-#' @examples
 #'
 oisst_list_to_stack <- function(box, times.window) {
 
@@ -90,13 +99,13 @@ oisst_list_to_stack <- function(box, times.window) {
   data.stem <- "https://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/noaa.oisst.v2.highres/"
 
   # Connecting and extracting lat/lon/time variables from netcdf file
-  my.nc  <- ncdf4::nc_open(paste(data.stem, x, sep = ""))
+  my.nc   <- ncdf4::nc_open(paste(data.stem, x, sep = ""))
   lats    <- ncdf4::ncvar_get(my.nc, var = "lat")
   lons    <- ncdf4::ncvar_get(my.nc, var = "lon")
   times   <- ncdf4::ncvar_get(my.nc, var = "time")
 
   # Make times a little bit easier to handle
-  dates.full <- as.Date(times, origin='1800-01-01', tz= "GMT")
+  dates.full <- as.Date(times, origin ='1800-01-01', tz = "GMT")
 
   # Find indices and windows corresponding to spatial box of interest,
   # which are then used in the "start" and "count" arguments to the ncvar_get call
@@ -145,7 +154,7 @@ oisst_list_to_stack <- function(box, times.window) {
 
 
 
-
+####______________________________####
 
 
 #' @title Satellite Data Extraction Function
@@ -163,7 +172,6 @@ oisst_list_to_stack <- function(box, times.window) {
 #' @return stack.out Stack of daily OISST files and also saves the raster stack as a .grd file in the output directory specified by out.dir
 #' @export
 #'
-#' @examples
 #'
 env_data_extract <- function(data.set = "OISST", dates = NULL, box = c(-77, -60, 35, 46), out.dir = here::here("data", "OISST_thredd_test"), mask = NULL) {
 
@@ -189,6 +197,7 @@ env_data_extract <- function(data.set = "OISST", dates = NULL, box = c(-77, -60,
   # Spatial projection infomation
   proj.wgs84 <- sp::CRS("+init=epsg:4326") #WGS84 projection for all rasters
 
+  ####  MURSST Data  ####
   # Access data from the web depending on "data.set"
   # MURSST-- Download of full timeseries takes ~ 20 minutes.
   if(data.set == "MURSST"){
@@ -269,7 +278,7 @@ env_data_extract <- function(data.set = "OISST", dates = NULL, box = c(-77, -60,
     }
   }
 
-  # ERSST
+  ####  ERSST Data  ####
   if(data.set == "ERSST") {
     # Set data path
     data.path <- "http://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/noaa.ersst/sst.mnmean.v4.nc"
@@ -335,11 +344,17 @@ env_data_extract <- function(data.set = "OISST", dates = NULL, box = c(-77, -60,
     return(stack.out)
   }
 
-  # OISST -- Download of full timeseries takes ~ 20 minutes.
+  ####  OISST Data  ####
   if(data.set == "OISST") {
     stem.path<- "http://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/noaa.oisst.v2.highres/"
 
-    b.box <- c(make360(box[1]), make360(box[2]), box[3], box[4])
+    ####____Debug Null Box  ####
+    #Behavior for box = NULL
+    if(is.null(box)) {
+      b.box <- c(0, 360, -90, 90)
+    } else {
+      b.box <- c(make360(box[1]), make360(box[2]), box[3], box[4])
+    }
 
     # Get file list
     if(!is.null(dates)){
@@ -349,12 +364,12 @@ env_data_extract <- function(data.set = "OISST", dates = NULL, box = c(-77, -60,
       files    <- paste(stem.path, paste("sst.day.mean.", seq(from = date.min, to = date.max, by = 1), ".v2.nc", sep = ""), sep = "")
     } else {
       current.year <- format(Sys.Date(), "%Y")
-      files<- paste(stem.path, paste("sst.day.mean.", seq(from = 1981, to = current.year, by = 1), ".v2.nc", sep = ""), sep = "")
+      files <- paste(stem.path, paste("sst.day.mean.", seq(from = 1981, to = current.year, by = 1), ".v2.nc", sep = ""), sep = "")
     }
 
     stack.out <- stack()
 
-    for(i in seq_along(files)){
+    for(i in seq_along(files)) {
       # Connecting and extracting lat/lon/time variables from netcdf file
       my.nc <- nc_open(files[i])
       lats  <- ncvar_get(my.nc, var = "lat")
@@ -362,7 +377,8 @@ env_data_extract <- function(data.set = "OISST", dates = NULL, box = c(-77, -60,
       times <- ncvar_get(my.nc, var = "time")
 
       # Make times a little bit easier to handle
-      dates.full <- as.Date(times, origin='1800-01-01', tz= "GMT")
+      dates.full <- as.Date(times, origin = '1800-01-01', tz= "GMT")
+
 
       # Find indices and windows corresponding to spatial box of interest, which are then used in the "start" and "count" arguments to the ncvar_get call for the sst variable
       x.window <- which(lons > b.box[1] & lons < b.box[2])
@@ -387,7 +403,15 @@ env_data_extract <- function(data.set = "OISST", dates = NULL, box = c(-77, -60,
       count.use <- c("lon" = x.count, "lat" = y.count, "time" = time.count)
 
       # Run ncvar_get, adjusting order of start and count as needed
-      temp <- ncvar_get(my.nc, varid = "sst", start = start.use[dim.order], count = count.use[dim.order])
+      ####____Debug NULL Box  ####
+      if(is.null(box)) {
+        temp <- ncvar_get(my.nc, varid = "sst", start = c("lon" = 1, "lat" = 1, "time" = 1), count = c("lon" = -1, "lat" = -1, "time" = time.count))
+      } else {
+        temp <- ncvar_get(my.nc, varid = "sst", start = start.use[dim.order], count = count.use[dim.order])
+      }
+
+
+
 
       # Moving from the array format of temp to a raster stack
       temp.list <- lapply(seq(dim(temp)[3]), function(x) fix_raster(temp[,,x], lons.use = lons, lats.use = lats, x.min.use = x.min, x.max.use = x.max, y.min.use = y.min, y.max.use = y.max))
@@ -433,73 +457,13 @@ env_data_extract <- function(data.set = "OISST", dates = NULL, box = c(-77, -60,
 
 ####______________________________####
 
-####  Testing  ####
 
 
 
 
-# library(tidyverse)
-# library(here)
-
-# # # Using data range from a file
-# station_data <- read_csv("/Users/akemberling/Box/Adam Kemberling/Box_Projects/Convergence_ML/data/trawldat.csv")
-# station_data <- station_data %>%
-#   mutate(ID = as.character(ID),
-#          DATE = str_c(EST_YEAR, EST_MONTH, EST_DAY, sep = "-")) %>%
-#   arrange(EST_YEAR, EST_MONTH, EST_DAY) %>%
-#   filter(EST_YEAR >= 1982)
-#
-# date_start <- as.character(head(station_data)[1, "DATE"])
-# date_stop  <- as.character(tail(station_data, rows = 1)[1, "DATE"])
-# date_range <- c(date_start, date_stop)
-
-# #Manual, small date range for testing
-# date_range <- c("2017-1-1", "2018-5-11")
-#
-#
-#
-# #### env_data_extract -test  ####
-# env_data_extract(data.set = "OISST",
-#                  dates = date_range,
-#                  box = c(-77, -60, 35, 46),
-#                  out.dir = "/Users/akemberling/Documents/Repositories/testing_dir",
-#                  mask = NULL)
-#
-#
-#
-# ####__####
-# ####  NETCDF Point Value Extraction  ####
-# ####  Extracting values from full raster stack for specific locations and specific times
-#
-# #Load data
-# station_data <- read_csv("~/Box/Adam Kemberling/Box_Projects/Convergence_ML/data/trawldat.csv")
-# station_data <- station_data %>%
-#   mutate(ID = as.character(ID)) %>%
-#   arrange(EST_YEAR, EST_MONTH, EST_DAY) %>%
-#   filter(EST_YEAR >= 1982)
-#
-# #Point locations
-# head(station_data)
-#
-# #Raster Stack
-# sst_stack <- raster::stack("/Users/akemberling/Documents/Repositories/testing_dir/OISST.grd")
-#
-#
-# 1. Make a column that will match date indices from raster stack
-
-# # raster names cannot start with a number, or contain spaces or underscores
-# # goal is to match format of names(sst_stack)
-# station_data <- station_data %>%
-#   mutate(
-#     valid_dates = str_c("X",
-#                         EST_YEAR, ".",
-#                         str_pad(EST_MONTH, width = 2, side = "left", pad = "0"), ".",
-#                         str_pad(EST_DAY, width = 2, side = "left", pad = "0")))
 
 
-
-
-#' Make Valid Raster Stack Dates
+#' @title Make Valid Raster Stack Dates
 #'
 #' @details Takes a dataframe object containing columns for the year, month, and day
 #' and creates a new "valid_dates" column that will match the naming convention for
@@ -515,7 +479,6 @@ env_data_extract <- function(data.set = "OISST", dates = NULL, box = c(-77, -60,
 #' @return df_out Original dataframe with added "valid_dates" column
 #' @export
 #'
-#' @examples
 #'
 make_stack_dates <- function(point_location_df, year_col, month_col, day_col) {
 
@@ -539,51 +502,218 @@ make_stack_dates <- function(point_location_df, year_col, month_col, day_col) {
 }
 
 
-# #Works without quoting the columns
-# station_data <- make_stack_dates(
-#   point_location_df = station_data,
-#   year_col = EST_YEAR,
-#   month_col = EST_MONTH,
-#   day_col = EST_DAY)
-#
-#
-#
-# # 2. Put station locations into a list, grouped by those index values
-# stations_l <- station_data %>% split(.$valid_dates)
-#
-# # 3. Subset dates to just the ones available in stack
-# stations_l <- stations_l[which(names(stations_l) %in% names(sst_stack))]
-#
-# # 4. Function to extract values by date
-# point_extraction <- function(points_list = stations_l, ras_stack = sst_stack, xcoord = "DECDEG_BEGLON", ycoord = "DECDEG_BEGLAT") {
-#
-#   #Extract the date index from the station data
-#   date_index <- as.character(points_list[1, "valid_dates"])
-#
-#   #Pull the values for each station that day
-#   vals_out <- raster::extract(
-#     ras_stack[[date_index]],           #Target Date Layer
-#     points_list[ , c(xcoord, ycoord)], #Coordinates
-#     df = T                             #Output as Dataframe
-#     )
-#
-#   #Add extracted values to original data
-#   df_out <- points_list %>% mutate(ras_val = vals_out[,2])
-#   return(df_out)
-#
-#
-#
-# } # End Point extraction function
-#
-# # 4. Use map() or lapply() to iterate through the list and extract values
-# test_extract <- purrr::map(.x = stations_l, .f = point_extraction, sst_stack)
-#
-# # 5. Collapse to a dataframe, rename variable
-# sst_out <- bind_rows(test_extract) %>% rename(sst = ras_val)
+
+####______________________________####
+
+
+#' @title OISST Time-Period Means
+#'
+#' @description Generate average annual SST measurements from the daily OISST
+#' raster brick using custom date windows. Takes the daily OISST mean temperature
+#' raster stack and a dataframe outlining period start and end dates as inputs.
+#'
+#' Returns a raster stack with mean SST For every year for each intra-annual time-period
+#' specified.
+#'
+#' @param stack_in Raster stack of daily SST Measurements from OISST dataset
+#' @param projection_crs The coordinate reference system number/proj4string for the desired output
+#' @param time_res_df Dataframe detailing the time-period structure you wish to calculate SST means for
+#'
+#' @return
+#' @export
+#'
+oisst_period_means <- function(stack_in = dailymu.stack, projection_crs = 26919, time_res_df = season_tester) {
+
+  ####  1. Reprojection  ####
+  #Reproject if necessary
+  project_utm <- st_crs(projection_crs)
+
+  #Default is NAD1983 / UTM zone 19N Gulf of Maine
+  if(projection_crs != 26919){
+    stack_in <- raster::projectRaster(stack_in, crs = project_utm$proj4string)
+  }
+
+  #Intra-annual break names
+  break_names <- unique(time_res_df$breaks)
+
+  #Annual Slices, and start and end date information
+  year_min     <- min(lubridate::year(time_res_df$start_date))
+  year_max     <- max(lubridate::year(time_res_df$end_date))
+  years        <- seq(from = year_min, to = year_max, by = 1)
+  names(years) <- years
+  start_months <- str_pad(lubridate::month(time_res_df$start_date), width = 2, pad = "0", side = "left")
+  start_days   <- str_pad(lubridate::day(time_res_df$start_date), width = 2, pad = "0", side = "left")
+  end_months   <- str_pad(lubridate::month(time_res_df$end_date), width = 2, pad = "0", side = "left")
+  end_days     <- str_pad(lubridate::day(time_res_df$end_date), width = 2, pad = "0", side = "left")
 
 
 
+  ### 2. List organization  ####
 
+  #Set up flexible organizational structure
+
+  # 1. Break dates are the date ranges we want to summarize by, in a list
+  break_dates <- vector(mode = "list", length = length(break_names)) %>% setNames(break_names)
+  break_dates <-  break_dates %>% map(function(x) {
+    x <- vector(mode = "list", length = length(years)) %>% setNames(years)
+  })
+
+
+  # 2. Break indices are the raster layer indices that match them
+  break_indices <- break_dates
+
+  # 3. Break Means
+  break_summs <- break_dates
+
+  #Stacks out
+  stacks_out <- vector(mode = "list", length = length(break_names)) %>% setNames(break_names)
+
+
+  ####  3. Processing Loop  ####
+
+  #Loop through n-breaks (j) over n-years(i)
+  for (j in 1:length(break_dates)) {
+    for(i in seq_along(years)){
+
+      # 1. Pull the dates for the season distinction
+      break_dates[[j]][[i]] <- seq(from = as.Date(paste(years[i], start_months[j], start_days[j], sep = "-")), to = as.Date(paste(years[i], end_months[j], end_days[j], sep = "-")), by = 1)
+
+
+      # 2. Check to see if there's data to subset
+      break_indices[[j]][[i]] <- which(gsub("[.]", "-", gsub("X", "", names(stack_in))) %in% as.character(break_dates[[j]][[i]]))
+
+      #Calculate mean values for each season
+      if(length(break_indices[[j]][[i]]) != 0) {
+        break_summs[[j]][[i]] <- calc(stack_in[[break_indices[[j]][[i]]]], mean)
+      } else{
+        break_summs[[j]][[i]] <- "period outside data range"
+
+      }
+
+      names(break_summs[[j]][[i]]) <- str_c(break_names[j], years[i],sep = ".")
+
+    } # Close I Loop
+
+
+  } #Close J Loop
+
+
+  #### 4. Drop Nulls ####
+  stacks_out <- break_summs %>%
+    map(function(.x) {.x %>% discard(~ class(.x) == "character")})
+
+
+  #### 5. Build names from valid layers  ####
+  stack_names <- imap(stacks_out, function(x,y) {
+    name_out <- str_c(y, names(x), sep = ".")}) %>%
+    unname() %>%
+    unlist()
+
+
+  ####  Unlist Periods and Stack  ####
+  all_breaks_mu_stack <- stacks_out %>%
+    unlist() %>%
+    setNames(stack_names) %>%
+    stack()
+
+
+  #And return the mother stack
+  return(all_breaks_mu_stack)
+
+}
+
+
+#' @title Vectorized Daily OISST 30-Year Climatology Means
+#'
+#' @description Generate Daily 30-year climatologies for a given area.
+#'
+#' Returns a raster stack with mean SST for every day in the year over the desired time window.
+#'
+#' @param stack_in Raster stack of daily SST Measurements from OISST dataset
+#' @param projection_crs The coordinate reference system number/proj4string for the desired output
+#' @param anom_period Character vector indicating start and end years to calculate climatology for. NULL defaults to 1982-2011.
+#'
+#' @return
+#' @export
+#'
+calc_daily_climatologies <- function(stack_in = dailymu.stack, projection_crs = 26919, anom_period = NULL) {
+
+  ####  1. Set up daily indexing DF  ####
+  if(is.null(anom_period) == TRUE) {
+    #Set up daily df
+    start_dates <- seq.Date(from = as.Date("1982-01-01"), to = as.Date("1982-12-31"), by = "days")
+    end_dates   <- seq.Date(from = as.Date("2011-01-01"), to = as.Date("2011-12-31"), by = "days")
+    time_res_df <- data.frame(
+      "start_date" = start_dates,
+      "end_date" = end_dates) %>%
+      mutate(breaks = str_c(lubridate::month(start_date, label = T), lubridate::day(start_date)))
+  } else{
+    start_dates <- seq.Date(from = as.Date(str_c(anom_period[1], "-01-01")), to = as.Date(str_c(anom_period[1], "-12-31")), by = "days")
+    end_dates   <- seq.Date(from = as.Date(str_c(anom_period[2], "-01-01")), to = as.Date(str_c(anom_period[2], "-12-31")), by = "days")
+    time_res_df <- data.frame(
+      "start_date" = start_dates,
+      "end_date" = end_dates) %>%
+      mutate(breaks = str_c(lubridate::month(start_date, label = T), lubridate::day(start_date)))
+  }
+
+
+  ####  2. Reproject  ####
+  #Reproject if necessary
+  project_utm <- st_crs(projection_crs)
+
+  #Default is NAD1983 / UTM zone 19N Gulf of Maine
+  if(projection_crs != 26919){
+    stack_in <- raster::projectRaster(stack_in, crs = project_utm$proj4string)
+  }
+
+  #Names for the raster layers we are calculating
+  break_names <- unique(time_res_df$breaks)
+
+  ### 3. Calculate Daily Climatologies  ####
+
+  #Set up flexible organizational structure that we can vectorize
+
+  # 1. Break dates are the dates we wants a summary raster layer for
+  break_dates <- vector(mode = "list", length = length(break_names)) %>% setNames(break_names)
+
+  # 2. Calculate daily means
+  daily_climatologies <- pmap(time_res_df, function(...){
+
+    #Walk each row using this object
+    current <- tibble(...)
+
+    #Pull that day from the stack for all years
+    date_pull <- seq.Date(from = current$start_date, to = current$end_date, by = "year")
+
+    # #Check to Make sure that date is in the stack
+    break_indices <- which(gsub("[.]", "-", gsub("X", "", names(stack_in))) %in% as.character(date_pull))
+
+
+    # #Calculate Mean values for each day
+    if(length(break_indices) != 0) {
+      daily_climatology <- calc(stack_in[[break_indices]], mean)
+    } else{
+      daily_climatology <- "SST data Unavailable"
+
+    }
+
+    #Name it
+    names(daily_climatology) <- current$breaks
+    return(daily_climatology)
+
+  })
+
+  #Name the list of raster layers
+  names(daily_climatologies) <- time_res_df$breaks
+
+  #### 3. Drop Invalid Dates ####
+  daily_climatologies <- daily_climatologies %>% discard(~ class(.x) == "character")
+
+  #Stack and return the mother stack
+  daily_stack <- stack(daily_climatologies)
+  return(daily_stack)
+
+}
 
 
 

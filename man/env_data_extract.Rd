@@ -31,6 +31,3 @@ This function accesses webhosted satellite data and then downloads a subset of t
 on dates and long/lat bounding box. After downloading the data, the function processes it and saves it as
 one raster stack file. Installs "ncdf4" and "raster" packages if not installed.
 }
-\examples{
-
-}

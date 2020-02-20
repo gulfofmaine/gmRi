@@ -18,6 +18,3 @@ rast.temp Raster stack of OI Sea Surface Temperatures
 This function loops over daily OISST files and returns a single stack.
 Installs "ncdf4" and "raster" packages if not installed.
 }
-\examples{
-
-}

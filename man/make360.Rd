@@ -16,6 +16,3 @@ lon Longitude from 0-360 degrees
 This is a simple function to translate negative longitudes
 (measured on -180:180 scale) into 0-360, which is coordinate system used by some environmental datasets.
 }
-\examples{
-
-}

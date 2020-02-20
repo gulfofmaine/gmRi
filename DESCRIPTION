@@ -23,4 +23,5 @@ Imports:
   ncdf4,
   raster,
   rlang,
-  sp
+  sp,
+  lubridate
