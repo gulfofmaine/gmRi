@@ -28,6 +28,3 @@ rast.out Correctly trimmed and oriented raster object
 his function helps convert an array (x, y, z)
 into raster layers with the correct dimensions and orientation.
 }
-\examples{
-
-}

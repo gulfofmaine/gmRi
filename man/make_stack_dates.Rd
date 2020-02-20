@@ -28,6 +28,3 @@ a raster stack object, i.e. names(raster_stack) which cannot start with a number
 or contain spaces or underscores. Month and day values are left-padded with zeros
 to maintain consistent string length.
 }
-\examples{
-
-}
