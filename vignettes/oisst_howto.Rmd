@@ -9,7 +9,7 @@ vignette: >
 ---
 
 ```{r setup, include = FALSE}
-knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, fig.align = "center")
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, fig.align = "center", eval = FALSE)
 
 library(ncdf4)
 library(sf)
@@ -36,11 +36,13 @@ theme_set(theme_bw())
 
 # Establish Desired Destination Path
 oisst_path <- "/Users/akemberling/Documents/oisst_local"
+oisst_path <- "/Users/akemberling/Documents/oisst_mainstays/full_period"
 
 
 # Pull data from Thredds server
 daily_sst_stack <- env_data_extract(data.set = "OISST", 
                                     dates = c("1982-01-01", "1984-12-31"), 
+                                    #box = c(1, 359, -89, 89), 
                                     box = c(-77, -60, 35, 46), 
                                     out.dir = oisst_path, 
                                     mask = NULL)

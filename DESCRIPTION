@@ -10,12 +10,20 @@ Authors@R:
 Description: Common routines and utilities for performing various 
   research tasks and implementing GMRI branding. Currently this package 
   adds ggplot2 palette tools to access official Gulf of Maine Research 
-  Institute colors.
+  Institute colors. Further support for processing satellite data for
+  common workflows is in development.
 License: CC0
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.0.2
-Suggests: knitr, rmarkdown
+RoxygenNote: 7.1.1
+Suggests: 
+  knitr, 
+  rmarkdown,
+  patchwork,
+  rnaturalearth,
+  sf,
+  stars,
+  tidyverse
 VignetteBuilder: knitr
 Imports:
   ggplot2 (>= 2.1.1),
@@ -27,3 +35,4 @@ Imports:
   rlang,
   sp,
   lubridate
+  

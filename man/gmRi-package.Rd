@@ -11,7 +11,8 @@
 Common routines and utilities for performing various 
   research tasks and implementing GMRI branding. Currently this package 
   adds ggplot2 palette tools to access official Gulf of Maine Research 
-  Institute colors.
+  Institute colors. Further support for processing satellite data for
+  common workflows is in development.
 }
 \author{
 \strong{Maintainer}: Adam Kemberling \email{akemberling@gmri.org} (\href{https://orcid.org/0000-0003-0402-0829}{ORCID})
