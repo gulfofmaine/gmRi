@@ -15,3 +15,6 @@ use_gmri_footer(footer_file = "akemberling_gmri_footer.html")
 \description{
 Insert HTML Header File from gmRi package files
 }
+\examples{
+# Not Run use_gmri_footer(gmri_rmarkdown.css)
+}

@@ -15,3 +15,6 @@ use_gmri_header(header_file = "gmri_logo_header.html")
 \description{
 Insert HTML Header File from gmRi package files
 }
+\examples{
+# Not Run use_gmri_header(gmri_rmarkdown.css)
+}

@@ -1,5 +1,56 @@
 # For Accessing GMRI Stylesheets
 
+
+#' Use CSS File from gmRi package files
+#'
+#' @param css_file String indicating desired css filename.
+#'
+#' @return
+#' @export
+#'
+#' @examples # Not Run use_gmri_style(gmri_rmarkdown.css)
+use_gmri_style <- function(css_file = "gmri_rmarkdown.css"){
+  # css file
+  file_name <- paste0("/", css_file)
+  file_path <- paste0(system.file("stylesheets", package = "gmRi"), file_name)
+  shiny::includeCSS(path = file_path)
+}
+
+
+#' Insert HTML Header File from gmRi package files
+#'
+#' @param header_file String indicating desired css filename.
+#'
+#' @return
+#' @export
+#'
+#' @examples # Not Run use_gmri_header(gmri_rmarkdown.css)
+use_gmri_header <- function(header_file = "gmri_logo_header.html"){
+  # css file
+  file_name <- paste0("/", header_file)
+  file_path <- paste0(system.file("stylesheets", package = "gmRi"), file_name)
+  shiny::includeHTML(path = file_path)
+}
+
+
+#' Insert HTML Header File from gmRi package files
+#'
+#' @param header_file String indicating desired css filename.
+#'
+#' @return
+#' @export
+#'
+#' @examples # Not Run use_gmri_footer(gmri_rmarkdown.css)
+use_gmri_footer <- function(footer_file = "akemberling_gmri_footer.html"){
+  # css file
+  file_name <- paste0("/", footer_file)
+  file_path <- paste0(system.file("stylesheets", package = "gmRi"), file_name)
+  shiny::includeHTML(path = file_path)
+}
+
+
+
+
 #' Access GMRI Stylesheets - DEFUNCT
 #'
 #' @param stylesheet String identifying which stylesheet to attach to Rmarkdown or Shiny App
@@ -47,54 +98,4 @@ use_gmri_stylesheets <- function(stylesheet = "gmri rmarkdown", header = "none",
     message("AKemberling Footer attached")
   }
 
-}
-
-
-
-
-#' Use CSS File from gmRi package files
-#'
-#' @param css_file String indicating desired css filename.
-#'
-#' @return
-#' @export
-#'
-#' @examples
-use_gmri_style <- function(css_file = "gmri_rmarkdown.css"){
-  # css file
-  file_name <- paste0("/", css_file)
-  file_path <- paste0(system.file("stylesheets", package = "gmRi"), file_name)
-  shiny::includeCSS(path = file_path)
-}
-
-
-#' Insert HTML Header File from gmRi package files
-#'
-#' @param header_file String indicating desired css filename.
-#'
-#' @return
-#' @export
-#'
-#' @examples
-use_gmri_header <- function(header_file = "gmri_logo_header.html"){
-  # css file
-  file_name <- paste0("/", header_file)
-  file_path <- paste0(system.file("stylesheets", package = "gmRi"), file_name)
-  shiny::includeHTML(path = file_path)
-}
-
-
-#' Insert HTML Header File from gmRi package files
-#'
-#' @param header_file String indicating desired css filename.
-#'
-#' @return
-#' @export
-#'
-#' @examples
-use_gmri_footer <- function(footer_file = "akemberling_gmri_footer.html"){
-  # css file
-  file_name <- paste0("/", footer_file)
-  file_path <- paste0(system.file("stylesheets", package = "gmRi"), file_name)
-  shiny::includeHTML(path = file_path)
 }

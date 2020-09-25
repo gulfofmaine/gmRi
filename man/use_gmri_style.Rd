@@ -15,3 +15,6 @@ use_gmri_style(css_file = "gmri_rmarkdown.css")
 \description{
 Use CSS File from gmRi package files
 }
+\examples{
+# Not Run use_gmri_style(gmri_rmarkdown.css)
+}
