@@ -66,6 +66,7 @@ This is a basic example of how to pull GMRI colors for a ggplot2 figure:
 ``` r
 library(gmRi)
 library(ggplot2)
+#> Warning: package 'ggplot2' was built under R version 3.6.2
 ## basic example code
 
 ggplot(mtcars, aes(hp, mpg)) +
@@ -84,3 +85,9 @@ ggplot(mpg, aes(manufacturer, fill = manufacturer)) +
 ```
 
 <img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
+
+# Additional Vignettes:
+
+1.  Details on accessing stylesheets and GMRI branded materials refer to
+    [vignette 1 : GMRI Style
+    Doc](http://gulfofmaine.github.io/gmri/vignettes/GMRI_Style_Doc.html)

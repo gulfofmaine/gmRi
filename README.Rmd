@@ -75,3 +75,6 @@ ggplot(mpg, aes(manufacturer, fill = manufacturer)) +
    scale_fill_gmri(palette = "mixed", guide = "none")
 ```
 
+# Additional Vignettes:
+
+ 1. Details on accessing stylesheets and GMRI branded materials refer to  [vignette 1 : GMRI Style Doc](http://gulfofmaine.github.io/gmri/vignettes/GMRI_Style_Doc.html)
