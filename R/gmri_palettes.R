@@ -22,6 +22,7 @@ gmri_colors <- c(
 #' green, teal, gmri blue, light gray, & dark gray.
 #'
 #' @param ... Character names of official GMRI colors
+#' @param as_char Boolean T/F determining how the values should be returned. Character values can be passed directly in places a color hexcode is desired.
 #' @export
 #' @examples
 #'
@@ -38,11 +39,19 @@ gmri_colors <- c(
 #' ggplot2::ggplot(mtcars, ggplot2::aes(hp, mpg)) +
 #'   ggplot2::geom_point(color = gmri_cols("gmri blue"), size = 4, alpha = .8)
 #'
-gmri_cols <- function(...) {
+gmri_cols <- function(..., as_char = FALSE) {
   cols <- c(...)
 
-  if (is.null(cols))
-    return (gmri_colors)
+  if (as_char == FALSE) {
+   if (is.null(cols))
+      return (gmri_colors)
+  }
+
+  if (as_char == TRUE) {
+    if (is.null(cols))
+      return (as.character(gmri_colors))
+  }
+
 
   gmri_colors[cols]
 }

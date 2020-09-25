@@ -2,12 +2,12 @@
 % Please edit documentation in R/use_stylesheets.R
 \name{use_gmri_stylesheets}
 \alias{use_gmri_stylesheets}
-\title{Access GMRI Stylesheets}
+\title{Access GMRI Stylesheets - DEFUNCT}
 \usage{
 use_gmri_stylesheets(
   stylesheet = "gmri rmarkdown",
-  header = NULL,
-  footer = NULL
+  header = "none",
+  footer = "none"
 )
 }
 \arguments{
@@ -21,5 +21,8 @@ use_gmri_stylesheets(
 Function prints the css and html elements attached
 }
 \description{
-Access GMRI Stylesheets
+Access GMRI Stylesheets - DEFUNCT
+}
+\examples{
+# Not Run
 }
