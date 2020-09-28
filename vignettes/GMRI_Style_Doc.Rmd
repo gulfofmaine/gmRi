@@ -31,22 +31,22 @@ An alternative way to add a header is by including it in a subfolder, and referi
 
 ```{r}
 # Add Header with gmRi Logo
-gmRi::use_gmri_header(header_file = "gmri_logo_header.html")
+gmRi::insert_gmri_header(header_file = "gmri_logo_header.html")
 ```
 
 ## Attaching CSS File from gmRi Package
 
 The CSS file determines what fonts, colors, sizes, spacing, and margins should be applied to different elements throughout the document. The default css file will apply the GMRI font to the headers, and apply some GMRI colors to various rmarkdown elements. 
 
-This can be placed anywhere in the document, but it is helpful to place with other code for formatting near the top of the document.
+This can be placed anywhere in the document **except** in the setup code block. It is helpful to place this line of code with other formatting options near the top of the document.
 
 ```{r}
 
-# alternative access to css file/header/footer
-gmRi::use_gmri_style(css_file = "gmri_rmarkdown.css")
+# Access GMRI CSS Style
+gmRi::use_gmri_style_rmd(css_file = "gmri_rmarkdown.css")
 ```
 
-
+An alternative function `use_gmri_style_shiny` exists for linking a stylesheet to a Shiny Application. This function has two alternative calls for attaching a header or footer as well.
 
 ## Including GMRI Colors in Plots
 
@@ -90,5 +90,5 @@ One way to add personalization is through a custom footer file. This file is wri
 
 ```{r}
 # footer
-gmRi::use_gmri_footer(footer_file = "akemberling_gmri_footer.html")
+gmRi::insert_gmri_footer(footer_file = "akemberling_gmri_footer.html")
 ```

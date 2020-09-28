@@ -1,7 +1,7 @@
 # For Accessing GMRI Stylesheets
 
 
-#' Use CSS File from gmRi package files
+#' Use CSS File from gmRi package files - Rmd Implementation
 #'
 #' @param css_file String indicating desired css filename.
 #'
@@ -9,7 +9,7 @@
 #' @export
 #'
 #' @examples # Not Run use_gmri_style(gmri_rmarkdown.css)
-use_gmri_style <- function(css_file = "gmri_rmarkdown.css"){
+use_gmri_style_rmd <- function(css_file = "gmri_rmarkdown.css"){
   # css file
   file_name <- paste0("/", css_file)
   file_path <- paste0(system.file("stylesheets", package = "gmRi"), file_name)
@@ -17,7 +17,7 @@ use_gmri_style <- function(css_file = "gmri_rmarkdown.css"){
 }
 
 
-#' Insert HTML Header File from gmRi package files
+#' Insert HTML Header File from gmRi package files - Rmd Implementation
 #'
 #' @param header_file String indicating desired css filename.
 #'
@@ -25,7 +25,7 @@ use_gmri_style <- function(css_file = "gmri_rmarkdown.css"){
 #' @export
 #'
 #' @examples # Not Run use_gmri_header(gmri_rmarkdown.css)
-use_gmri_header <- function(header_file = "gmri_logo_header.html"){
+insert_gmri_header <- function(header_file = "gmri_logo_header.html"){
   # css file
   file_name <- paste0("/", header_file)
   file_path <- paste0(system.file("stylesheets", package = "gmRi"), file_name)
@@ -33,15 +33,15 @@ use_gmri_header <- function(header_file = "gmri_logo_header.html"){
 }
 
 
-#' Insert HTML Header File from gmRi package files
+#' Insert HTML Header File from gmRi package files - Rmd Implementation
 #'
-#' @param header_file String indicating desired css filename.
+#' @param footer_file String indicating desired css filename.
 #'
 #' @return
 #' @export
 #'
 #' @examples # Not Run use_gmri_footer(gmri_rmarkdown.css)
-use_gmri_footer <- function(footer_file = "akemberling_gmri_footer.html"){
+insert_gmri_footer <- function(footer_file = "akemberling_gmri_footer.html"){
   # css file
   file_name <- paste0("/", footer_file)
   file_path <- paste0(system.file("stylesheets", package = "gmRi"), file_name)
@@ -51,7 +51,7 @@ use_gmri_footer <- function(footer_file = "akemberling_gmri_footer.html"){
 
 
 
-#' Access GMRI Stylesheets - DEFUNCT
+#' Access GMRI Stylesheets - Shiny App Implementation
 #'
 #' @param stylesheet String identifying which stylesheet to attach to Rmarkdown or Shiny App
 #' @param header Optional string identifying html footer to attach, default is NULL, "gmri logo right" example given
@@ -61,9 +61,10 @@ use_gmri_footer <- function(footer_file = "akemberling_gmri_footer.html"){
 #' @export
 #'
 #' @examples # Not Run
-use_gmri_stylesheets <- function(stylesheet = "gmri rmarkdown", header = "none", footer = "none") {
+use_gmri_style_shiny <- function(stylesheet = "gmri rmarkdown", header = "none", footer = "none") {
 
   # Add the resource path to the stylesheets contained in the gmRi package
+  # Allows access to stylesheets folder contents from shiny app using prefix: styles
   shiny::addResourcePath(
     prefix = "styles",
     directoryPath = system.file("stylesheets", package = "gmRi")

@@ -34,5 +34,6 @@ Imports:
   raster,
   rlang,
   sp,
-  lubridate
+  lubridate,
+  shiny
   
