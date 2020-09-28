@@ -4,11 +4,7 @@
 \alias{calc_daily_climatologies}
 \title{Vectorized Daily OISST 30-Year Climatology Means}
 \usage{
-calc_daily_climatologies(
-  stack_in = dailymu.stack,
-  projection_crs = 26919,
-  anom_period = NULL
-)
+calc_daily_climatologies(stack_in, projection_crs = 26919, anom_period = NULL)
 }
 \arguments{
 \item{stack_in}{Raster stack of daily SST Measurements from OISST dataset}

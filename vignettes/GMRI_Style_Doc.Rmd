@@ -1,0 +1,94 @@
+---
+title: "GMRI R Style Doc"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{GMRI_Style_Doc}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(gmRi)
+```
+
+# Accessing GMRI styles
+
+This package contains various functions for quickly accessing GMRI styles, colors, and themes. 
+
+To add a GMRI css stylesheet to an Rmarkdown File, simple use the function `use_gmri_styles()` and indicate which css stylesheet you wish to add. 
+
+
+
+## Adding a Header
+
+A seperate function: `use_gmri_header()`. The default header places the GMRI logo in the upper right corner. This requires placement of the `gmri_logo.png` within the same directory as the Rmarkdown or shiny app file in a subdirectory titled `www`.
+
+This code block should be included as the very first code block in the document, prior to any headers or text. The html header will be inserted in place, so any text above it will remain above it.
+
+An alternative way to add a header is by including it in a subfolder, and refering to it in the YAML. 
+
+```{r}
+# Add Header with gmRi Logo
+gmRi::insert_gmri_header(header_file = "gmri_logo_header.html")
+```
+
+## Attaching CSS File from gmRi Package
+
+The CSS file determines what fonts, colors, sizes, spacing, and margins should be applied to different elements throughout the document. The default css file will apply the GMRI font to the headers, and apply some GMRI colors to various rmarkdown elements. 
+
+This can be placed anywhere in the document **except** in the setup code block. It is helpful to place this line of code with other formatting options near the top of the document.
+
+```{r}
+
+# Access GMRI CSS Style
+gmRi::use_gmri_style_rmd(css_file = "gmri_rmarkdown.css")
+```
+
+An alternative function `use_gmri_style_shiny` exists for linking a stylesheet to a Shiny Application. This function has two alternative calls for attaching a header or footer as well.
+
+## Including GMRI Colors in Plots
+
+You can also access GMRI colors in ggplot through some additional functions for accessing brand colorways.
+
+
+### Discrete Colors Manually
+
+Available GMRI colors can be accessed by running `gmri_cols()` without any arguments. This function can also be used to return the hex values of a desired color by name. This is helpful for manual insertion of specific colors.
+
+```{r, fig.height=6, fig.width=6}
+mtcars$car <- rownames(mtcars) 
+mtcars$cyl <- factor(mtcars$cyl)
+
+ggplot(mtcars, aes(cyl, mpg, color = cyl)) +
+  geom_boxplot() +
+  scale_color_manual(
+    values = setNames(gmri_cols(c("gmri blue", "orange", "teal"), as_char = TRUE),
+                      c("4", "6", "8"))
+  )
+```
+
+
+
+### Interpolated Colors
+
+There are also 2 functions for interpolating colors using several palettes, these are `scale_fill_gmri()` and `scale_color_gmri()`.
+
+```{r, fig.height=6, fig.width=6}
+
+ggplot(mtcars, aes(mpg, car, fill = car)) +
+  geom_col() +
+  scale_fill_gmri() +
+  labs(y = NULL)
+```
+
+
+## Adding a Footer
+
+One way to add personalization is through a custom footer file. This file is written in HTML and can be attached to the bottom of the ddocument for a personalized footer. The default is an example that uses the github logo and a link to a personal github account.
+
+```{r}
+# footer
+gmRi::insert_gmri_footer(footer_file = "akemberling_gmri_footer.html")
+```

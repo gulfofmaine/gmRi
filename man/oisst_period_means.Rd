@@ -4,11 +4,7 @@
 \alias{oisst_period_means}
 \title{OISST Time-Period Means}
 \usage{
-oisst_period_means(
-  stack_in = dailymu.stack,
-  projection_crs = 26919,
-  time_res_df = season_tester
-)
+oisst_period_means(stack_in, projection_crs = 26919, time_res_df)
 }
 \arguments{
 \item{stack_in}{Raster stack of daily SST Measurements from OISST dataset}

@@ -21,6 +21,12 @@ knitr::opts_chunk$set(
 
 The goal of gmRi is to consolidate useful reasearch tools under one consistent repository. Things like official GMRI colors or stylesheets for Rmarkdown documents are easy first steps in creating consistent and professsional looking documents. Consistent workflows for creating datasets from outside sources like from satellite SST or NERACOOS buoy arrays will make our work take less time and be consistent in-house.
 
+```{r, echo = FALSE}
+# Access GMRI CSS Style
+gmRi::use_gmri_style_rmd(css_file = "gmri_rmarkdown.css")
+```
+
+
 ## Installation
 
 You can install the development version of gmRi from [GitHub](www.github.com) with:
@@ -75,3 +81,6 @@ ggplot(mpg, aes(manufacturer, fill = manufacturer)) +
    scale_fill_gmri(palette = "mixed", guide = "none")
 ```
 
+# Additional Vignettes:
+
+ 1. Details on accessing stylesheets and GMRI branded materials refer to  [vignette 1 : GMRI Style Doc](http://gulfofmaine.github.io/gmri/vignettes/GMRI_Style_Doc.html)
