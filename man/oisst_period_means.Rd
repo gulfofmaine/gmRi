@@ -23,4 +23,6 @@ raster stack and a dataframe outlining period start and end dates as inputs.
 
 Returns a raster stack with mean SST For every year for each intra-annual time-period
 specified.
+
+Useful for getting means across a specific time window within a year, like a month or season.
 }

@@ -30,4 +30,7 @@ stack.out Stack of daily OISST files and also saves the raster stack as a .grd f
 This function accesses webhosted satellite data and then downloads a subset of the data based
 on dates and long/lat bounding box. After downloading the data, the function processes it and saves it as
 one raster stack file. Installs "ncdf4" and "raster" packages if not installed.
+
+This function is helpful for getting fresh downloads from thredds. In most cases it is faster to access the data that is stored in shared
+resource locations.
 }

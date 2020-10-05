@@ -25,6 +25,6 @@ fix_raster(x, lons.use, lats.use, x.min.use, x.max.use, y.min.use, y.max.use)
 rast.out Correctly trimmed and oriented raster object
 }
 \description{
-his function helps convert an array (x, y, z)
-into raster layers with the correct dimensions and orientation.
+Helper function to convert an array (x, y, z)
+into raster layers with the correct dimensions and orientation for spatial analyses. Typically used when working from netcdf to raster.
 }
