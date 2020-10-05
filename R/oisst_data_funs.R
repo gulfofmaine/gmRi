@@ -13,6 +13,8 @@
 #' @description This is a simple function to translate negative longitudes
 #' (measured on -180:180 scale) into 0-360, which is coordinate system used by some environmental datasets.
 #'
+#' Not a solution for when data is erroneously missing a negative sign, when the format is -180 to 180.
+#'
 #' @param lon Longitude in -180:180 degrees
 #'
 #' @return lon Longitude from 0-360 degrees
@@ -32,8 +34,8 @@ make360 <- function(lon) {
 
 #' @title Fix Raster
 #'
-#' @description his function helps convert an array (x, y, z)
-#' into raster layers with the correct dimensions and orientation.
+#' @description Helper function to convert an array (x, y, z)
+#' into raster layers with the correct dimensions and orientation for spatial analyses. Typically used when working from netcdf to raster.
 #'
 #' @param x  matrix. As currently implemented, x is an individiaul time slice from an x, y, z array.
 #' @param lons.use Longitudes, extracted using ncvar_get
@@ -61,9 +63,11 @@ fix_raster <- function(x, lons.use, lats.use, x.min.use, x.max.use, y.min.use, y
 ####______________________________####
 
 
-#' @title OISST list to Stack
+#' @title Download OISST from Thredds, convert to Stack
 #'
-#' @description This function loops over daily OISST files and returns a single stack.
+#' @description This function loops over daily OISST files online at [earth systems research lab](https://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/noaa.oisst.v2.highres/),
+#' then downloads and returns a single raster stack.
+#'
 #' Installs "ncdf4" and "raster" packages if not installed.
 #'
 #' @param box bounding box object used to clip netcdf data
@@ -74,7 +78,8 @@ fix_raster <- function(x, lons.use, lats.use, x.min.use, x.max.use, y.min.use, y
 #' @export
 #'
 #'
-oisst_list_to_stack <- function(box, times.window) {
+oisst_list_to_stack <- function(box,
+                                times.window) {
 
   ## Start function
   # Install libraries
@@ -163,6 +168,9 @@ oisst_list_to_stack <- function(box, times.window) {
 #' on dates and long/lat bounding box. After downloading the data, the function processes it and saves it as
 #' one raster stack file. Installs "ncdf4" and "raster" packages if not installed.
 #'
+#' This function is helpful for getting fresh downloads from thredds. In most cases it is faster to access the data that is stored in shared
+#' resource locations.
+#'
 #' @param data.set Env data to extract (options = ERSST, OISST, MURSST)
 #' @param dates If !NULL, subset full time series to specific dates. Dates should be specified as dates = c("YYYY-MM-DD", "YYYY-MM-DD")
 #' @param box  If !NULL, crop rasters to sepcific box faster downloading and processing. Box should be specified as box = c(xmin, xmax, ymin, ymax).
@@ -173,7 +181,11 @@ oisst_list_to_stack <- function(box, times.window) {
 #' @export
 #'
 #'
-env_data_extract <- function(data.set = "OISST", dates = NULL, box = c(-77, -60, 35, 46), out.dir = here::here("data", "OISST_thredd_test"), mask = NULL) {
+env_data_extract <- function(data.set = "OISST",
+                             dates = NULL,
+                             box = c(-77, -60, 35, 46),
+                             out.dir = here::here("data", "OISST_thredd_test"),
+                             mask = NULL) {
 
 
   ## Start function
@@ -515,6 +527,8 @@ make_stack_dates <- function(point_location_df, year_col, month_col, day_col) {
 #' Returns a raster stack with mean SST For every year for each intra-annual time-period
 #' specified.
 #'
+#' Useful for getting means across a specific time window within a year, like a month or season.
+#'
 #' @param stack_in Raster stack of daily SST Measurements from OISST dataset
 #' @param projection_crs The coordinate reference system number/proj4string for the desired output
 #' @param time_res_df Dataframe detailing the time-period structure you wish to calculate SST means for
@@ -630,6 +644,9 @@ oisst_period_means <- function(stack_in, projection_crs = 26919, time_res_df) {
 #' @title Vectorized Daily OISST 30-Year Climatology Means
 #'
 #' @description Generate Daily 30-year climatologies for a given area.
+#'
+#' This function takes a raster stack of OISST data (usually with a clipped extent for memory). Default climatology ranges from 1982-01-01 to 2011-12-31, as such
+#' the input stack must extend beyond those dates estimate the climatology correctly.
 #'
 #' Returns a raster stack with mean SST for every day in the year over the desired time window.
 #'
