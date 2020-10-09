@@ -2,7 +2,7 @@
 % Please edit documentation in R/oisst_data_funs.R
 \name{oisst_list_to_stack}
 \alias{oisst_list_to_stack}
-\title{OISST list to Stack}
+\title{Download OISST from Thredds, convert to Stack}
 \usage{
 oisst_list_to_stack(box, times.window)
 }
@@ -15,6 +15,8 @@ oisst_list_to_stack(box, times.window)
 rast.temp Raster stack of OI Sea Surface Temperatures
 }
 \description{
-This function loops over daily OISST files and returns a single stack.
+This function loops over daily OISST files online at [earth systems research lab](https://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/noaa.oisst.v2.highres/),
+then downloads and returns a single raster stack.
+
 Installs "ncdf4" and "raster" packages if not installed.
 }

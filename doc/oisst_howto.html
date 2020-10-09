@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+
+<title>OISST Data Extraction Workflow</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css" data-origin="pandoc">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    for (var j = 0; j < rules.length; j++) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#header {
+text-align: center;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">OISST Data Extraction Workflow</h1>
+
+
+
+<div id="downloading-oisst-data-using-thredds-server" class="section level2">
+<h2>1. Downloading OISST Data Using THREDDS Server</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="co"># Establish Desired Destination Path</span></a>
+<a class="sourceLine" id="cb1-2" data-line-number="2">oisst_path &lt;-<span class="st"> &quot;/Users/akemberling/Documents/oisst_local&quot;</span></a>
+<a class="sourceLine" id="cb1-3" data-line-number="3">oisst_path &lt;-<span class="st"> &quot;/Users/akemberling/Documents/oisst_mainstays/full_period&quot;</span></a>
+<a class="sourceLine" id="cb1-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb1-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb1-6" data-line-number="6"><span class="co"># Pull data from Thredds server</span></a>
+<a class="sourceLine" id="cb1-7" data-line-number="7">daily_sst_stack &lt;-<span class="st"> </span><span class="kw">env_data_extract</span>(<span class="dt">data.set =</span> <span class="st">&quot;OISST&quot;</span>, </a>
+<a class="sourceLine" id="cb1-8" data-line-number="8">                                    <span class="dt">dates =</span> <span class="kw">c</span>(<span class="st">&quot;1982-01-01&quot;</span>, <span class="st">&quot;1984-12-31&quot;</span>), </a>
+<a class="sourceLine" id="cb1-9" data-line-number="9">                                    <span class="co">#box = c(1, 359, -89, 89), </span></a>
+<a class="sourceLine" id="cb1-10" data-line-number="10">                                    <span class="dt">box =</span> <span class="kw">c</span>(<span class="op">-</span><span class="dv">77</span>, <span class="dv">-60</span>, <span class="dv">35</span>, <span class="dv">46</span>), </a>
+<a class="sourceLine" id="cb1-11" data-line-number="11">                                    <span class="dt">out.dir =</span> oisst_path, </a>
+<a class="sourceLine" id="cb1-12" data-line-number="12">                                    <span class="dt">mask =</span> <span class="ot">NULL</span>)</a></code></pre></div>
+</div>
+<div id="importing-daily-mean-sst-data-as-raster-stack" class="section level2">
+<h2>2. Importing Daily Mean SST Data as Raster Stack</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="co"># Load data into R as Raster stack</span></a>
+<a class="sourceLine" id="cb2-2" data-line-number="2">daily_sst_stack &lt;-<span class="st"> </span>raster<span class="op">::</span><span class="kw">stack</span>(<span class="kw">str_c</span>(oisst_path, <span class="st">&quot;/&quot;</span>, <span class="st">&quot;OISST.grd&quot;</span>))</a></code></pre></div>
+</div>
+<div id="calculating-seasonal-averages" class="section level2">
+<h2>3. Calculating Seasonal Averages</h2>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="co">#Set up the Breaks you want</span></a>
+<a class="sourceLine" id="cb3-2" data-line-number="2">season_breaks &lt;-<span class="st"> </span><span class="kw">data.frame</span>(</a>
+<a class="sourceLine" id="cb3-3" data-line-number="3">  <span class="st">&quot;breaks&quot;</span> =<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;SPRING&quot;</span>, <span class="st">&quot;FALL&quot;</span>),</a>
+<a class="sourceLine" id="cb3-4" data-line-number="4">  <span class="st">&quot;start_date&quot;</span> =<span class="st"> </span><span class="kw">c</span>(<span class="kw">as.Date</span>(<span class="st">&quot;1981-03-01&quot;</span>), </a>
+<a class="sourceLine" id="cb3-5" data-line-number="5">                   <span class="kw">as.Date</span>(<span class="st">&quot;1981-09-01&quot;</span>)),</a>
+<a class="sourceLine" id="cb3-6" data-line-number="6">  <span class="st">&quot;end_date&quot;</span> =<span class="st"> </span><span class="kw">c</span>(<span class="kw">as.Date</span>(<span class="st">&quot;1984-05-31&quot;</span>), </a>
+<a class="sourceLine" id="cb3-7" data-line-number="7">                 <span class="kw">as.Date</span>(<span class="st">&quot;1984-11-30&quot;</span>))</a>
+<a class="sourceLine" id="cb3-8" data-line-number="8">)</a>
+<a class="sourceLine" id="cb3-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb3-10" data-line-number="10"></a>
+<a class="sourceLine" id="cb3-11" data-line-number="11"><span class="co">#Calculate Means</span></a>
+<a class="sourceLine" id="cb3-12" data-line-number="12">fall_spring_means &lt;-<span class="st"> </span><span class="kw">oisst_period_means</span>(<span class="dt">stack_in =</span> daily_sst_stack, </a>
+<a class="sourceLine" id="cb3-13" data-line-number="13">                                        <span class="dt">projection_crs =</span> <span class="dv">4326</span>, </a>
+<a class="sourceLine" id="cb3-14" data-line-number="14">                                        <span class="dt">time_res_df =</span> season_breaks)</a></code></pre></div>
+<div id="mapping-it-with-sf-and-stars-for-rasters" class="section level3">
+<h3>Mapping it with sf and stars (for rasters)</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="co"># Plot them</span></a>
+<a class="sourceLine" id="cb4-2" data-line-number="2">p1 &lt;-<span class="st"> </span><span class="kw">ggplot</span>() <span class="op">+</span></a>
+<a class="sourceLine" id="cb4-3" data-line-number="3"><span class="st">  </span><span class="kw">geom_stars</span>(<span class="dt">data =</span> <span class="kw">st_as_stars</span>(fall_spring_means<span class="op">$</span>SPRING<span class="fl">.1982</span>)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb4-4" data-line-number="4"><span class="st">  </span><span class="kw">geom_sf</span>(<span class="dt">data =</span> northeast) <span class="op">+</span></a>
+<a class="sourceLine" id="cb4-5" data-line-number="5"><span class="st">  </span><span class="kw">geom_sf</span>(<span class="dt">data =</span> canada) <span class="op">+</span></a>
+<a class="sourceLine" id="cb4-6" data-line-number="6"><span class="st">  </span><span class="kw">scale_fill_distiller</span>(<span class="dt">palette =</span> <span class="st">&quot;RdBu&quot;</span>, <span class="dt">na.value =</span> <span class="st">&quot;NA&quot;</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb4-7" data-line-number="7"><span class="st">  </span><span class="kw">guides</span>(<span class="dt">fill =</span> <span class="kw">guide_colorbar</span>(<span class="dt">title =</span> <span class="st">&quot;SST - Celsius&quot;</span>)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb4-8" data-line-number="8"><span class="st">  </span><span class="kw">coord_sf</span>(<span class="dt">xlim =</span> <span class="kw">c</span>(<span class="op">-</span><span class="dv">77</span>, <span class="dv">-60</span>), <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="dv">35</span>, <span class="dv">46</span>), <span class="dt">expand =</span> <span class="ot">FALSE</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb4-9" data-line-number="9"><span class="st">  </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="ot">NULL</span>, <span class="dt">y =</span> <span class="ot">NULL</span>, <span class="dt">caption =</span> <span class="st">&quot;Spring 1982&quot;</span>)</a>
+<a class="sourceLine" id="cb4-10" data-line-number="10"></a>
+<a class="sourceLine" id="cb4-11" data-line-number="11">p2 &lt;-<span class="st"> </span><span class="kw">ggplot</span>() <span class="op">+</span></a>
+<a class="sourceLine" id="cb4-12" data-line-number="12"><span class="st">  </span><span class="kw">geom_stars</span>(<span class="dt">data =</span> <span class="kw">st_as_stars</span>(fall_spring_means<span class="op">$</span>FALL<span class="fl">.1982</span>)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb4-13" data-line-number="13"><span class="st">  </span><span class="kw">geom_sf</span>(<span class="dt">data =</span> northeast) <span class="op">+</span></a>
+<a class="sourceLine" id="cb4-14" data-line-number="14"><span class="st">  </span><span class="kw">geom_sf</span>(<span class="dt">data =</span> canada) <span class="op">+</span></a>
+<a class="sourceLine" id="cb4-15" data-line-number="15"><span class="st">  </span><span class="kw">scale_fill_distiller</span>(<span class="dt">palette =</span> <span class="st">&quot;RdBu&quot;</span>, <span class="dt">na.value =</span> <span class="st">&quot;NA&quot;</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb4-16" data-line-number="16"><span class="st">  </span><span class="kw">guides</span>(<span class="dt">fill =</span> <span class="kw">guide_colorbar</span>(<span class="dt">title =</span> <span class="st">&quot;SST - Celsius&quot;</span>)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb4-17" data-line-number="17"><span class="st">  </span><span class="kw">coord_sf</span>(<span class="dt">xlim =</span> <span class="kw">c</span>(<span class="op">-</span><span class="dv">77</span>, <span class="dv">-60</span>), <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="dv">35</span>, <span class="dv">46</span>), <span class="dt">expand =</span> <span class="ot">FALSE</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb4-18" data-line-number="18"><span class="st">  </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="ot">NULL</span>, <span class="dt">y =</span> <span class="ot">NULL</span>, <span class="dt">caption =</span> <span class="st">&quot;Fall 1982&quot;</span>)</a>
+<a class="sourceLine" id="cb4-19" data-line-number="19"></a>
+<a class="sourceLine" id="cb4-20" data-line-number="20">p1 <span class="op">/</span><span class="st"> </span>p2</a></code></pre></div>
+</div>
+</div>
+<div id="extracting-daily-values-with-point-locations" class="section level2">
+<h2>4. Extracting Daily Values with Point Locations</h2>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="co"># Create spatial points object from station data</span></a>
+<a class="sourceLine" id="cb5-2" data-line-number="2">station_data &lt;-<span class="st"> </span><span class="kw">read_csv</span>(<span class="st">&quot;/Users/akemberling/Box/Adam Kemberling/Box_Projects/Convergence_ML/data/trawldat.csv&quot;</span>)</a>
+<a class="sourceLine" id="cb5-3" data-line-number="3">trawl_sf &lt;-<span class="st"> </span><span class="kw">st_as_sf</span>(station_data, <span class="dt">coords =</span> <span class="kw">c</span>(<span class="st">&quot;DECDEG_BEGLON&quot;</span>, <span class="st">&quot;DECDEG_BEGLAT&quot;</span>), <span class="dt">crs =</span> <span class="dv">4326</span>)</a>
+<a class="sourceLine" id="cb5-4" data-line-number="4"></a>
+<a class="sourceLine" id="cb5-5" data-line-number="5"><span class="co"># # Reproject if necessary</span></a>
+<a class="sourceLine" id="cb5-6" data-line-number="6"><span class="co"># project_utm &lt;- 26919 #NAD1983 / UTM zone 19N got Maine</span></a>
+<a class="sourceLine" id="cb5-7" data-line-number="7"><span class="co"># trawl_sf_proj &lt;- trawl_sf %&gt;% st_transform(crs = project_utm)</span></a>
+<a class="sourceLine" id="cb5-8" data-line-number="8"><span class="co"># project_utm &lt;- st_crs(trawl_sf_proj)</span></a>
+<a class="sourceLine" id="cb5-9" data-line-number="9"></a>
+<a class="sourceLine" id="cb5-10" data-line-number="10"></a>
+<a class="sourceLine" id="cb5-11" data-line-number="11"></a>
+<a class="sourceLine" id="cb5-12" data-line-number="12"><span class="co"># Format Date Column</span></a>
+<a class="sourceLine" id="cb5-13" data-line-number="13">trawl_sf &lt;-<span class="st"> </span>trawl_sf <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb5-14" data-line-number="14"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">DATE =</span> lubridate<span class="op">::</span><span class="kw">ymd_hms</span>(<span class="kw">str_c</span>(EST_YEAR, <span class="st">&quot;-&quot;</span>, EST_MONTH, <span class="st">&quot;-&quot;</span>, EST_DAY, <span class="st">&quot; 12:00:00&quot;</span>)))</a></code></pre></div>
+</div>
+<div id="single-season-point-extractions" class="section level2">
+<h2>5. Single Season Point Extractions</h2>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="co">#Single Year Test = Fall 1982</span></a>
+<a class="sourceLine" id="cb6-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb6-3" data-line-number="3"><span class="co">#Test Raster </span></a>
+<a class="sourceLine" id="cb6-4" data-line-number="4">test_ras &lt;-<span class="st"> </span>fall_spring_means<span class="op">$</span>FALL<span class="fl">.1982</span></a>
+<a class="sourceLine" id="cb6-5" data-line-number="5"></a>
+<a class="sourceLine" id="cb6-6" data-line-number="6"></a>
+<a class="sourceLine" id="cb6-7" data-line-number="7"><span class="co">#Test points = all stations all years</span></a>
+<a class="sourceLine" id="cb6-8" data-line-number="8">test_points &lt;-<span class="st"> </span><span class="kw">bind_cols</span>( <span class="dt">lon =</span> station_data<span class="op">$</span>DECDEG_BEGLON, <span class="dt">lat =</span> station_data<span class="op">$</span>DECDEG_BEGLAT)</a>
+<a class="sourceLine" id="cb6-9" data-line-number="9">test_points<span class="op">$</span>sst &lt;-<span class="st"> </span>raster<span class="op">::</span><span class="kw">extract</span>(test_ras, test_points)</a></code></pre></div>
+<div id="mapping-it-with-sf" class="section level3">
+<h3>Mapping it with sf</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1">test_points &lt;-<span class="st"> </span><span class="kw">st_as_sf</span>(test_points, <span class="dt">coords =</span> <span class="kw">c</span>(<span class="st">&quot;lon&quot;</span>, <span class="st">&quot;lat&quot;</span>), <span class="dt">crs =</span> <span class="dv">4326</span>)</a>
+<a class="sourceLine" id="cb7-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb7-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb7-4" data-line-number="4"><span class="co">#Test plot</span></a>
+<a class="sourceLine" id="cb7-5" data-line-number="5"><span class="kw">ggplot</span>() <span class="op">+</span></a>
+<a class="sourceLine" id="cb7-6" data-line-number="6"><span class="st">  </span><span class="kw">geom_sf</span>(<span class="dt">data =</span> test_points, <span class="kw">aes</span>(<span class="dt">color =</span> sst)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb7-7" data-line-number="7"><span class="st">  </span><span class="kw">geom_sf</span>(<span class="dt">data =</span> northeast) <span class="op">+</span></a>
+<a class="sourceLine" id="cb7-8" data-line-number="8"><span class="st">  </span><span class="kw">geom_sf</span>(<span class="dt">data =</span> canada) <span class="op">+</span></a>
+<a class="sourceLine" id="cb7-9" data-line-number="9"><span class="st">  </span><span class="kw">scale_color_distiller</span>(<span class="dt">palette =</span> <span class="st">&quot;RdBu&quot;</span>, <span class="dt">na.value =</span> <span class="st">&quot;NA&quot;</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb7-10" data-line-number="10"><span class="st">  </span><span class="kw">guides</span>(<span class="dt">fill =</span> <span class="kw">guide_colorbar</span>(<span class="dt">title =</span> <span class="st">&quot;SST - Celsius&quot;</span>)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb7-11" data-line-number="11"><span class="st">  </span><span class="kw">coord_sf</span>(<span class="dt">xlim =</span> <span class="kw">c</span>(<span class="op">-</span><span class="dv">72</span>, <span class="dv">-65</span>), <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="fl">39.5</span>, <span class="dv">45</span>), <span class="dt">expand =</span> <span class="ot">FALSE</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb7-12" data-line-number="12"><span class="st">  </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="st">&quot;&quot;</span>, <span class="dt">y =</span> <span class="st">&quot;&quot;</span>, <span class="dt">caption =</span> <span class="st">&quot;All station coordinates - Fall 1982 SST Layer&quot;</span>)</a></code></pre></div>
+</div>
+</div>
+<div id="extracting-all-yearsseasons-with-brick" class="section level2">
+<h2>6. Extracting All Years/Seasons with Brick</h2>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb8-1" data-line-number="1"><span class="co">#Extracting all years from the brick</span></a>
+<a class="sourceLine" id="cb8-2" data-line-number="2">test_points &lt;-<span class="st"> </span>dplyr<span class="op">::</span><span class="kw">select</span>(station_data, <span class="dt">lon =</span> DECDEG_BEGLON, <span class="dt">lat =</span> DECDEG_BEGLAT, <span class="dt">year =</span> EST_YEAR)</a>
+<a class="sourceLine" id="cb8-3" data-line-number="3"></a>
+<a class="sourceLine" id="cb8-4" data-line-number="4"><span class="co">#Extract specific to the sample year (or whatever the raster resolution is)</span></a>
+<a class="sourceLine" id="cb8-5" data-line-number="5"><span class="co">#Season is generated at random here because imported data does not contain that information</span></a>
+<a class="sourceLine" id="cb8-6" data-line-number="6">full_extraction &lt;-<span class="st"> </span>test_points <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb8-7" data-line-number="7"><span class="st">  </span><span class="kw">mutate</span>(<span class="dt">season =</span> <span class="kw">sample</span>(<span class="kw">c</span>(<span class="st">&quot;SPRING&quot;</span>, <span class="st">&quot;FALL&quot;</span>), <span class="dt">replace =</span> T, <span class="dt">size =</span> <span class="dv">1</span>),</a>
+<a class="sourceLine" id="cb8-8" data-line-number="8">         <span class="dt">raster_res =</span> <span class="kw">str_c</span>(season, year, <span class="dt">sep =</span> <span class="st">&quot;.&quot;</span>)) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb8-9" data-line-number="9"><span class="st">  </span><span class="kw">split</span>(.<span class="op">$</span>raster_res) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb8-10" data-line-number="10"><span class="st">  </span><span class="kw">imap_dfr</span>(<span class="cf">function</span>(df, resolution){</a>
+<a class="sourceLine" id="cb8-11" data-line-number="11">    </a>
+<a class="sourceLine" id="cb8-12" data-line-number="12">    <span class="co"># Build Brick layer ID</span></a>
+<a class="sourceLine" id="cb8-13" data-line-number="13">    stack_id &lt;-<span class="st"> </span>resolution</a>
+<a class="sourceLine" id="cb8-14" data-line-number="14">    </a>
+<a class="sourceLine" id="cb8-15" data-line-number="15">    <span class="co"># Build Raster Layer Index Number</span></a>
+<a class="sourceLine" id="cb8-16" data-line-number="16">    layer_index &lt;-<span class="st"> </span><span class="kw">which</span>(<span class="kw">names</span>(fall_spring_means) <span class="op">==</span><span class="st"> </span>stack_id)</a>
+<a class="sourceLine" id="cb8-17" data-line-number="17">    </a>
+<a class="sourceLine" id="cb8-18" data-line-number="18">    <span class="co"># Return NA's if there's no layer that matches</span></a>
+<a class="sourceLine" id="cb8-19" data-line-number="19">    <span class="cf">if</span>(<span class="kw">length</span>(layer_index) <span class="op">!=</span><span class="st"> </span><span class="dv">0</span>){</a>
+<a class="sourceLine" id="cb8-20" data-line-number="20">        df<span class="op">$</span>sst &lt;-<span class="st"> </span>raster<span class="op">::</span><span class="kw">extract</span>(fall_spring_means[[layer_index]], df[, <span class="kw">c</span>(<span class="st">&quot;lon&quot;</span>, <span class="st">&quot;lat&quot;</span>)])</a>
+<a class="sourceLine" id="cb8-21" data-line-number="21">      <span class="kw">return</span>(df) } <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb8-22" data-line-number="22">        df<span class="op">$</span>sst &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="ot">NA</span>, <span class="kw">nrow</span>(df))</a>
+<a class="sourceLine" id="cb8-23" data-line-number="23">        <span class="kw">return</span>(df)</a>
+<a class="sourceLine" id="cb8-24" data-line-number="24">      }</a>
+<a class="sourceLine" id="cb8-25" data-line-number="25">    </a>
+<a class="sourceLine" id="cb8-26" data-line-number="26">  })</a></code></pre></div>
+<div id="mapping-it-with-sf-1" class="section level3">
+<h3>Mapping it with sf</h3>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1">full_extraction &lt;-<span class="st"> </span><span class="kw">st_as_sf</span>(full_extraction, <span class="dt">coords =</span> <span class="kw">c</span>(<span class="st">&quot;lon&quot;</span>, <span class="st">&quot;lat&quot;</span>), <span class="dt">crs =</span> <span class="dv">4326</span>)</a>
+<a class="sourceLine" id="cb9-2" data-line-number="2"></a>
+<a class="sourceLine" id="cb9-3" data-line-number="3">full_extraction <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb9-4" data-line-number="4"><span class="st">  </span><span class="kw">filter</span>(year <span class="op">%in%</span><span class="st"> </span><span class="dv">1982</span><span class="op">:</span><span class="dv">1984</span>) <span class="op">%&gt;%</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb9-5" data-line-number="5"><span class="st">  </span><span class="kw">ggplot</span>() <span class="op">+</span></a>
+<a class="sourceLine" id="cb9-6" data-line-number="6"><span class="st">    </span><span class="kw">geom_sf</span>(<span class="kw">aes</span>(<span class="dt">color =</span> sst)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb9-7" data-line-number="7"><span class="st">    </span><span class="kw">geom_sf</span>(<span class="dt">data =</span> northeast) <span class="op">+</span></a>
+<a class="sourceLine" id="cb9-8" data-line-number="8"><span class="st">    </span><span class="kw">geom_sf</span>(<span class="dt">data =</span> canada) <span class="op">+</span></a>
+<a class="sourceLine" id="cb9-9" data-line-number="9"><span class="st">    </span><span class="kw">scale_color_distiller</span>(<span class="dt">palette =</span> <span class="st">&quot;RdBu&quot;</span>, <span class="dt">na.value =</span> <span class="st">&quot;NA&quot;</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb9-10" data-line-number="10"><span class="st">    </span><span class="kw">guides</span>(<span class="dt">fill =</span> <span class="kw">guide_colorbar</span>(<span class="dt">title =</span> <span class="st">&quot;SST - Celsius&quot;</span>)) <span class="op">+</span></a>
+<a class="sourceLine" id="cb9-11" data-line-number="11"><span class="st">    </span><span class="kw">coord_sf</span>(<span class="dt">xlim =</span> <span class="kw">c</span>(<span class="op">-</span><span class="dv">72</span>, <span class="dv">-65</span>), <span class="dt">ylim =</span> <span class="kw">c</span>(<span class="fl">39.5</span>, <span class="dv">45</span>), <span class="dt">expand =</span> <span class="ot">FALSE</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb9-12" data-line-number="12"><span class="st">    </span><span class="kw">labs</span>(<span class="dt">x =</span> <span class="st">&quot;&quot;</span>, <span class="dt">y =</span> <span class="st">&quot;&quot;</span>, <span class="dt">caption =</span> <span class="st">&quot;Seasonal Survey Stations Extracting Matching SST Means&quot;</span>) <span class="op">+</span></a>
+<a class="sourceLine" id="cb9-13" data-line-number="13"><span class="st">    </span><span class="kw">facet_grid</span>(year <span class="op">~</span><span class="st"> </span>season)</a></code></pre></div>
+</div>
+</div>
+<div id="extracting-data-with-shapefiles" class="section level2">
+<h2>7. Extracting Data with Shapefiles</h2>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
