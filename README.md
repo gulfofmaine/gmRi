@@ -88,6 +88,7 @@ ggplot(mpg, aes(manufacturer, fill = manufacturer)) +
 
 # Additional Vignettes:
 
+
 1.  Details on accessing stylesheets and GMRI branded materials refer to
     [vignette 1 : GMRI Style
     Doc](http://gulfofmaine.github.io/gmRi/doc/GMRI_Style_Doc.html)
@@ -95,3 +96,4 @@ ggplot(mpg, aes(manufacturer, fill = manufacturer)) +
 2.  Accessing OISST data via thredds and performing common tasks.
     [vignette 2 : OISST
     How-To](http://gulfofmaine.github.io/gmRi/doc/GMRI_Style_Doc.html)
+
