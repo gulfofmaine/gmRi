@@ -2,18 +2,21 @@
 % Please edit documentation in R/box_paths_allyn.R
 \name{shared.path}
 \alias{shared.path}
-\title{Shared Path}
+\title{Access Shared Path}
 \usage{
 shared.path(
   os.use = "unix",
-  group = c("RES Data", "Mills Lab", "Climate Change Ecology Lab", "NSF OKN Demo Data"),
+  group = c("RES Data", "Mills Lab", "Climate Change Ecology Lab", "NSF OKN", "root"),
   folder = "Functions/"
 )
 }
 \arguments{
 \item{os.use}{Character string defining operating system. Either "unix" or "windows"}
 
-\item{group}{Character string defining where to load shared Data and Functions. Either RES (things shared across the entire research department) or Mills Lab (things shared within the Mills Lab)}
+\item{group}{Character string defining where to load shared Data and Functions.
+Either RES (things shared across the entire research department) or
+Mills Lab (things shared within the Mills Lab). Additional shortcuts are NSF OKN
+for knowledge graph data resources and root for the minimal path to box.}
 
 \item{folder}{Sub-folder within box you wish to access}
 }
