@@ -33,12 +33,15 @@ enter_user_name_func <- function() {
 
 
 
-#' @title Shared Path
+#' @title Access Shared Path
 #'
 #' @description This function creates paths to shared Data and Functions folders stored either inside the Mills Lab folder or outside the Mills Lab folder
 #'
 #' @param os.use Character string defining operating system. Either "unix" or "windows"
-#' @param group Character string defining where to load shared Data and Functions. Either RES (things shared across the entire research department) or Mills Lab (things shared within the Mills Lab)
+#' @param group Character string defining where to load shared Data and Functions.
+#' Either RES (things shared across the entire research department) or
+#' Mills Lab (things shared within the Mills Lab). Additional shortcuts are NSF OKN
+#' for knowledge graph data resources and root for the minimal path to box.
 #' @param folder Sub-folder within box you wish to access
 #'
 #' @return path.out Path to shared folder. We will then use these paths within shared code to load shared data or source shared functions.
@@ -49,14 +52,17 @@ enter_user_name_func <- function() {
 #'
 #' # Not Run
 #' # gom.shapefile<- st_read(paste(res.data.path, "Shapefiles/GoM_sf.shp", sep = ""))
-shared.path <- function(os.use = "unix", group = c("RES Data", "Mills Lab", "Climate Change Ecology Lab", "NSF OKN Demo Data"), folder = "Functions/") {
+shared.path <- function(os.use = "unix",
+                        group = c("RES Data", "Mills Lab", "Climate Change Ecology Lab", "NSF OKN", "root"),
+                        folder = "Functions/") {
   if (os.use == "unix") {
     if (!is.null(group)) {
       path.out <- switch(group,
         "RES Data" = paste("~/Box/RES Data/", sep = ""),
         "Mills Lab" = paste("~/Box/Mills Lab/", folder, sep = ""),
         "Climate Change Ecology Lab" = paste("~/Box/Climate Change Ecology Lab/", folder, sep = ""),
-        "NSF OKN" = paste("~/Box/NSF OKN Demo Data/", folder, sep = "")
+        "NSF OKN" = paste("~/Box/NSF OKN Demo Data/", folder, sep = ""),
+        "root" = paste("~/Box/", folder, sep = "")
       )
     } else {
       path.out <- paste("~/Box/Mills Lab/Projects/", sub(".*\\/", "", getwd()), "/", sep = "")
@@ -68,6 +74,7 @@ shared.path <- function(os.use = "unix", group = c("RES Data", "Mills Lab", "Cli
         "Mills Lab" = paste("C:/Users/", user.name, "/Box/Mills Lab/", folder, sep = ""),
         "Climate Change Ecology Lab" = paste("C:/Users/", user.name, "/Box/Climate Change Ecology Lab/", folder, sep = ""),
         "NSF OKN" = paste("C:/Users/", user.name, "/Box/NSF OKN Demo Data/", folder, sep = ""),
+        "root" = paste("C:/Users/", user.name, "/Box/", folder, sep = "")
       )
     } else {
       path.out <- paste("C:/Users/", user.name, "/Box/Mills Lab/Projects/", sub(".*\\/", "", getwd()), "/", sep = "")
