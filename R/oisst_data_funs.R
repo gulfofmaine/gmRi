@@ -877,4 +877,4 @@ oisst_window_load <- function(okn_path, data_window){
 }
 
 
-oisst_window_load(okn_path, data_window)
+# oisst_window_load(okn_path, data_window)

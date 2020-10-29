@@ -70,9 +70,14 @@ nsf_access_paths <- function(os.use = "unix", user.name = "not applicable I use 
 #' @export
 #'
 #' @examples
-okn_access_timeseries <- function(okn_path = okn_path,
+okn_access_timeseries <- function(okn_path,
                                   sat_source = "oisst",
                                   region_family = "nefsc"){
+
+  # get okn data path
+  okn_path <- okn_path
+
+
 
   # Path to satellite source
   source_path <- paste0(okn_path, "/", sat_source)

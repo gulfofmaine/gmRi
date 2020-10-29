@@ -4,11 +4,7 @@
 \alias{okn_access_timeseries}
 \title{Access Regional Timeseries from OKN Demo Data}
 \usage{
-okn_access_timeseries(
-  okn_path = okn_path,
-  sat_source = "oisst",
-  region_family = "nefsc"
-)
+okn_access_timeseries(okn_path, sat_source = "oisst", region_family = "nefsc")
 }
 \arguments{
 \item{okn_path}{Personal path to ~Box/NSF OKN Demo Data}
