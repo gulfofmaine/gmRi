@@ -58,11 +58,11 @@ shared.path <- function(os.use = "unix",
   if (os.use == "unix") {
     if (!is.null(group)) {
       path.out <- switch(group,
-        "RES Data" = paste("~/Box/RES Data/", sep = ""),
-        "Mills Lab" = paste("~/Box/Mills Lab/", folder, sep = ""),
+        "RES Data"                   = paste("~/Box/RES Data/", sep = ""),
+        "Mills Lab"                  = paste("~/Box/Mills Lab/", folder, sep = ""),
         "Climate Change Ecology Lab" = paste("~/Box/Climate Change Ecology Lab/", folder, sep = ""),
-        "NSF OKN" = paste("~/Box/NSF OKN Demo Data/", folder, sep = ""),
-        "root" = paste("~/Box/", folder, sep = "")
+        "NSF OKN"                    = paste("~/Box/NSF OKN Demo Data/", folder, sep = ""),
+        "root"                       = paste("~/Box/", folder, sep = "")
       )
     } else {
       path.out <- paste("~/Box/Mills Lab/Projects/", sub(".*\\/", "", getwd()), "/", sep = "")
@@ -70,11 +70,11 @@ shared.path <- function(os.use = "unix",
   } else if (os.use == "windows") {
     if (!is.null(group)) {
       path.out <- switch(group,
-        "RES Data" = paste("C:/Users/", user.name, "/Box/Res Data/", sep = ""),
-        "Mills Lab" = paste("C:/Users/", user.name, "/Box/Mills Lab/", folder, sep = ""),
+        "RES Data"                   = paste("C:/Users/", user.name, "/Box/Res Data/", sep = ""),
+        "Mills Lab"                  = paste("C:/Users/", user.name, "/Box/Mills Lab/", folder, sep = ""),
         "Climate Change Ecology Lab" = paste("C:/Users/", user.name, "/Box/Climate Change Ecology Lab/", folder, sep = ""),
-        "NSF OKN" = paste("C:/Users/", user.name, "/Box/NSF OKN Demo Data/", folder, sep = ""),
-        "root" = paste("C:/Users/", user.name, "/Box/", folder, sep = "")
+        "NSF OKN"                    = paste("C:/Users/", user.name, "/Box/NSF OKN Demo Data/", folder, sep = ""),
+        "root"                       = paste("C:/Users/", user.name, "/Box/", folder, sep = "")
       )
     } else {
       path.out <- paste("C:/Users/", user.name, "/Box/Mills Lab/Projects/", sub(".*\\/", "", getwd()), "/", sep = "")

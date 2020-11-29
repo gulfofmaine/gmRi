@@ -130,7 +130,7 @@ load_global_oisst <- function(oisst_path = "~Box/NSF OKN Demo Data/oisst",
                               resource = c("raw", "climatology", "anomalies", "warming rates"),
                               year_range = seq(2010, 2020, 1)){
 
-  print("Function currently in development.")
+  message("Function currently in development.")
 
   # Redirect to resource folder
   resource <- tolower(resource)
@@ -143,9 +143,10 @@ load_global_oisst <- function(oisst_path = "~Box/NSF OKN Demo Data/oisst",
 
 
   # generate list for the years
-  if(resource %in% c("climatology", "warming_rates")){
+  if(resource %in% c("climatology", "warming rates")){
     resource_out <- raster::stack(resource_folder)
-  } else {
+
+  } else if(resource %in% c("raw", "anomalies")){
 
     # Make list of paths for each year
     resource_list <- c()
