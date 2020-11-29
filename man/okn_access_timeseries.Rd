@@ -4,7 +4,12 @@
 \alias{okn_access_timeseries}
 \title{Access Regional Timeseries from OKN Demo Data}
 \usage{
-okn_access_timeseries(okn_path, sat_source = "oisst", region_family = "nefsc")
+okn_access_timeseries(
+  okn_path,
+  sat_source = "oisst",
+  region_family = c("nmfs trawl regions", "lme", "gmri focus areas"),
+  poly_name = "gulf of maine"
+)
 }
 \arguments{
 \item{okn_path}{Personal path to ~Box/NSF OKN Demo Data}
@@ -22,4 +27,8 @@ as well as regionally masked timeseries have been pre-processed and stored on bo
 is available here.
 
 Simply name the satellite data source, the desired extent or mask, and the function will return the corresponding table.
+}
+\examples{
+box_paths <- gmRi::research_access_paths(os.use = "unix", user.name = "not applicable I use a mac")
+agulhas_timeseries <- okn_access_timeseries(okn_path = box_paths$okn, sat_source = "oisst", region_family = "lme", poly_name = "agulhas current")
 }

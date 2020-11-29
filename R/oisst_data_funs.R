@@ -5,7 +5,7 @@
 
 
 ####______________________________####
-
+####  Rotate Data  ####
 
 
 #' @title Longitude 180 to 360
@@ -30,7 +30,7 @@ make360 <- function(lon) {
 
 
 ####______________________________####
-
+####  Fix Raster from Array  ####
 
 #' @title Fix Raster
 #'
@@ -60,8 +60,57 @@ fix_raster <- function(x, lons.use, lats.use, x.min.use, x.max.use, y.min.use, y
 }
 
 
-####______________________________####
 
+####______________________________####
+#### Fix Raster Stack Names  ####
+
+
+#' @title Make Valid Raster Stack Dates
+#'
+#' @details Takes a dataframe object containing columns for the year, month, and day
+#' and creates a new "valid_dates" column that will match the naming convention for
+#' a raster stack object, i.e. names(raster_stack) which cannot start with a number
+#' or contain spaces or underscores. Month and day values are left-padded with zeros
+#' to maintain consistent string length.
+#'
+#' @param point_location_df Dataframe of point locations we wish to use to extract data from raster stack
+#' @param year_col name of the column that contains year information (unquoted text)
+#' @param month_col name of the column that contains the month information (unquoted text)
+#' @param day_col name of the column that contains the day information (unquoted text)
+#'
+#' @return df_out Original dataframe with added "valid_dates" column
+#' @export
+#'
+#'
+make_stack_dates <- function(point_location_df, year_col, month_col, day_col) {
+
+  #tidy quotation
+  year_col  <- rlang::enquo(year_col)
+  month_col <- rlang::enquo(month_col)
+  day_col   <- rlang::enquo(day_col)
+
+  #Create valid_dates
+  df_out <-  dplyr::mutate(point_location_df,
+                           valid_dates = str_c(
+                             "X",         #Must not begin with a number
+                             !!year_col,  #followed by year
+                             ".",         #spaces become periods
+                             str_pad(!!month_col, width = 2, side = "left", pad = "0"), #month is padded
+                             ".",         #connected by another period
+                             str_pad(!!day_col, width = 2, side = "left", pad = "0"))   #day is also padded
+  )
+
+
+  return(df_out)
+}
+
+
+
+
+
+
+####______________________________####
+#### Download OISST from THREDDS  ####
 
 #' @title Download OISST from Thredds, convert to Stack
 #'
@@ -78,8 +127,7 @@ fix_raster <- function(x, lons.use, lats.use, x.min.use, x.max.use, y.min.use, y
 #' @export
 #'
 #'
-oisst_list_to_stack <- function(box,
-                                times.window) {
+oisst_list_to_stack <- function(box, times.window) {
 
   ## Start function
   # Install libraries
@@ -160,7 +208,7 @@ oisst_list_to_stack <- function(box,
 
 
 ####______________________________####
-
+####  Download OISST/MUR/ERSST from THREDDS  ####
 
 #' @title Satellite Data Extraction Function
 #'
@@ -471,52 +519,145 @@ env_data_extract <- function(data.set = "OISST",
 
 
 
-
 ####______________________________####
+#### Load OISST Data from Box area/time   ####
 
-#' @title Make Valid Raster Stack Dates
+
+#' @title Access OISST via Data Window of lat/lon/time
 #'
-#' @details Takes a dataframe object containing columns for the year, month, and day
-#' and creates a new "valid_dates" column that will match the naming convention for
-#' a raster stack object, i.e. names(raster_stack) which cannot start with a number
-#' or contain spaces or underscores. Month and day values are left-padded with zeros
-#' to maintain consistent string length.
+#' @description Returns a list of OISST raster stacks that
+#' has been clipped to the desired lat/lon/time extent. Each list element
+#' is named according to year, and contains all daily measurements within the
+#' desired window of time, and clipped to the desired lat/lon extent.
 #'
-#' @param point_location_df Dataframe of point locations we wish to use to extract data from raster stack
-#' @param year_col name of the column that contains year information (unquoted text)
-#' @param month_col name of the column that contains the month information (unquoted text)
-#' @param day_col name of the column that contains the day information (unquoted text)
 #'
-#' @return df_out Original dataframe with added "valid_dates" column
+#' Useful for loading OISST observations from box, but only for a particular area and/or time.
+#'
+#' @param okn_path User specific path to the OKN Demo Data Folder on Box. Can be obtained using shared.path funciton.
+#' @param data_window dataframe with columns for lat, lon, & time indicating the extent of data desired.
+#'
+#' @return
 #' @export
 #'
+#'@examples
+#'#not run
+#'# okn_path <- shared.path(group = "NSF OKN", folder = "")
+#'# data_window <- data.frame(lon = c(-72, -65), lat = c(42,44), time = as.Date(c("2016-08-01", "2020-12-31")))
 #'
-make_stack_dates <- function(point_location_df, year_col, month_col, day_col) {
+oisst_window_load <- function(okn_path, data_window){
 
-  #tidy quotation
-  year_col  <- rlang::enquo(year_col)
-  month_col <- rlang::enquo(month_col)
-  day_col   <- rlang::enquo(day_col)
-
-  #Create valid_dates
-  df_out <-  dplyr::mutate(point_location_df,
-      valid_dates = str_c(
-        "X",         #Must not begin with a number
-        !!year_col,  #followed by year
-        ".",         #spaces become periods
-        str_pad(!!month_col, width = 2, side = "left", pad = "0"), #month is padded
-        ".",         #connected by another period
-        str_pad(!!day_col, width = 2, side = "left", pad = "0"))   #day is also padded
-    )
+  # Get OISST data  from Box
+  oisst_path  <- list.files(stringr::str_c(okn_path, "oisst/annual_observations/"))
+  oisst_paths <- stringr::str_c(okn_path, "oisst/annual_observations/", oisst_path)
+  oisst_paths <- oisst_paths[!stringr::str_detect(oisst_paths, ".zarr")] # Paths
+  oisst_years <- stringr::str_sub(oisst_paths, -10, -7)                  # Labels
+  oisst_paths <- stats::setNames(oisst_paths, oisst_years)
 
 
-  return(df_out)
+
+  ###  Set limits based on desired data window
+
+  # Shift from -180 ~ 180 to 0 ~ 360
+  data_window$lon <- data_window$lon + 360
+  if (max(data_window$lon) > 540){ data_window$lon <- data_window$lon - 360 }
+
+  # Pull the min/max lat/lon to use as bbox
+  lon_min <- floor(min(data_window$lon))
+  lon_max <- ceiling(max(data_window$lon))
+  lat_min <- floor(min(data_window$lat))
+  lat_max <- ceiling(max(data_window$lat))
+
+  #  Format dates
+  if( class(data_window$time) == "Date") {
+    time_min <- min(data_window$time)
+    time_max <- max(data_window$time)
+  } else {
+    message("Time dimension not of class 'Date', all years returned.")
+    time_min <- as.Date("1981-01-01")
+    time_max <- as.Date("2020-12-31")
+  }
+
+
+
+  ####____ a.   Set up Rasters from Netcdf Files  ####
+  oisst_ras_list <- purrr::map(oisst_paths, function(nc_year){
+
+    # Open connection, get subsetting indices from limits
+    my_nc <- ncdf4::nc_open(nc_year)
+    nc_year_label <- stringr::str_sub(nc_year, -10, -7)
+
+    # Tester
+    #my_nc <- nc_open(oisst_paths["2018"]) ; nc_year_label <- "2018"
+
+    # Subset to area and times of interest
+    lon_idx  <- which( my_nc$dim$lon$vals > lon_min & my_nc$dim$lon$vals < lon_max)
+    lat_idx  <- which( my_nc$dim$lat$vals > lat_min & my_nc$dim$lat$vals < lat_max)
+    time_idx <- which(
+      as.Date(my_nc$dim$time$vals, origin='1800-01-01', tz = "GMT") > time_min &
+        as.Date(my_nc$dim$time$vals, origin='1800-01-01', tz = "GMT") < time_max)
+
+    if (length(time_idx) < 1) {
+      message(paste0(nc_year_label, " outside data range."))
+      return("Year outside time extent of data")}
+
+    # Pull netcdf data you need
+    nc_data <- ncdf4::ncvar_get(nc = my_nc, varid = "sst")[lon_idx, lat_idx, time_idx]
+
+    # Make raster Stack from subset array
+
+    #Get lon/lat/time dimensions
+    xvals <- my_nc$dim$lon$vals[lon_idx] - 360
+    yvals <- my_nc$dim$lat$vals[lat_idx]
+    time_dims <- 1:dim(nc_data)[3]
+
+    # Get the dates that correspond in the least streamlined way possible, for naming purposes
+    dates <- as.Date(my_nc$dim$time$vals[time_idx], origin = '1800-01-01', tz = "GMT")
+
+
+    # Convert Each day to a raster, rotate, and stack
+    nc_stack <- purrr::map(time_dims, function(time_index){
+      single_date <- nc_data[, , time_index]
+      dimnames(single_date) <- list(lon = my_nc$dim$lon$vals[lon_idx],
+                                    lat = my_nc$dim$lat$vals[lat_idx])
+      single_date <- t(single_date)          # transpose
+
+      # make/configure raster
+      ras <- raster::raster(single_date,
+                            crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs",
+                            xmn = min(xvals),
+                            xmx = max(xvals),
+                            ymn = min(yvals),
+                            ymx = max(yvals))
+      ras <- raster::flip(ras, 2)
+      return(ras)
+    }) %>%
+      raster::stack() %>%
+      stats::setNames(dates)
+
+    # Progress message
+    message(paste0(nc_year_label, " done"))
+
+    # Return the raster stack for the year
+    return(nc_stack)
+
+  })
+
+
+
+
 }
 
 
+# oisst_window_load(okn_path, data_window)
+
+
+
+
+
+
 
 ####______________________________####
-
+####  Mean OISST for Area/Time  ####
 
 #' @title OISST Time-Period Means
 #'
@@ -641,12 +782,21 @@ oisst_period_means <- function(stack_in, projection_crs = 26919, time_res_df) {
 }
 
 
+
+
+
+####______________________________####
+####  Calculate Daily Climatology for Area  ####
+
+
+
 #' @title Vectorized Daily OISST 30-Year Climatology Means
 #'
 #' @description Generate Daily 30-year climatologies for a given area.
 #'
 #' This function takes a raster stack of OISST data (usually with a clipped extent for memory). Default climatology ranges from 1982-01-01 to 2011-12-31, as such
 #' the input stack must extend beyond those dates estimate the climatology correctly.
+#'
 #'
 #' Returns a raster stack with mean SST for every day in the year over the desired time window.
 #'
@@ -747,134 +897,4 @@ calc_daily_climatologies <- function(stack_in, projection_crs = 26919, anom_peri
 
 
 
-####______________________________####
 
-
-
-#' @title Access OISST via Data Window of lat/lon/time
-#'
-#' @description Returns a list of OISST raster stacks that
-#' has been clipped to the desired lat/lon/time extent. Each list element
-#' is named according to year, and contains all daily measurements within the
-#' desired window of time, and clipped to the desired lat/lon extent.
-#'
-#'
-#' Useful for loading OISST observations from box, but only for a particular area and/or time.
-#'
-#' @param okn_path User specific path to the OKN Demo Data Folder on Box. Can be obtained using shared.path funciton.
-#' @param data_window dataframe with columns for lat, lon, & time indicating the extent of data desired.
-#'
-#' @return
-#' @export
-#'
-#'@examples
-#'#not run
-#'# okn_path <- shared.path(group = "NSF OKN", folder = "")
-#'# data_window <- data.frame(lon = c(-72, -65), lat = c(42,44), time = as.Date(c("2016-08-01", "2020-12-31")))
-#'
-oisst_window_load <- function(okn_path, data_window){
-
-  # Get OISST data  from Box
-  oisst_path  <- list.files(stringr::str_c(okn_path, "oisst/annual_observations/"))
-  oisst_paths <- stringr::str_c(okn_path, "oisst/annual_observations/", oisst_path)
-  oisst_paths <- oisst_paths[!stringr::str_detect(oisst_paths, ".zarr")] # Paths
-  oisst_years <- stringr::str_sub(oisst_paths, -10, -7)                  # Labels
-  oisst_paths <- stats::setNames(oisst_paths, oisst_years)
-
-  # # try stack to validate data exists
-  # oisst_test <- stack(oisst_paths[2])
-  # plot(oisst_test$X1982.01.01)
-
-  ###  Set limits based on desired data window
-
-  # Shift from -180 ~ 180 to 0 ~ 360
-  data_window$lon <- data_window$lon + 360
-  if (max(data_window$lon) > 540){
-    data_window$lon <- data_window$lon - 360
-  }
-  lon_min <- floor(min(data_window$lon))
-  lon_max <- ceiling(max(data_window$lon))
-  lat_min <- floor(min(data_window$lat))
-  lat_max <- ceiling(max(data_window$lat))
-
-  if( class(data_window$time) == "Date") {
-    time_min <- min(data_window$time)
-    time_max <- max(data_window$time)
-  } else {
-    message("Time dimension not of class 'Date', all years returned.")
-    time_min <- as.Date("1981-01-01")
-    time_max <- as.Date("2020-12-31")
-  }
-
-
-
-  ####____ a.   Set up Rasters from Netcdf Files  ####
-  oisst_ras_list <- purrr::map(oisst_paths, function(nc_year){
-
-    # Open connection, get subsetting indices from limits
-    my_nc <- ncdf4::nc_open(nc_year)
-    nc_year_label <- stringr::str_sub(nc_year, -10, -7)
-
-    # Tester
-    #my_nc <- nc_open(oisst_paths["2018"]) ; nc_year_label <- "2018"
-
-    # Subset to area and times of interest
-    lon_idx  <- which( my_nc$dim$lon$vals > lon_min & my_nc$dim$lon$vals < lon_max)
-    lat_idx  <- which( my_nc$dim$lat$vals > lat_min & my_nc$dim$lat$vals < lat_max)
-    time_idx <- which(
-      as.Date(my_nc$dim$time$vals, origin='1800-01-01', tz = "GMT") > time_min &
-      as.Date(my_nc$dim$time$vals, origin='1800-01-01', tz = "GMT") < time_max)
-
-    if (length(time_idx) < 1) {
-      message(paste0(nc_year_label, " outside data range."))
-      return("Year outside time extent of data")}
-
-    # Pull netcdf data you need
-    nc_data <- ncdf4::ncvar_get(nc = my_nc, varid = "sst")[lon_idx, lat_idx, time_idx]
-
-    # Make raster Stack from subset array
-
-    #Get lon/lat/time dimensions
-    xvals <- my_nc$dim$lon$vals[lon_idx] - 360
-    yvals <- my_nc$dim$lat$vals[lat_idx]
-    time_dims <- 1:dim(nc_data)[3]
-
-    # Get the dates that correspond in the least streamlined way possible, for naming purposes
-    dates <- as.Date(my_nc$dim$time$vals[time_idx], origin = '1800-01-01', tz = "GMT")
-
-
-    # Convert Each day to a raster, rotate, and stack
-    nc_stack <- purrr::map(time_dims, function(time_index){
-      single_date <- nc_data[, , time_index]
-      dimnames(single_date) <- list(lon = my_nc$dim$lon$vals[lon_idx],
-                                    lat = my_nc$dim$lat$vals[lat_idx])
-      single_date <- t(single_date)          # transpose
-
-      # make/configure raster
-      ras <- raster::raster(single_date,
-                            crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs",
-                            xmn = min(xvals),
-                            xmx = max(xvals),
-                            ymn = min(yvals),
-                            ymx = max(yvals))
-      ras <- raster::flip(ras, 2)
-      return(ras)
-    }) %>%
-      raster::stack() %>%
-      stats::setNames(dates)
-
-    # Progress message
-    message(paste0(nc_year_label, " done"))
-
-    # Return the raster stack for the year
-    return(nc_stack)
-
-  })
-
-
-
-
-}
-
-
-# oisst_window_load(okn_path, data_window)
