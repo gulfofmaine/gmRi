@@ -22,5 +22,6 @@ Generate Daily 30-year climatologies for a given area.
 This function takes a raster stack of OISST data (usually with a clipped extent for memory). Default climatology ranges from 1982-01-01 to 2011-12-31, as such
 the input stack must extend beyond those dates estimate the climatology correctly.
 
+
 Returns a raster stack with mean SST for every day in the year over the desired time window.
 }
