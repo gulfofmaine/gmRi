@@ -1,0 +1,423 @@
+---
+title: "OISST Mainstays Workflows"
+output: 
+  rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{OISST Mainstays Workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE, fig.align = "center", eval = TRUE, fig.height = 6, fig.width = 6)
+
+library(ncdf4)
+library(sf)
+library(raster)
+library(stars)
+library(tidyverse)
+library(here)
+library(patchwork)
+library(rnaturalearth)
+library(gmRi)
+
+#Geographic boundaries
+northeast <- ne_states("united states of america") %>% 
+  st_as_sf() %>% 
+  filter(region_sub %in% c("New England", "Middle Atlantic", "South Atlantic"))
+canada <- ne_states("canada") %>% st_as_sf()
+
+# Plot default
+theme_set(theme_bw())
+
+# Potential map theme
+gmri_map_theme <- list(
+  theme(
+    panel.border = element_rect(color = "black", fill = NA),
+    plot.background = element_rect(color = "transparent", fill = "transparent"),
+    line = element_blank(),
+    axis.title.x = element_blank(), # turn off titles
+    axis.title.y = element_blank(),
+    legend.position = "bottom", 
+    legend.title.align = 0.5))
+```
+
+# About OISST Mainstays
+
+OISST Mainstays is a collection of pre-processed OISST data resources that are stored in a shared location on Box. There a number of convenience functions in this package for working with this data effectively.
+
+
+## Loading Data Window
+As a commonly used resource for high resolution sea surface temperature data it makes sense for us to have it on-hand rather than re-download from THREDDS as needed. For this reason there are numerous functions for grabbing data for specific areas and dates from our shared box drive.
+
+`oisst_window_load()` is a convenience function that will load a subset of the OISST data using a table indicating the lat/lon/time you wish to access. This function also works for accessing pre-processed SST anomalies from the 1982-2011 climatology.
+
+
+```{r}
+
+# Load GMRI stylesheet
+gmRi::use_gmri_style_rmd("gmri_rmarkdown.css")
+
+# OISST is on box within the NSF OKN Demo Data Folder
+box_paths <- research_access_paths(os.use = "unix")
+okn_path <- box_paths$okn
+
+
+# Next we build a time/space extent that we want data for
+data_window <- data.frame(
+  lon = c(-74, -65), 
+  lat = c(35,44), 
+  time = as.Date(c("2016-01-01", "2020-12-31")))
+
+# Load the desired data into a raster stack
+# anomalies = FALSE returns raw sst
+daily_sst_stack <- oisst_window_load(okn_path, data_window, anomalies = FALSE)
+```
+
+
+### Using names to index time periods
+
+The way the layers are names off box are such that individual days are nested as layers under their respective year. To get the average for a period of time you just need to grab the indices that match the time period of interest.
+
+For months that is quite easy, as shown below using march as an example.
+
+```{r}
+# Use layer names to get an average over time
+date_names <- names(daily_sst_stack$`2019`)
+march_flag <- which(str_sub(date_names, -5, -4) == "03")
+march_2019 <- mean(daily_sst_stack$`2019`[[march_flag]])
+
+date_names <- names(daily_sst_stack$`2020`)
+march_flag <- which(str_sub(date_names, -5, -4) == "03")
+march_2020 <- mean(daily_sst_stack$`2019`[[march_flag]])
+```
+
+
+
+
+### Mapping data with sf and stars (for rasters)
+
+The [stars package](https://r-spatial.github.io/stars/)  is produced by the r-spatial group and is the array data equivelant to the [sf package](https://r-spatial.github.io/sf/index.html). Stars lets you map spatio-temporal arrays in a familiar ggplot form that makes it easy to incorporate point and polygon data as well.
+
+To map layers using stars you simply need to convert the desired layer to a stars object and plot using `geom_stars`.
+
+```{r, fig.height=8, fig.width=6}
+
+# Plot them
+p1 <- ggplot() +
+  geom_stars(data = st_as_stars(march_2019)) +
+  geom_sf(data = northeast) +
+  geom_sf(data = canada) +
+  gmri_map_theme +
+  scale_fill_distiller(palette = "RdBu", na.value = "NA") +
+  guides(fill = guide_colorbar(title = "SST - Celsius")) +
+  coord_sf(xlim = c(-74, -64), ylim = c(34, 45), expand = FALSE) +
+  labs(x = NULL, y = NULL, caption = "March Average 2019")
+
+p2 <- ggplot() +
+  geom_stars(data = st_as_stars(march_2020)) +
+  geom_sf(data = northeast) +
+  geom_sf(data = canada) +
+  gmri_map_theme +
+  scale_fill_distiller(palette = "RdBu", na.value = "NA") +
+  guides(fill = guide_colorbar(title = "SST - Celsius")) +
+  coord_sf(xlim = c(-74, -64), ylim = c(34, 45), expand = FALSE) +
+  labs(x = NULL, y = NULL, caption ="March Average 2020")
+
+p1 / p2
+```
+
+
+
+## Extracting Daily Values with Point Locations
+
+Another common need is to match temperature values in space and time with specific point locations. This is achieved with the
+
+
+```{r}
+# Create spatial points object from survdat station data
+res_path <- box_paths$res
+load(paste0(res_path, "NMFS_trawl/Survdat_Nye_Aug 2020.RData"))
+station_data <- survdat %>% filter(EST_YEAR >= 2016) %>% as_tibble()
+rm(survdat)
+
+
+```
+
+### Single Layer Point Extractions
+
+To get values from a single raster layer, regardless of date, you simply use rasters extract function.
+
+```{r}
+#Test Raster - March 2020 Average
+test_ras <- march_2020
+
+#Test points = all stations all years
+test_points <- bind_cols(
+  lon = station_data$DECDEG_BEGLON, 
+  lat = station_data$DECDEG_BEGLAT)
+
+# Extract temperature as new column
+test_points$sst <- raster::extract(test_ras, test_points)
+
+# Make an sf object and plot
+test_points <- st_as_sf(test_points, coords = c("lon", "lat"), crs = 4326)
+
+
+# Plot
+ggplot() +
+  geom_sf(data = test_points, aes(color = sst)) +
+  geom_sf(data = northeast) +
+  geom_sf(data = canada) +
+  gmri_map_theme +
+  scale_color_distiller(palette = "RdBu", na.value = "NA") +
+  guides(fill = guide_colorbar(title = "SST - Celsius")) +
+  coord_sf(xlim = c(-75, -65), ylim = c(37, 45), expand = FALSE) +
+  labs(x = "", y = "", caption = "Point Extraction - March 2020 Mean SST")
+```
+
+
+### Extracting All Years/Dates from Raster Brick
+
+The way the OISST data is organized with `oisst_window_load` lets us loop/apply an extraction by first matching up years and then by matching the day of the year.
+
+The preparation steps are just to create a date key that matches the conventions that raster layers use. For that the dates cannot begin with a number, they begin with a capital "X" and underscores, hyphens, and spaces are replaced with a period.
+
+```{r}
+
+# Format Date Column to match with Raster Stack
+station_data <- station_data %>% mutate(
+  EST_YEAR  = as.character(EST_YEAR),
+  EST_MONTH = str_pad(EST_MONTH, width = 2, pad = "0", side = "left"),
+  EST_DAY   = str_pad(EST_DAY, width = 2, pad = "0", side = "left"),
+  date_key  = str_c("X", EST_YEAR, ".", EST_MONTH, ".", EST_DAY)) %>% 
+  rename(lon = DECDEG_BEGLON,
+         lat = DECDEG_BEGLAT)
+```
+
+
+Once we have a key for indexing the proper years and dates, or averages if we did some sort of manipulation, then you simply split the data by the year and match using those keys.
+
+I use `purrr::imap` here which stands for indexed map. It takes a list as input and includes the name of the list items as a second input for whatever function you build. This lets me pass data and a matching name together which I use to index into the raster stacks.
+
+
+```{r}
+
+
+#####  Extracting all years from the brick  ####
+full_extraction <- station_data %>% 
+  split(.$EST_YEAR) %>% 
+  imap_dfr(function(year_df, year_id){
+    
+    # Build Brick year layer ID
+    year_index <- which(names(daily_sst_stack) == as.character(year_id))
+    
+    # Check that the year has a match, if so proceed
+    if(length(year_index) != 0){
+    
+      # Grab that year
+      year_stack <- daily_sst_stack[[year_index]]
+    
+      # Loop/Map again for individual dates if the year is in the stack
+      year_df <- year_df %>% 
+          split(.$date_key) %>% 
+          imap_dfr(function(daily_df, date_key){
+            date_index <- which(names(year_stack) == date_key)
+            daily_df$sst <- raster::extract(
+              year_stack[[date_index]], 
+              daily_df[, c("lon","lat")])
+            return(daily_df)})
+      
+      # Return df
+      return(year_df)
+      
+      # If no matching year, fill column with NA's
+      } else {
+          year_df$sst <- rep(NA, nrow(year_df))
+          return(year_df)
+      }
+    
+  })
+```
+
+### Plotting Extracted SST by Date
+
+To visualize the success/faiilure of that we can plot sst over time,
+
+```{r}
+full_extraction <- full_extraction %>% 
+  mutate(DATE = lubridate::ymd_hms(str_c(EST_YEAR, "-", EST_MONTH, "-", EST_DAY, " 12:00:00")))
+
+
+full_extraction %>% 
+  ggplot(aes(DATE, sst, color = sst)) +
+  geom_point() +
+  scale_color_distiller(palette = "RdBu", na.value = "NA") +
+  labs(x = "", y = "Extracted SST")
+```
+
+
+## Extracting Data with Shapefiles
+
+Shapefile extractions for netcdf files can be accomplished more memory efficiently by first loading just the area needed using `oisst_window_load`.
+
+From there you can use `raster::mask` and `raster::crop` to pull data using a specific shapefile.
+
+For this demo I will use NMFS Trawl survey strata we usually use together to represent the Gulf of Maine.
+
+```{r}
+# Load the strata
+survey_strata <- read_sf(str_c(res_path, "Shapefiles/BottomTrawlStrata/BTS_Strata.shp"))  %>% 
+  janitor::clean_names() %>% 
+  filter(strata >= 01010 ,
+         strata <= 01760,
+         strata != 1310,
+         strata != 1320,
+         strata != 1330,
+         strata != 1350,
+         strata != 1410,
+         strata != 1420,
+         strata != 1490) 
+
+
+# Key to which strata = which regions
+strata_key <- list(
+  "Georges Bank"          = as.character(13:23),
+  "Gulf of Maine"         = as.character(24:40),
+  "Southern New England"  = str_pad(as.character(1:12), width = 2, pad = "0", side = "left"),
+  "Mid-Atlantic Bight"    = as.character(61:76))
+
+
+# Assign Areas
+survey_strata <- survey_strata %>% 
+  mutate(
+    strata = str_pad(strata, width = 5, pad = "0", side = "left"),
+    strata_num = str_sub(strata, 3, 4),
+    area = case_when(
+      strata_num %in% strata_key$`Georges Bank` ~ "Georges Bank",
+      strata_num %in% strata_key$`Gulf of Maine` ~ "Gulf of Maine",
+      strata_num %in% strata_key$`Southern New England` ~ "Southern New England",
+      strata_num %in% strata_key$`Mid-Atlantic Bight` ~ "Mid-Atlantic Bight",
+    TRUE ~ "Outside Major Study Areas"
+  )) %>% 
+  select(finstr_id, strata, strata_num, area, a2, str2, set, stratuma, str3, geometry)
+
+
+# Pull the Gulf of Maine
+gom_sf <- filter(survey_strata, area == "Gulf of Maine")
+
+# Plot to see them
+ggplot() +
+  geom_sf(data = northeast) +
+  geom_sf(data = canada) +
+  geom_sf(data = survey_strata, aes(fill = area), alpha = 0.2) +
+  geom_sf(data = gom_sf, aes(fill = area)) +
+  gmri_map_theme +
+  coord_sf(xlim = c(-76, -65), ylim = c(35.5, 45), expand = FALSE) 
+```
+
+
+
+From this shapefile we can pull its lat/lon limits and use them to load in just the oisst data we need to do a shapefile clip.
+
+For this time around we will load the temperature anomalies so we can make a timeseries of those.
+
+
+```{r}
+# Pull limits
+gom_extent <- st_bbox(gom_sf)
+
+# Use them for data window
+data_window <- data.frame(
+  lon = c(gom_extent["xmin"], gom_extent["xmax"]), 
+  lat = c(gom_extent["ymin"], gom_extent["ymax"]), 
+  time = as.Date(c("2016-01-01", "2020-12-31")))
+
+# Load the desired data into a raster stack
+# anomalies = FALSE returns raw sst
+gom_anom_stack <- oisst_window_load(okn_path, data_window, anomalies = TRUE)
+```
+
+
+
+### Mapping Regional Anomalies
+
+```{r}
+# Mean July Anomalies
+july_flag <- str_detect(names(gom_anom_stack$`2020`), "2020.07")
+july_dates <- which(july_flag)
+july_gom <- mean(gom_anom_stack$`2020`[[july_dates]])
+
+# Plot July 2020 Mean Temp anoms
+ggplot() +
+  geom_stars(data = st_as_stars(july_gom)) +
+  geom_sf(data = northeast) +
+  geom_sf(data = canada) +
+  geom_sf(data = gom_sf, fill = "transparent") +
+  gmri_map_theme +
+  scale_fill_distiller(palette = "RdBu", na.value = "NA") +
+  guides(fill = guide_colorbar(title = "SST Temperature Anomaly", 
+                               title.position = "top", 
+                               title.hjust = 0.5)) +
+  coord_sf(xlim = c(-72, -65), ylim = c(41, 45), expand = FALSE) +
+  labs(x = NULL, y = NULL)
+
+```
+
+
+### Clipping Raster
+
+Once we have the data we want to mask it is then simple to use the shapefile to clip the data.
+
+```{r}
+
+#Stacks will have to be done seperately
+stack_2020 <- gom_anom_stack$`2020`
+
+## crop and mask
+gom_crop <- crop(stack_2020, gom_sf)
+gom_masked <- mask(gom_crop, gom_sf)
+
+# Plot to Display
+ggplot() +
+  geom_stars(data = st_as_stars(gom_masked$X2020.01.01)) +
+  geom_sf(data = northeast) +
+  geom_sf(data = canada) +
+  geom_sf(data = gom_sf, fill = "transparent") +
+  gmri_map_theme +
+  scale_fill_distiller(palette = "RdBu", na.value = "NA") +
+  guides(fill = guide_colorbar(title = "SST Temperature Anomaly", 
+                               title.position = "top", 
+                               title.hjust = 0.5)) +
+  coord_sf(xlim = c(-72, -65), ylim = c(41, 45), expand = FALSE) +
+  labs(x = NULL, y = NULL, caption = "January 1, 2020 SST Anomalies")
+```
+
+
+
+### Timeline from Stack
+
+The cellstats function can be used to get some metric of an entire raster layer. Using this function we can make timelines of the raster stacks from each year.
+
+```{r}
+# Make timeline using cellstats
+gom_2020 <- data.frame("sst_anom" = cellStats(gom_masked, stat = "mean")) %>% 
+  rownames_to_column(var = "date") %>% 
+  mutate(date = str_remove(date, "X"))
+
+
+# Plot timeline
+gom_2020 %>% 
+  mutate(date = lubridate::ymd(date)) %>% 
+  ggplot(aes(date, sst_anom, color = sst_anom)) +
+  geom_line(group = 1) +
+  scale_color_gradient2(low = "blue", mid = "gray50", high = "darkred", midpoint = 0, ) +
+  #scale_color_distiller(palette = "RdBu", na.value = "NA")
+  labs(x = "", y = "Sea Surface Temperature Anomaly",
+       caption = "Gulf of Maine Temperature Anomalies - 2020")
+
+```
+
+
+
+

@@ -4,12 +4,14 @@
 \alias{oisst_window_load}
 \title{Access OISST via Data Window of lat/lon/time}
 \usage{
-oisst_window_load(okn_path, data_window)
+oisst_window_load(okn_path, data_window, anomalies = FALSE)
 }
 \arguments{
 \item{okn_path}{User specific path to the OKN Demo Data Folder on Box. Can be obtained using shared.path funciton.}
 
 \item{data_window}{dataframe with columns for lat, lon, & time indicating the extent of data desired.}
+
+\item{anomalies}{Boolean indication of whether to return observed sst or anomalies. Default = TRUE.}
 }
 \value{
 
