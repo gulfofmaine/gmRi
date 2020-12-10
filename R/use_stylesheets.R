@@ -17,6 +17,9 @@ use_gmri_style_rmd <- function(css_file = "gmri_rmarkdown.css"){
 }
 
 
+
+
+
 #' Insert HTML Header File from gmRi package files - Rmd Implementation
 #'
 #' @param header_file String indicating desired css filename.

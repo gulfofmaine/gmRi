@@ -535,6 +535,7 @@ env_data_extract <- function(data.set = "OISST",
 #'
 #' @param okn_path User specific path to the OKN Demo Data Folder on Box. Can be obtained using shared.path funciton.
 #' @param data_window dataframe with columns for lat, lon, & time indicating the extent of data desired.
+#' @param anomalies Boolean indication of whether to return observed sst or anomalies. Default = TRUE.
 #'
 #' @return
 #' @export
@@ -544,15 +545,22 @@ env_data_extract <- function(data.set = "OISST",
 #'# okn_path <- shared.path(group = "NSF OKN", folder = "")
 #'# data_window <- data.frame(lon = c(-72, -65), lat = c(42,44), time = as.Date(c("2016-08-01", "2020-12-31")))
 #'
-oisst_window_load <- function(okn_path, data_window){
+oisst_window_load <- function(okn_path, data_window, anomalies = FALSE){
 
   # Get OISST data  from Box
-  oisst_path  <- list.files(stringr::str_c(okn_path, "oisst/annual_observations/"))
-  oisst_paths <- stringr::str_c(okn_path, "oisst/annual_observations/", oisst_path)
-  oisst_paths <- oisst_paths[!stringr::str_detect(oisst_paths, ".zarr")] # Paths
-  oisst_years <- stringr::str_sub(oisst_paths, -10, -7)                  # Labels
-  oisst_paths <- stats::setNames(oisst_paths, oisst_years)
-
+  if(anomalies == FALSE){
+    oisst_path  <- list.files(stringr::str_c(okn_path, "oisst/annual_observations/"))
+    oisst_paths <- stringr::str_c(okn_path, "oisst/annual_observations/", oisst_path)
+    oisst_paths <- oisst_paths[!stringr::str_detect(oisst_paths, ".zarr")] # Paths
+    oisst_years <- stringr::str_sub(oisst_paths, -10, -7)                  # Yr Labels
+    oisst_paths <- stats::setNames(oisst_paths, oisst_years)
+  } else if(anomalies == TRUE){
+    oisst_path  <- list.files(stringr::str_c(okn_path, "oisst/annual_anomalies/"))
+    oisst_paths <- stringr::str_c(okn_path, "oisst/annual_anomalies/", oisst_path)
+    oisst_paths <- oisst_paths[stringr::str_detect(oisst_paths, ".nc")]    # Paths
+    oisst_years <- stringr::str_sub(oisst_paths, -7, -4)                   # Yr Labels
+    oisst_paths <- stats::setNames(oisst_paths, oisst_years)
+  }
 
 
   ###  Set limits based on desired data window
@@ -566,6 +574,12 @@ oisst_window_load <- function(okn_path, data_window){
   lon_max <- ceiling(max(data_window$lon))
   lat_min <- floor(min(data_window$lat))
   lat_max <- ceiling(max(data_window$lat))
+
+  # Get year vector to subset list at end and remove empty years
+  start_year <- min(lubridate:::year(data_window$time))
+  end_year <- max(lubridate:::year(data_window$time))
+  year_vector <- as.character(c(start_year:end_year))
+
 
   #  Format dates
   if( class(data_window$time) == "Date") {
@@ -584,26 +598,50 @@ oisst_window_load <- function(okn_path, data_window){
 
     # Open connection, get subsetting indices from limits
     my_nc <- ncdf4::nc_open(nc_year)
-    nc_year_label <- stringr::str_sub(nc_year, -10, -7)
 
-    # Tester
+    # Years are at different locations for the file names for anomalies
+    if(anomalies == FALSE){
+      nc_year_label <- stringr::str_sub(nc_year, -10, -7)
+    } else if(anomalies == TRUE){
+      nc_year_label <- stringr::str_sub(nc_year, -7, -4)
+    }
+
+
+     # Tester
     #my_nc <- nc_open(oisst_paths["2018"]) ; nc_year_label <- "2018"
 
     # Subset to area and times of interest
     lon_idx  <- which( my_nc$dim$lon$vals > lon_min & my_nc$dim$lon$vals < lon_max)
     lat_idx  <- which( my_nc$dim$lat$vals > lat_min & my_nc$dim$lat$vals < lat_max)
-    time_idx <- which(
-      as.Date(my_nc$dim$time$vals, origin='1800-01-01', tz = "GMT") > time_min &
-        as.Date(my_nc$dim$time$vals, origin='1800-01-01', tz = "GMT") < time_max)
 
+
+
+    # Date Origin is different for each anomaly netcdf so we need to split here again
+    # That should be fixed, but this will work for now...
+    if(anomalies == FALSE){
+      time_idx <- which(
+        as.Date(my_nc$dim$time$vals, origin = '1800-01-01', tz = "GMT") > time_min &
+          as.Date(my_nc$dim$time$vals, origin = '1800-01-01', tz = "GMT") < time_max)
+    } else if(anomalies == TRUE){
+      time_idx <- which(
+        as.Date(my_nc$dim$time$vals, origin = paste0(nc_year_label, '-01-01'), tz = "GMT") > time_min &
+          as.Date(my_nc$dim$time$vals, origin = paste0(nc_year_label, '-01-01'), tz = "GMT") < time_max)
+    }
+
+
+    # If time index is less than one, output message indicating that year will be empty
     if (length(time_idx) < 1) {
-      message(paste0(nc_year_label, " outside data range."))
+      message(paste0(nc_year_label, " outside data range, not included in stack."))
       return("Year outside time extent of data")}
 
-    # Pull netcdf data you need
-    nc_data <- ncdf4::ncvar_get(nc = my_nc, varid = "sst")[lon_idx, lat_idx, time_idx]
+    # Pull netcdf data that you need using indexes
+    if(anomalies == FALSE){
+      nc_data <- ncdf4::ncvar_get(nc = my_nc, varid = "sst")[lon_idx, lat_idx, time_idx]
+    } else if(anomalies == TRUE){
+      nc_data <- ncdf4::ncvar_get(nc = my_nc, varid = "sst")[lon_idx, lat_idx, time_idx]
+    }
 
-    # Make raster Stack from subset array
+    ####____ b. Make raster Stack from subset array  ####
 
     #Get lon/lat/time dimensions
     xvals <- my_nc$dim$lon$vals[lon_idx] - 360
@@ -611,8 +649,11 @@ oisst_window_load <- function(okn_path, data_window){
     time_dims <- 1:dim(nc_data)[3]
 
     # Get the dates that correspond in the least streamlined way possible, for naming purposes
-    dates <- as.Date(my_nc$dim$time$vals[time_idx], origin = '1800-01-01', tz = "GMT")
-
+    if(anomalies == FALSE){
+      dates <- as.Date(my_nc$dim$time$vals[time_idx], origin = '1800-01-01', tz = "GMT")
+    } else if(anomalies == TRUE){
+      dates <- as.Date(my_nc$dim$time$vals[time_idx], origin = paste0(nc_year_label, '-01-01'), tz = "GMT")
+    }
 
     # Convert Each day to a raster, rotate, and stack
     nc_stack <- purrr::map(time_dims, function(time_index){
@@ -642,13 +683,21 @@ oisst_window_load <- function(okn_path, data_window){
 
   })
 
+  # Drop empty years
+  out_stack <- oisst_ras_list[year_vector]
+  return(out_stack)
 
 
 
 }
 
 
-# oisst_window_load(okn_path, data_window)
+
+
+# Testing Code:
+# okn_path <- shared.path(group = "NSF OKN", folder = "")
+# data_window <- data.frame(lon = c(-72, -65), lat = c(42,44), time = as.Date(c("2019-08-01", "2020-12-31")))
+# oisst_stack <- oisst_window_load(okn_path, data_window, anomalies = TRUE)
 
 
 
@@ -679,14 +728,14 @@ oisst_window_load <- function(okn_path, data_window){
 #'
 oisst_period_means <- function(stack_in, projection_crs = 26919, time_res_df) {
 
-  ####  1. Reprojection  ####
-  #Reproject if necessary
-  project_utm <- sf::st_crs(projection_crs)
-
-  #Default is NAD1983 / UTM zone 19N Gulf of Maine
-  if(projection_crs != 26919){
-    stack_in <- raster::projectRaster(stack_in, crs = project_utm$proj4string)
-  }
+  # ####  1. Reprojection  ####
+  # #Reproject if necessary
+  # project_utm <- sf::st_crs(projection_crs)
+  #
+  # #Default is NAD1983 / UTM zone 19N Gulf of Maine
+  # if(projection_crs != 26919){
+  #   stack_in <- raster::projectRaster(stack_in, crs = project_utm$proj4string)
+  # }
 
   #Intra-annual break names
   break_names <- unique(time_res_df$breaks)
