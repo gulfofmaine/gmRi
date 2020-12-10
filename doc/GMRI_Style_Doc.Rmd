@@ -1,6 +1,9 @@
 ---
 title: "GMRI R Style Doc"
-output: rmarkdown::html_vignette
+output: 
+  rmarkdown::html_vignette:
+    includes:
+      before_body: www/gmri_logo_header.html
 vignette: >
   %\VignetteIndexEntry{GMRI_Style_Doc}
   %\VignetteEngine{knitr::rmarkdown}
@@ -24,11 +27,24 @@ To add a GMRI css stylesheet to an Rmarkdown File, simple use the function `use_
 
 ## Adding a Header
 
-A seperate function: `use_gmri_header()`. This function works by printing an html file located in the `gmRi/inst/stylesheets` directory in-place into the .Rmd or shiny file.
+A seperate function: `insert_gmri_header()`. This function was conceived to work by printing an html file located in the `gmRi/inst/stylesheets` directory in-place into the .Rmd or shiny file.
 
 This code block should be included as the very first code block in the document, prior to any headers or text. The html header will be inserted in place, so any text above it will remain above it.
 
-An alternative way to add a header is by including it in a subfolder, and refering to it in the YAML, or alternatively by including it directly via a path to a subfolder.
+Currently this function is unable to locate the .png file for the logo to display correctly. Perhaps a friendly collaborator could remedy this...
+
+An alternative way to add a header is by including it in the `www` subfolder of a .Rmd file. Then in the YAML header it can be referenced directly with:
+
+`output:`   
+  `html_document:`   
+    `includes:`   
+      `in_header: www/header.html`   
+        `before_body: www/doc_prefix.html`   
+        `after_body: www/doc_suffix.html`   
+
+If it references an image file make sure the path is also `www/image.png` and that the file is in that folder.
+
+OR alternatively you can add html, or images directly by including it directly via a path to a subfolder and referencing them in the subfolder.
 
 **Example:**
 The following line of html code will attach the GMRI logo to the right of the document, the top-right when included at the start of an .Rmd doc.

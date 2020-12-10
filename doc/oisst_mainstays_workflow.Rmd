@@ -135,9 +135,11 @@ Another common need is to match temperature values in space and time with specif
 
 
 ```{r}
-# Create spatial points object from survdat station data
+# Load the NEFSC Survdat data from res path on box
 res_path <- box_paths$res
 load(paste0(res_path, "NMFS_trawl/Survdat_Nye_Aug 2020.RData"))
+
+# filter some years out for speed
 station_data <- survdat %>% filter(EST_YEAR >= 2016) %>% as_tibble()
 rm(survdat)
 

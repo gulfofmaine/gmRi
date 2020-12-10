@@ -95,3 +95,7 @@ ggplot(mpg, aes(manufacturer, fill = manufacturer)) +
 2.  Accessing OISST data via thredds and performing common tasks.
     [vignette 2 : OISST
     How-To](http://gulfofmaine.github.io/gmRi/doc/oisst_howto.html)
+
+3.  Working with pre-processed OISST resources on box from OISST
+    Mainstays Repo. [OISST Mainstays - GMRI OISST Resources on
+    Box](http://gulfofmaine.github.io/gmRi/doc/oisst_mainstays_workflow.html)
