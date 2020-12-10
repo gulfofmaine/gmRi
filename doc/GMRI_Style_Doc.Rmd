@@ -27,11 +27,16 @@ To add a GMRI css stylesheet to an Rmarkdown File, simple use the function `use_
 
 ## Adding a Header
 
-A seperate function: `insert_gmri_header()`. This function was conceived to work by printing an html file located in the `gmRi/inst/stylesheets` directory in-place into the .Rmd or shiny file.
+The function: `insert_gmri_header()` was created to insert a header file into an rmarkdown document or shiny app. This function was conceived to work by printing an html file located in the `gmRi/inst/stylesheets` directory in-place into the .Rmd or shiny file. Currently it only works succesfully with shiny apps.
 
-This code block should be included as the very first code block in the document, prior to any headers or text. The html header will be inserted in place, so any text above it will remain above it.
+This function should be run in the first code block in the document, prior to any outputs or text. The html header will be inserted in place, so any text above it will remain above it.
 
-Currently this function is unable to locate the .png file for the logo to display correctly. Perhaps a friendly collaborator could remedy this...
+```{r, echo = FALSE, eval = FALSE}
+# Add Header with gmRi Logo
+gmRi::insert_gmri_header(header_file = "gmri_logo_header.html")
+```
+
+Currently this function fails for rmarkdown files because it is unable to locate the .png file for the logo to display correctly. Perhaps a friendly collaborator could remedy this...
 
 An alternative way to add a header is by including it in the `www` subfolder of a .Rmd file. Then in the YAML header it can be referenced directly with:
 
@@ -56,10 +61,6 @@ The following line of html code will attach the GMRI logo to the right of the do
 ```
 
 
-```{r, echo = FALSE, eval = FALSE}
-# Add Header with gmRi Logo
-gmRi::insert_gmri_header(header_file = "gmri_logo_header.html")
-```
 
 ## Attaching CSS File from gmRi Package
 
