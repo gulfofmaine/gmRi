@@ -1,5 +1,5 @@
 ####
-####  Accessing NSF OKN Processed Data  ####
+####  Accessing OISST Mainstays Processed Data  ####
 ####
 #### Many commonly used forms of rocessed OISST and ERSST data were used
 #### Things like anomaly timeseries related to important regions like GOM, GB, or even LME's
@@ -38,16 +38,20 @@ research_access_paths <- function(os.use = "unix", user.name = "not applicable I
   okn_path <- shared.path(os.use = os.use, group = "NSF OKN", folder = "")
 
   # Path to Research Team Data
-  res_path   <- shared.path(os.use = os.use, group = "RES Data", folder = NULL)
+  res_path   <- shared.path(os.use = os.use, group = "RES_Data", folder = NULL)
 
   # Path to Kathy Mills Research Lab
   mills_path <- shared.path(os.use = os.use, group = "Mills Lab", folder = "")
+
+  # OISST Mainstays Folder
+  oisst_path <- shared.path(os.use = os.use, group = "RES_Data", folder = "OISST/oisst_mainstays/")
 
 
   # group them all together for export
   res_paths <- list(okn = okn_path,
                     res = res_path,
-                    mills = mills_path)
+                    mills = mills_path,
+                    oisst_mainstays = oisst_path)
   return(res_paths)
 
 }
@@ -65,7 +69,7 @@ research_access_paths <- function(os.use = "unix", user.name = "not applicable I
 #' Simply name the satellite data source, the desired extent or mask, and the function will return the corresponding table.
 #'
 #'
-#' @param okn_path Personal path to ~Box/NSF OKN Demo Data
+#' @param oisst_path Personal path to ~Box/RES_Data/OISST/oisst_mainstays
 #' @param sat_source String indicating satellite data source.
 #' @param region_family Identify the family of shapefiles that you are interested in. Choices = "LME", "Groundfish Regions"
 #'
@@ -73,8 +77,8 @@ research_access_paths <- function(os.use = "unix", user.name = "not applicable I
 #' @export
 #'
 #' @examples box_paths <- gmRi::research_access_paths(os.use = "unix", user.name = "not applicable I use a mac")
-#' @examples agulhas_timeseries <- okn_access_timeseries(okn_path = box_paths$okn, sat_source = "oisst", region_family = "lme", poly_name = "agulhas current")
-okn_access_timeseries <- function(okn_path,
+#' @examples agulhas_timeseries <- okn_access_timeseries(okn_path = box_paths$oisst_mainstays, sat_source = "oisst", region_family = "lme", poly_name = "agulhas current")
+okn_access_timeseries <- function(oisst_path,
                                   sat_source = "oisst",
                                   region_family = c("nmfs trawl regions", "lme", "gmri focus areas"),
                                   poly_name = "gulf of maine"){
@@ -118,14 +122,14 @@ okn_access_timeseries <- function(okn_path,
 ####  Access OISST NETCDF's  ####
 #' @title Access OISST Mainstays Arrays
 #'
-#' @param oisst_path Local path to oisst folder on box, subfolder of NSF OKN Demo Data
+#' @param oisst_path Local path to oisst folder on box, subfolder of RES_Data/OISST/oisst_mainstays
 #' @param resource Name of the global extent resource, choices are raw, climatology, warming rates, and anomalies.
 #' @param year_range optional vector of years for raw or anommalies data resources.
 #'
 #' @return resource_out Raster stack of the desired netcdf array
 #' @export
 #'
-#' @examples #not run load_global_oisst(oisst_path = "~Box/NSF OKN Demo Data/oisst", resource = "warming rates", year_range = NULL)
+#' @examples #not run load_global_oisst(oisst_path = "~Box/RES_Data/OISST/oisst_mainstays", resource = "warming rates", year_range = NULL)
 load_global_oisst <- function(oisst_path = "~Box/NSF OKN Demo Data/oisst",
                               resource = c("raw", "climatology", "anomalies", "warming rates"),
                               year_range = seq(2010, 2020, 1)){

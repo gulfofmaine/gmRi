@@ -27,19 +27,35 @@ northeast <- ne_states("united states of america") %>%
   filter(region_sub %in% c("New England", "Middle Atlantic", "South Atlantic"))
 canada <- ne_states("canada") %>% st_as_sf()
 
+# Plot default
 theme_set(theme_bw())
+
+# Potential map theme
+gmri_map_theme <- list(
+  theme(
+    panel.border = element_rect(color = "black", fill = NA),
+    plot.background = element_rect(color = "transparent", fill = "transparent"),
+    line = element_blank(),
+    axis.title.x = element_blank(), # turn off titles
+    axis.title.y = element_blank(),
+    legend.position = "bottom", 
+    legend.title.align = 0.5))
 ```
 
-## 1. Downloading OISST Data Using THREDDS Server
+## Option 1. Downloading OISST Data Using THREDDS Server
 
-```{r}
+This approach takes an input bounding box for a desired area, and downloads the desired gridded dataset using THREDDS. 
 
-# Establish Desired Destination Path
+**NOTE:**
+For most use cases this will be more time consuming than accessing what has already been placed on box. NOT the preferred usage, but still viable.
+
+```{r, eval = FALSE}
+
+# Establish Desired Local Destination Path
 oisst_path <- "/Users/akemberling/Documents/oisst_local"
-oisst_path <- "/Users/akemberling/Documents/oisst_mainstays/full_period"
 
 
-# Pull data from Thredds server
+# Pull data from Thredds server using bounding box
 daily_sst_stack <- env_data_extract(data.set = "OISST", 
                                     dates = c("1982-01-01", "1984-12-31"), 
                                     #box = c(1, 359, -89, 89), 
@@ -50,23 +66,31 @@ daily_sst_stack <- env_data_extract(data.set = "OISST",
 
 ```
 
-## 2. Importing Daily Mean SST Data as Raster Stack
+## Loading OISST Files as Raster Stack
 
-```{r}
+Whether accessing data downloaded via THREDDS or those stored on box, any single netcdf can be loaded into the environment using `raster::stack("file_location.nc)`
+
+```{r, eval = FALSE}
 # Load data into R as Raster stack
 daily_sst_stack <- raster::stack(str_c(oisst_path, "/", "OISST.grd"))
 ```
 
-## 3. Calculating Seasonal Averages
+## Calculating Seasonal Averages from THREDDS Download
 
-```{r}
+**NOTE:** Seasonal average function built to work off THREDDS download structure. Function does not work with oisst_window_load output.
+
+From these raster stacks it is possible to get average temperature values for seasonal windows of time. For this we can use the `oisst_period_means()` function.
+
+For this function you need to provide a table indicating the labels for the time windows and the start and end dates
+
+```{r, eval = FALSE}
 #Set up the Breaks you want
 season_breaks <- data.frame(
   "breaks" = c("SPRING", "FALL"),
-  "start_date" = c(as.Date("1981-03-01"), 
-                   as.Date("1981-09-01")),
-  "end_date" = c(as.Date("1984-05-31"), 
-                 as.Date("1984-11-30"))
+  "start_date" = c(as.Date("2018-03-01"), 
+                   as.Date("2018-09-01")),
+  "end_date" = c(as.Date("2020-05-31"), 
+                 as.Date("2020-11-30"))
 )
 
 
@@ -76,39 +100,53 @@ fall_spring_means <- oisst_period_means(stack_in = daily_sst_stack,
                                         time_res_df = season_breaks)
 ```
 
+# Option 2. Access OISST Data from Box
 
-### Mapping it with sf and stars (for rasters)
+**Preferred Method**
 
-```{r, fig.height=8, fig.width=6}
-# Plot them
-p1 <- ggplot() +
-  geom_stars(data = st_as_stars(fall_spring_means$SPRING.1982)) +
-  geom_sf(data = northeast) +
-  geom_sf(data = canada) +
-  scale_fill_distiller(palette = "RdBu", na.value = "NA") +
-  guides(fill = guide_colorbar(title = "SST - Celsius")) +
-  coord_sf(xlim = c(-77, -60), ylim = c(35, 46), expand = FALSE) +
-  labs(x = NULL, y = NULL, caption = "Spring 1982")
+As a commonly used resource for high resolution sea surface temperature data it makes sense for us to have it on-hand rather than re-download from THREDDS as needed. For this reason there are numerous functions for grabbing data for specific areas and dates from our shared box drive.
 
-p2 <- ggplot() +
-  geom_stars(data = st_as_stars(fall_spring_means$FALL.1982)) +
-  geom_sf(data = northeast) +
-  geom_sf(data = canada) +
-  scale_fill_distiller(palette = "RdBu", na.value = "NA") +
-  guides(fill = guide_colorbar(title = "SST - Celsius")) +
-  coord_sf(xlim = c(-77, -60), ylim = c(35, 46), expand = FALSE) +
-  labs(x = NULL, y = NULL, caption = "Fall 1982")
+This function also works for accessing pre-processed SST anomalies from the 1982-2011 climatology.
 
-p1 / p2
+
+```{r, message = FALSE}
+
+# OISST is on box within the NSF OKN Demo Data Folder
+box_paths <- research_access_paths(os.use = "unix")
+okn_path <- box_paths$okn
+
+
+# Next we build a time/space extent that we want data for
+data_window <- data.frame(
+  lon = c(-72, -65), 
+  lat = c(35,44), 
+  time = as.Date(c("2018-08-01", "2020-12-31")))
+
+# Load the desired data into a raster stack
+# anomalies = FALSE returns raw sst
+daily_sst_stack <- oisst_window_load(okn_path, data_window, anomalies = FALSE)
 ```
+
+
+
+
 
 
 ## 4. Extracting Daily Values with Point Locations
 
+Another common need is to match temperature values in space and time with specific point locations. This is achieved with the
+
+
 ```{r}
-# Create spatial points object from station data
-station_data <- read_csv("/Users/akemberling/Box/Adam Kemberling/Box_Projects/Convergence_ML/data/trawldat.csv")
-trawl_sf <- st_as_sf(station_data, coords = c("DECDEG_BEGLON", "DECDEG_BEGLAT"), crs = 4326)
+# Create spatial points object from survdat station data
+res_path <- box_paths$res
+load(paste0(res_path, "NMFS_trawl/Survdat_Nye_Aug 2020.RData"))
+station_data <- survdat %>% filter(EST_YEAR >= 2018)
+rm(survdat)
+
+# Convert station data to sf object for spatial extraction
+trawl_sf <- st_as_sf(station_data, coords = c("DECDEG_BEGLON", "DECDEG_BEGLAT"), 
+                     crs = 4326)
 
 # # Reproject if necessary
 # project_utm <- 26919 #NAD1983 / UTM zone 19N got Maine
@@ -116,28 +154,31 @@ trawl_sf <- st_as_sf(station_data, coords = c("DECDEG_BEGLON", "DECDEG_BEGLAT"),
 # project_utm <- st_crs(trawl_sf_proj)
 
 
-
-# Format Date Column
+# Format Date Column to match with Raster Stack
 trawl_sf <- trawl_sf %>% 
   mutate(DATE = lubridate::ymd_hms(str_c(EST_YEAR, "-", EST_MONTH, "-", EST_DAY, " 12:00:00")))
 ```
 
-## 5. Single Season Point Extractions
+## 5. Single Layer Point Extractions
+
+To get values from a single raster layer, regardless of date, you simply use rasters extract function.
 
 ```{r}
 #Single Year Test = Fall 1982
 
 #Test Raster 
-test_ras <- fall_spring_means$FALL.1982
+test_ras <- march_2020
 
 
 #Test points = all stations all years
 test_points <- bind_cols( lon = station_data$DECDEG_BEGLON, lat = station_data$DECDEG_BEGLAT)
+
+# Extract temperature as new column
 test_points$sst <- raster::extract(test_ras, test_points)
 ```
 
 
-### Mapping it with sf
+### Mapping Extraction with sf
 
 ```{r, fig.height=5, fig.width=5}
 test_points <- st_as_sf(test_points, coords = c("lon", "lat"), crs = 4326)
@@ -148,19 +189,25 @@ ggplot() +
   geom_sf(data = test_points, aes(color = sst)) +
   geom_sf(data = northeast) +
   geom_sf(data = canada) +
+  gmri_map_theme +
   scale_color_distiller(palette = "RdBu", na.value = "NA") +
   guides(fill = guide_colorbar(title = "SST - Celsius")) +
   coord_sf(xlim = c(-72, -65), ylim = c(39.5, 45), expand = FALSE) +
-  labs(x = "", y = "", caption = "All station coordinates - Fall 1982 SST Layer")
+  labs(x = "", y = "", caption = "Point Extraction - March 2020 Mean SST")
 
 ```
 
-## 6. Extracting All Years/Seasons with Brick
+## 6. Extracting All Years/Seasons with Raster Brick
 
 ```{r}
 
 #Extracting all years from the brick
-test_points <- dplyr::select(station_data, lon = DECDEG_BEGLON, lat = DECDEG_BEGLAT, year = EST_YEAR)
+test_points <- dplyr::select(station_data, 
+                             lon = DECDEG_BEGLON, 
+                             lat = DECDEG_BEGLAT, 
+                             year = EST_YEAR)
+
+
 
 #Extract specific to the sample year (or whatever the raster resolution is)
 #Season is generated at random here because imported data does not contain that information
@@ -210,9 +257,5 @@ full_extraction %>%
 ```
 
 
-## 7. Extracting Data with Shapefiles
 
-```{r}
-
-```
 
