@@ -533,7 +533,7 @@ env_data_extract <- function(data.set = "OISST",
 #'
 #' Useful for loading OISST observations from box, but only for a particular area and/or time.
 #'
-#' @param okn_path User specific path to the OKN Demo Data Folder on Box. Can be obtained using shared.path funciton.
+#' @param oisst_path User specific path to the OKN Demo Data Folder on Box. Can be obtained using shared.path function.
 #' @param data_window dataframe with columns for lat, lon, & time indicating the extent of data desired.
 #' @param anomalies Boolean indication of whether to return observed sst or anomalies. Default = TRUE.
 #'
@@ -542,24 +542,30 @@ env_data_extract <- function(data.set = "OISST",
 #'
 #'@examples
 #'#not run
-#'# okn_path <- shared.path(group = "NSF OKN", folder = "")
+#'# oisst_path <- shared.path(group = "RES_Data", folder = "OISST/oisst_mainstays")
 #'# data_window <- data.frame(lon = c(-72, -65), lat = c(42,44), time = as.Date(c("2016-08-01", "2020-12-31")))
 #'
-oisst_window_load <- function(okn_path, data_window, anomalies = FALSE){
+oisst_window_load <- function(oisst_path, data_window, anomalies = FALSE){
 
   # Get OISST data  from Box
+
+  # Accessing Observed Temperatures
   if(anomalies == FALSE){
-    oisst_path  <- list.files(stringr::str_c(okn_path, "oisst/annual_observations/"))
-    oisst_paths <- stringr::str_c(okn_path, "oisst/annual_observations/", oisst_path)
-    oisst_paths <- oisst_paths[!stringr::str_detect(oisst_paths, ".zarr")] # Paths
-    oisst_years <- stringr::str_sub(oisst_paths, -10, -7)                  # Yr Labels
-    oisst_paths <- stats::setNames(oisst_paths, oisst_years)
-  } else if(anomalies == TRUE){
-    oisst_path  <- list.files(stringr::str_c(okn_path, "oisst/annual_anomalies/"))
-    oisst_paths <- stringr::str_c(okn_path, "oisst/annual_anomalies/", oisst_path)
-    oisst_paths <- oisst_paths[stringr::str_detect(oisst_paths, ".nc")]    # Paths
-    oisst_years <- stringr::str_sub(oisst_paths, -7, -4)                   # Yr Labels
-    oisst_paths <- stats::setNames(oisst_paths, oisst_years)
+    file_names  <- list.files(stringr::str_c(oisst_path, "annual_observations/"))
+    file_paths <- stringr::str_c(oisst_path, "annual_observations/", file_names)
+    file_paths <- file_paths[!stringr::str_detect(file_paths, ".zarr")]  # No .zarr files
+    file_paths <- file_paths[!stringr::str_detect(file_paths, "2020")]   # Temporarily disable 2020
+    file_years <- stringr::str_sub(file_paths, -10, -7)                  # Yr Labels
+    file_paths <- stats::setNames(file_paths, file_years)
+
+    # Accessing Anomalies
+    } else if(anomalies == TRUE){
+    file_names  <- list.files(stringr::str_c(oisst_path, "annual_anomalies/"))
+    file_paths <- stringr::str_c(oisst_path, "annual_anomalies/", file_names)
+    file_paths <- file_paths[stringr::str_detect(file_paths, ".nc")]     # No .zarr files
+    file_paths <- file_paths[!stringr::str_detect(file_paths, "2020")]    # Temporarily disable 2020
+    file_years <- stringr::str_sub(file_paths, -7, -4)                   # Yr Labels
+    file_paths <- stats::setNames(file_paths, file_years)
   }
 
 
@@ -594,7 +600,7 @@ oisst_window_load <- function(okn_path, data_window, anomalies = FALSE){
 
 
   ####____ a.   Set up Rasters from Netcdf Files  ####
-  oisst_ras_list <- purrr::map(oisst_paths, function(nc_year){
+  oisst_ras_list <- purrr::map(file_paths, function(nc_year){
 
     # Open connection, get subsetting indices from limits
     my_nc <- ncdf4::nc_open(nc_year)
@@ -608,7 +614,7 @@ oisst_window_load <- function(okn_path, data_window, anomalies = FALSE){
 
 
      # Tester
-    #my_nc <- nc_open(oisst_paths["2018"]) ; nc_year_label <- "2018"
+    #my_nc <- nc_open(file_paths["2018"]) ; nc_year_label <- "2018"
 
     # Subset to area and times of interest
     lon_idx  <- which( my_nc$dim$lon$vals > lon_min & my_nc$dim$lon$vals < lon_max)
@@ -630,9 +636,10 @@ oisst_window_load <- function(okn_path, data_window, anomalies = FALSE){
 
 
     # If time index is less than one, output message indicating that year will be empty
-    if (length(time_idx) < 1) {
+    if(length(time_idx) < 1){
       message(paste0(nc_year_label, " outside data range, not included in stack."))
-      return("Year outside time extent of data")}
+      return("Year outside time extent of data")
+    }
 
     # Pull netcdf data that you need using indexes
     if(anomalies == FALSE){
@@ -695,9 +702,9 @@ oisst_window_load <- function(okn_path, data_window, anomalies = FALSE){
 
 
 # Testing Code:
-# okn_path <- shared.path(group = "NSF OKN", folder = "")
+# oisst_path <- shared.path(group = "RES_Data", folder = "OISST/oisst_mainstays")
 # data_window <- data.frame(lon = c(-72, -65), lat = c(42,44), time = as.Date(c("2019-08-01", "2020-12-31")))
-# oisst_stack <- oisst_window_load(okn_path, data_window, anomalies = TRUE)
+# oisst_stack <- oisst_window_load(oisst_path, data_window, anomalies = TRUE)
 
 
 

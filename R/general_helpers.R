@@ -41,5 +41,5 @@ floor_decade <- function(year_vector, return_class = "factor"){
 #' @return
 #' @export
 #'
-#' @examples
+#' @examples # not run
 `%not in%` <- function(x, table){ is.na(match(x, table, nomatch = NA_integer_))}

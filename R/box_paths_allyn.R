@@ -55,35 +55,46 @@ enter_user_name_func <- function() {
 shared.path <- function(os.use = "unix",
                         group = c("RES Data", "Mills Lab", "Climate Change Ecology Lab", "NSF OKN", "root"),
                         folder = "Functions/") {
+  # Mac Operating System Paths
   if (os.use == "unix") {
+
+    # If group is specified use switch() to set it
     if (!is.null(group)) {
-      path.out <- switch(group,
-        "RES Data"                   = paste("~/Box/RES Data/", sep = ""),
-        "Mills Lab"                  = paste("~/Box/Mills Lab/", folder, sep = ""),
-        "Climate Change Ecology Lab" = paste("~/Box/Climate Change Ecology Lab/", folder, sep = ""),
-        "NSF OKN"                    = paste("~/Box/NSF OKN Demo Data/", folder, sep = ""),
-        "root"                       = paste("~/Box/", folder, sep = "")
-      )
-    } else {
-      path.out <- paste("~/Box/Mills Lab/Projects/", sub(".*\\/", "", getwd()), "/", sep = "")
-    }
-  } else if (os.use == "windows") {
-    if (!is.null(group)) {
-      path.out <- switch(group,
-        "RES Data"                   = paste("C:/Users/", user.name, "/Box/Res Data/", sep = ""),
-        "Mills Lab"                  = paste("C:/Users/", user.name, "/Box/Mills Lab/", folder, sep = ""),
-        "Climate Change Ecology Lab" = paste("C:/Users/", user.name, "/Box/Climate Change Ecology Lab/", folder, sep = ""),
-        "NSF OKN"                    = paste("C:/Users/", user.name, "/Box/NSF OKN Demo Data/", folder, sep = ""),
+      path.out <- switch(tolower(group),
+        "res_data"                   = paste("~/Box/RES_Data/", folder, sep = ""),
+        "res data"                   = paste("~/Box/RES_Data/", folder, sep = ""),
+        "res"                        = paste("~/Box/RES_Data/", folder, sep = ""),
+        "mills lab"                  = paste("~/Box/Mills Lab/", folder, sep = ""),
+        "mills"                      = paste("~/Box/Mills Lab/", folder, sep = ""),
+        "climate change ecology lab" = paste("~/Box/Climate Change Ecology Lab/", folder, sep = ""),
+        "nsf okn"                    = paste("~/Box/NSF OKN Demo Data/", folder, sep = ""),
+        "root"                       = paste("~/Box/", folder, sep = ""))
+
+      # Default Path is Mills Lab
+      } else { path.out <- paste("~/Box/Mills Lab/Projects/", sub(".*\\/", "", getwd()), "/", sep = "")}
+
+    # Windows Operating System Paths
+    } else if (os.use == "windows") {
+
+      # If group is specified use switch() to set it
+      if (!is.null(group)) {
+      path.out <- switch(tolower(group),
+        "res data"                   = paste("C:/Users/", user.name, "/Box/RES_Data/", folder, sep = ""),
+        "res_data"                   = paste("C:/Users/", user.name, "/Box/RES_Data/", folder, sep = ""),
+        "res"                        = paste("C:/Users/", user.name, "/Box/RES_Data/", folder, sep = ""),
+        "mills lab"                  = paste("C:/Users/", user.name, "/Box/Mills Lab/", folder, sep = ""),
+        "mills"                      = paste("C:/Users/", user.name, "/Box/Mills Lab/", folder, sep = ""),
+        "climate change ecology lab" = paste("C:/Users/", user.name, "/Box/Climate Change Ecology Lab/", folder, sep = ""),
+        "nsf okn"                    = paste("C:/Users/", user.name, "/Box/NSF OKN Demo Data/", folder, sep = ""),
         "root"                       = paste("C:/Users/", user.name, "/Box/", folder, sep = "")
       )
-    } else {
-      path.out <- paste("C:/Users/", user.name, "/Box/Mills Lab/Projects/", sub(".*\\/", "", getwd()), "/", sep = "")
-    }
-  } else {
-    print("OS not recognized")
-  }
 
+      # Default Path is Mills Lab
+      } else { path.out <- paste("C:/Users/", user.name, "/Box/Mills Lab/Projects/", sub(".*\\/", "", getwd()), "/", sep = "")}
 
+    # Incorrecct OS Warning
+    } else { print("OS not recognized")}
 
+  # Return the Desired Paths
   return(path.out)
 }

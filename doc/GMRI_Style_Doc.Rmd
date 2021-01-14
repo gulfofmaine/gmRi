@@ -21,7 +21,7 @@ library(gmRi)
 
 This package contains various functions for quickly accessing GMRI styles, colors, and themes. 
 
-To add a GMRI css stylesheet to an Rmarkdown File, simple use the function `use_gmri_styles()` and indicate which css stylesheet you wish to add. 
+To add a GMRI css stylesheet to an Rmarkdown File, simple use the function `use_gmri_style_rmd()` and indicate which css stylesheet you wish to add. 
 
 
 

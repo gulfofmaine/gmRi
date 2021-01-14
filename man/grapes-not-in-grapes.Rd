@@ -17,3 +17,6 @@ x \%not in\% table
 \description{
 Negation of the `%in%` function.
 }
+\examples{
+# not run
+}

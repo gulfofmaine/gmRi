@@ -60,18 +60,18 @@ gmRi::use_gmri_style_rmd("gmri_rmarkdown.css")
 
 # OISST is on box within the NSF OKN Demo Data Folder
 box_paths <- research_access_paths(os.use = "unix")
-okn_path <- box_paths$okn
-
+oisst_path <- box_paths$oisst_mainstays
+oisst_path <- shared.path(os.use = "unix", group = "RES_Data", folder = "OISST/oisst_mainstays/")
 
 # Next we build a time/space extent that we want data for
 data_window <- data.frame(
   lon = c(-74, -65), 
   lat = c(35,44), 
-  time = as.Date(c("2016-01-01", "2020-12-31")))
+  time = as.Date(c("2016-01-01", "2019-12-31")))
 
 # Load the desired data into a raster stack
 # anomalies = FALSE returns raw sst
-daily_sst_stack <- oisst_window_load(okn_path, data_window, anomalies = FALSE)
+daily_sst_stack <- oisst_window_load(oisst_path, data_window, anomalies = FALSE)
 ```
 
 
@@ -83,13 +83,13 @@ For months that is quite easy, as shown below using march as an example.
 
 ```{r}
 # Use layer names to get an average over time
+date_names <- names(daily_sst_stack$`2018`)
+march_flag <- which(str_sub(date_names, -5, -4) == "03")
+march_2018 <- mean(daily_sst_stack$`2018`[[march_flag]])
+
 date_names <- names(daily_sst_stack$`2019`)
 march_flag <- which(str_sub(date_names, -5, -4) == "03")
 march_2019 <- mean(daily_sst_stack$`2019`[[march_flag]])
-
-date_names <- names(daily_sst_stack$`2020`)
-march_flag <- which(str_sub(date_names, -5, -4) == "03")
-march_2020 <- mean(daily_sst_stack$`2019`[[march_flag]])
 ```
 
 
@@ -105,6 +105,16 @@ To map layers using stars you simply need to convert the desired layer to a star
 
 # Plot them
 p1 <- ggplot() +
+  geom_stars(data = st_as_stars(march_2018)) +
+  geom_sf(data = northeast) +
+  geom_sf(data = canada) +
+  gmri_map_theme +
+  scale_fill_distiller(palette = "RdBu", na.value = "NA") +
+  guides(fill = guide_colorbar(title = "SST - Celsius")) +
+  coord_sf(xlim = c(-74, -64), ylim = c(34, 45), expand = FALSE) +
+  labs(x = NULL, y = NULL, caption = "March Average 2018")
+
+p2 <- ggplot() +
   geom_stars(data = st_as_stars(march_2019)) +
   geom_sf(data = northeast) +
   geom_sf(data = canada) +
@@ -112,17 +122,7 @@ p1 <- ggplot() +
   scale_fill_distiller(palette = "RdBu", na.value = "NA") +
   guides(fill = guide_colorbar(title = "SST - Celsius")) +
   coord_sf(xlim = c(-74, -64), ylim = c(34, 45), expand = FALSE) +
-  labs(x = NULL, y = NULL, caption = "March Average 2019")
-
-p2 <- ggplot() +
-  geom_stars(data = st_as_stars(march_2020)) +
-  geom_sf(data = northeast) +
-  geom_sf(data = canada) +
-  gmri_map_theme +
-  scale_fill_distiller(palette = "RdBu", na.value = "NA") +
-  guides(fill = guide_colorbar(title = "SST - Celsius")) +
-  coord_sf(xlim = c(-74, -64), ylim = c(34, 45), expand = FALSE) +
-  labs(x = NULL, y = NULL, caption ="March Average 2020")
+  labs(x = NULL, y = NULL, caption ="March Average 2019")
 
 p1 / p2
 ```
@@ -140,7 +140,7 @@ res_path <- box_paths$res
 load(paste0(res_path, "NMFS_trawl/Survdat_Nye_Aug 2020.RData"))
 
 # filter some years out for speed
-station_data <- survdat %>% filter(EST_YEAR >= 2016) %>% as_tibble()
+station_data <- survdat %>% filter(EST_YEAR >= 2016, EST_YEAR < 2020) %>% as_tibble()
 rm(survdat)
 
 
@@ -151,8 +151,8 @@ rm(survdat)
 To get values from a single raster layer, regardless of date, you simply use rasters extract function.
 
 ```{r}
-#Test Raster - March 2020 Average
-test_ras <- march_2020
+#Test Raster - March 2019 Average
+test_ras <- march_2019
 
 #Test points = all stations all years
 test_points <- bind_cols(
@@ -175,7 +175,7 @@ ggplot() +
   scale_color_distiller(palette = "RdBu", na.value = "NA") +
   guides(fill = guide_colorbar(title = "SST - Celsius")) +
   coord_sf(xlim = c(-75, -65), ylim = c(37, 45), expand = FALSE) +
-  labs(x = "", y = "", caption = "Point Extraction - March 2020 Mean SST")
+  labs(x = "", y = "", caption = "Point Extraction - March 2019 Mean SST")
 ```
 
 
@@ -255,7 +255,8 @@ full_extraction %>%
   ggplot(aes(DATE, sst, color = sst)) +
   geom_point() +
   scale_color_distiller(palette = "RdBu", na.value = "NA") +
-  labs(x = "", y = "Extracted SST")
+  labs(x = "", y = "Extracted SST") +
+  theme_dark()
 ```
 
 
@@ -312,7 +313,7 @@ gom_sf <- filter(survey_strata, area == "Gulf of Maine")
 ggplot() +
   geom_sf(data = northeast) +
   geom_sf(data = canada) +
-  geom_sf(data = survey_strata, aes(fill = area), alpha = 0.2) +
+  geom_sf(data = survey_strata, aes(fill = area), alpha = 0.4) +
   geom_sf(data = gom_sf, aes(fill = area)) +
   gmri_map_theme +
   coord_sf(xlim = c(-76, -65), ylim = c(35.5, 45), expand = FALSE) 
@@ -333,11 +334,11 @@ gom_extent <- st_bbox(gom_sf)
 data_window <- data.frame(
   lon = c(gom_extent["xmin"], gom_extent["xmax"]), 
   lat = c(gom_extent["ymin"], gom_extent["ymax"]), 
-  time = as.Date(c("2016-01-01", "2020-12-31")))
+  time = as.Date(c("2016-01-01", "2019-12-31")))
 
 # Load the desired data into a raster stack
 # anomalies = FALSE returns raw sst
-gom_anom_stack <- oisst_window_load(okn_path, data_window, anomalies = TRUE)
+gom_anom_stack <- oisst_window_load(oisst_path, data_window, anomalies = TRUE)
 ```
 
 
@@ -346,11 +347,11 @@ gom_anom_stack <- oisst_window_load(okn_path, data_window, anomalies = TRUE)
 
 ```{r}
 # Mean July Anomalies
-july_flag <- str_detect(names(gom_anom_stack$`2020`), "2020.07")
+july_flag <- str_detect(names(gom_anom_stack$`2019`), "2019.07")
 july_dates <- which(july_flag)
-july_gom <- mean(gom_anom_stack$`2020`[[july_dates]])
+july_gom <- mean(gom_anom_stack$`2019`[[july_dates]])
 
-# Plot July 2020 Mean Temp anoms
+# Plot July 2019 Mean Temp anoms
 ggplot() +
   geom_stars(data = st_as_stars(july_gom)) +
   geom_sf(data = northeast) +
@@ -374,15 +375,15 @@ Once we have the data we want to mask it is then simple to use the shapefile to 
 ```{r}
 
 #Stacks will have to be done seperately
-stack_2020 <- gom_anom_stack$`2020`
+stack_2019 <- gom_anom_stack$`2019`
 
 ## crop and mask
-gom_crop <- crop(stack_2020, gom_sf)
+gom_crop <- crop(stack_2019, gom_sf)
 gom_masked <- mask(gom_crop, gom_sf)
 
 # Plot to Display
 ggplot() +
-  geom_stars(data = st_as_stars(gom_masked$X2020.01.01)) +
+  geom_stars(data = st_as_stars(gom_masked$X2019.01.01)) +
   geom_sf(data = northeast) +
   geom_sf(data = canada) +
   geom_sf(data = gom_sf, fill = "transparent") +
@@ -392,7 +393,7 @@ ggplot() +
                                title.position = "top", 
                                title.hjust = 0.5)) +
   coord_sf(xlim = c(-72, -65), ylim = c(41, 45), expand = FALSE) +
-  labs(x = NULL, y = NULL, caption = "January 1, 2020 SST Anomalies")
+  labs(x = NULL, y = NULL, caption = "January 1, 2019 SST Anomalies")
 ```
 
 
@@ -403,20 +404,20 @@ The cellstats function can be used to get some metric of an entire raster layer.
 
 ```{r}
 # Make timeline using cellstats
-gom_2020 <- data.frame("sst_anom" = cellStats(gom_masked, stat = "mean")) %>% 
+gom_2019 <- data.frame("sst_anom" = cellStats(gom_masked, stat = "mean")) %>% 
   rownames_to_column(var = "date") %>% 
   mutate(date = str_remove(date, "X"))
 
 
 # Plot timeline
-gom_2020 %>% 
+gom_2019 %>% 
   mutate(date = lubridate::ymd(date)) %>% 
   ggplot(aes(date, sst_anom, color = sst_anom)) +
   geom_line(group = 1) +
-  scale_color_gradient2(low = "blue", mid = "gray50", high = "darkred", midpoint = 0, ) +
-  #scale_color_distiller(palette = "RdBu", na.value = "NA")
+  scale_color_distiller(palette = "RdBu", direction = -1) +
   labs(x = "", y = "Sea Surface Temperature Anomaly",
-       caption = "Gulf of Maine Temperature Anomalies - 2020")
+       caption = "Gulf of Maine Temperature Anomalies - 2019") +
+  theme_dark()
 
 ```
 
