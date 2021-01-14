@@ -18,7 +18,8 @@ research_access_paths(
 res_paths List containing user-specific paths
 }
 \description{
-Returns list of box resource paths for quick access.
+Returns list of box resource paths for quick access to commonly accessed
+resources.
 }
 \examples{
 box_paths <- research_access_paths(os.use = "unix", user.name = "not applicable I use a mac")
