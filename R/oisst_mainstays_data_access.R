@@ -14,12 +14,13 @@
 
 
 
-####  NSF OKN Paths  ####
+####  Research Data Access Paths  ####
 ####  This will change for each user, but will be foundational to all these functions
 #' @title Connect to the NSF OKN, RES, and Mills Lab Folders
 #'
 #'
-#' @description Returns list of box resource paths for quick access.
+#' @description Returns list of box resource paths for quick access to commonly accessed
+#' resources.
 #'
 #'
 #' @param os.use String flag indicating what operating system the user is currently using. Options are "unix" for mac users or "windows".
@@ -60,7 +61,7 @@ research_access_paths <- function(os.use = "unix", user.name = "not applicable I
 
 
 ####  Access Regional Timeseries, OISST  ####
-#' @title Access Regional Timeseries from OKN Demo Data
+#' @title Access Regional Timeseries from OISSTv2 Mainstays
 #'
 #' @description Tool for accessing NSF OKN Demo Data Products from Box. Global time series,
 #' as well as regionally masked timeseries have been pre-processed and stored on box. Wuick access
@@ -69,7 +70,7 @@ research_access_paths <- function(os.use = "unix", user.name = "not applicable I
 #' Simply name the satellite data source, the desired extent or mask, and the function will return the corresponding table.
 #'
 #'
-#' @param oisst_path Personal path to ~Box/RES_Data/OISST/oisst_mainstays
+#' @param res_path Personal path to ~Box/RES_Data/OISST/oisst_mainstays
 #' @param sat_source String indicating satellite data source.
 #' @param region_family Identify the family of shapefiles that you are interested in. Choices = "LME", "Groundfish Regions"
 #'
@@ -78,13 +79,13 @@ research_access_paths <- function(os.use = "unix", user.name = "not applicable I
 #'
 #' @examples box_paths <- gmRi::research_access_paths(os.use = "unix", user.name = "not applicable I use a mac")
 #' @examples agulhas_timeseries <- okn_access_timeseries(okn_path = box_paths$oisst_mainstays, sat_source = "oisst", region_family = "lme", poly_name = "agulhas current")
-okn_access_timeseries <- function(oisst_path,
-                                  sat_source = "oisst",
-                                  region_family = c("nmfs trawl regions", "lme", "gmri focus areas"),
-                                  poly_name = "gulf of maine"){
+oisst_access_timeseries <- function(res_path,
+                                    sat_source = "oisst",
+                                    region_family = c("nmfs trawl regions", "lme", "gmri focus areas"),
+                                    poly_name = "gulf of maine"){
 
   # get okn data path
-  okn_path <- okn_path
+  okn_path <- res_path
 
 
   # Path to satellite source
