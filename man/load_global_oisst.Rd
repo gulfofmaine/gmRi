@@ -5,15 +5,16 @@
 \title{Access OISST Mainstays Arrays}
 \usage{
 load_global_oisst(
-  oisst_path = "~Box/NSF OKN Demo Data/oisst",
-  resource = c("raw", "climatology", "anomalies", "warming rates"),
+  oisst_path = "~Box/RES_Data/OISST/oisst_mainstays",
+  resource = c("raw", "climatology82", "climatology91", "anomalies", "warming rates"),
   year_range = seq(2010, 2020, 1)
 )
 }
 \arguments{
 \item{oisst_path}{Local path to oisst folder on box, subfolder of RES_Data/OISST/oisst_mainstays}
 
-\item{resource}{Name of the global extent resource, choices are raw, climatology, warming rates, and anomalies.}
+\item{resource}{Name of the global extent resource, choices are raw, climatology, warming rates,
+and anomalies.}
 
 \item{year_range}{optional vector of years for raw or anommalies data resources.}
 }
@@ -24,5 +25,7 @@ resource_out Raster stack of the desired netcdf array
 Access OISST Mainstays Arrays
 }
 \examples{
-#not run load_global_oisst(oisst_path = "~Box/RES_Data/OISST/oisst_mainstays", resource = "warming rates", year_range = NULL)
+# Nor run
+# load_global_oisst(oisst_path = "~Box/RES_Data/OISST/oisst_mainstays",
+#                   resource = "warming rates", year_range = NULL)
 }

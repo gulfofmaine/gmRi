@@ -9,13 +9,15 @@ oisst_list_to_stack(box, times.window)
 \arguments{
 \item{box}{bounding box object used to clip netcdf data}
 
-\item{times.window}{two element vector of desired start and end dates. Must be able to convert to date using as.Date}
+\item{times.window}{two element vector of desired start and end dates.
+Must be able to convert to date using as.Date}
 }
 \value{
 rast.temp Raster stack of OI Sea Surface Temperatures
 }
 \description{
-This function loops over daily OISST files online at [earth systems research lab](https://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/noaa.oisst.v2.highres/),
+This function loops over daily OISST files online at
+[ESRL](https://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/noaa.oisst.v2.highres/),
 then downloads and returns a single raster stack.
 
 Installs "ncdf4" and "raster" packages if not installed.

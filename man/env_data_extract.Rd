@@ -15,22 +15,28 @@ env_data_extract(
 \arguments{
 \item{data.set}{Env data to extract (options = ERSST, OISST, MURSST)}
 
-\item{dates}{If !NULL, subset full time series to specific dates. Dates should be specified as dates = c("YYYY-MM-DD", "YYYY-MM-DD")}
+\item{dates}{If !NULL, subset full time series to specific dates. Dates should be specified
+as dates = c("YYYY-MM-DD", "YYYY-MM-DD")}
 
-\item{box}{If !NULL, crop rasters to sepcific box faster downloading and processing. Box should be specified as box = c(xmin, xmax, ymin, ymax).}
+\item{box}{If !NULL, crop rasters to sepcific box faster downloading and processing.
+Box should be specified as box = c(xmin, xmax, ymin, ymax).}
 
-\item{out.dir}{Directory to store resulting raster stack. Note, this will overwrite any rasters with the existing name.}
+\item{out.dir}{Directory to store resulting raster stack. Note, this will overwrite any rasters
+with the existing name.}
 
 \item{mask}{optional mask to trim data with}
 }
 \value{
-stack.out Stack of daily OISST files and also saves the raster stack as a .grd file in the output directory specified by out.dir
+stack.out Stack of daily OISST files and also saves the raster stack as a .grd file
+in the output directory specified by out.dir
 }
 \description{
-This function accesses webhosted satellite data and then downloads a subset of the data based
-on dates and long/lat bounding box. After downloading the data, the function processes it and saves it as
-one raster stack file. Installs "ncdf4" and "raster" packages if not installed.
+This function accesses webhosted satellite data and then downloads a subset of the
+data based on dates and long/lat bounding box. After downloading the data, the function
+processes it and saves it as one raster stack file.
+Installs "ncdf4" and "raster" packages if not installed.
 
-This function is helpful for getting fresh downloads from thredds. In most cases it is faster to access the data that is stored in shared
+This function is helpful for getting fresh downloads from thredds. In most cases it is faster
+to access the data that is stored in shared
 resource locations.
 }

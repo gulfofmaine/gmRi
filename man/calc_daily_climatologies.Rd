@@ -11,7 +11,8 @@ calc_daily_climatologies(stack_in, projection_crs = 26919, anom_period = NULL)
 
 \item{projection_crs}{The coordinate reference system number/proj4string for the desired output}
 
-\item{anom_period}{Character vector indicating start and end years to calculate climatology for. NULL defaults to 1982-2011.}
+\item{anom_period}{Character vector indicating start and end years to calculate climatology for.
+NULL defaults to 1982-2011.}
 }
 \value{
 
@@ -19,7 +20,8 @@ calc_daily_climatologies(stack_in, projection_crs = 26919, anom_period = NULL)
 \description{
 Generate Daily 30-year climatologies for a given area.
 
-This function takes a raster stack of OISST data (usually with a clipped extent for memory). Default climatology ranges from 1982-01-01 to 2011-12-31, as such
+This function takes a raster stack of OISST data (usually with a clipped extent for memory).
+Default climatology ranges from 1982-01-01 to 2011-12-31, as such
 the input stack must extend beyond those dates estimate the climatology correctly.
 
 
