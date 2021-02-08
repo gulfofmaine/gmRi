@@ -26,5 +26,6 @@ rast.out Correctly trimmed and oriented raster object
 }
 \description{
 Helper function to convert an array (x, y, z)
-into raster layers with the correct dimensions and orientation for spatial analyses. Typically used when working from netcdf to raster.
+into raster layers with the correct dimensions and orientation for spatial analyses.
+Typically used when working from netcdf to raster.
 }

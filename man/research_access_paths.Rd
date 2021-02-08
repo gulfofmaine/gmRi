@@ -6,11 +6,12 @@
 \usage{
 research_access_paths(
   os.use = "unix",
-  user.name = "not applicable I use a mac"
+  user.name = "not applicable, I use a mac."
 )
 }
 \arguments{
-\item{os.use}{String flag indicating what operating system the user is currently using. Options are "unix" for mac users or "windows".}
+\item{os.use}{String flag indicating what operating system the user is currently using.
+Options are "unix" for mac users or "windows".}
 
 \item{user.name}{User name for navigating root directory structure on windows.}
 }
@@ -22,5 +23,5 @@ Returns list of box resource paths for quick access to commonly accessed
 resources.
 }
 \examples{
-box_paths <- research_access_paths(os.use = "unix", user.name = "not applicable I use a mac")
+box_paths <- research_access_paths(os.use = "unix", user.name = "NA, I use a mac")
 }

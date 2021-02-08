@@ -7,7 +7,8 @@
 make_stack_dates(point_location_df, year_col, month_col, day_col)
 }
 \arguments{
-\item{point_location_df}{Dataframe of point locations we wish to use to extract data from raster stack}
+\item{point_location_df}{Dataframe of point locations we wish to use to extract data from
+raster stack}
 
 \item{year_col}{name of the column that contains year information (unquoted text)}
 

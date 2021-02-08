@@ -11,7 +11,8 @@ oisst_period_means(stack_in, projection_crs = 26919, time_res_df)
 
 \item{projection_crs}{The coordinate reference system number/proj4string for the desired output}
 
-\item{time_res_df}{Dataframe detailing the time-period structure you wish to calculate SST means for}
+\item{time_res_df}{Dataframe detailing the time-period structure you wish to calculate SST
+means for.}
 }
 \value{
 

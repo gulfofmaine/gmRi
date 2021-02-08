@@ -33,12 +33,13 @@ enter_user_name_func <- function() {
 
 
 
-#' @title Access Shared Path
+#' @title Access Shared Path from Box Drive
 #'
-#' @description This function creates paths to shared Data and Functions folders stored either inside the Mills Lab folder or outside the Mills Lab folder
+#' @description This function creates paths to shared Data and Functions folders stored either inside the Mills
+#' Lab folder or outside the Mills Lab folder in other top level locations on box.
 #'
-#' @param os.use Character string defining operating system. Either "unix" or "windows"
-#' @param group Character string defining where to load shared Data and Functions.
+#' @param os.use Character string defining operating system. Either "unix"/"mac" or "windows"
+#' @param group Character string of top-level directory within box to open. Ex. Box/RES_Data
 #' Either RES (things shared across the entire research department) or
 #' Mills Lab (things shared within the Mills Lab). Additional shortcuts are NSF OKN
 #' for knowledge graph data resources and root for the minimal path to box.
@@ -56,7 +57,7 @@ shared.path <- function(os.use = "unix",
                         group = c("RES Data", "Mills Lab", "Climate Change Ecology Lab", "NSF OKN", "root"),
                         folder = "Functions/") {
   # Mac Operating System Paths
-  if (os.use == "unix") {
+  if (os.use %in% c("unix", "mac")) {
 
     # If group is specified use switch() to set it
     if (!is.null(group)) {
@@ -92,9 +93,10 @@ shared.path <- function(os.use = "unix",
       # Default Path is Mills Lab
       } else { path.out <- paste("C:/Users/", user.name, "/Box/Mills Lab/Projects/", sub(".*\\/", "", getwd()), "/", sep = "")}
 
-    # Incorrecct OS Warning
+    # Incorrect OS Warning
     } else { print("OS not recognized")}
 
-  # Return the Desired Paths
+  # Return the Desired Paths, ensure it ends with /
+  if(stringr::str_sub(path.out, -1, -1) != "/") {path.out <- paste0(path.out, "/")}
   return(path.out)
 }

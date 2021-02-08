@@ -6,7 +6,6 @@
 \usage{
 oisst_access_timeseries(
   res_path,
-  sat_source = "oisst",
   region_family = c("nmfs trawl regions", "lme", "gmri focus areas"),
   poly_name = "gulf of maine"
 )
@@ -14,21 +13,29 @@ oisst_access_timeseries(
 \arguments{
 \item{res_path}{Personal path to ~Box/RES_Data/OISST/oisst_mainstays}
 
-\item{sat_source}{String indicating satellite data source.}
+\item{region_family}{Identify the family of shapefiles that you are interested in.
+Choices = "LME", "Groundfish Regions"}
 
-\item{region_family}{Identify the family of shapefiles that you are interested in. Choices = "LME", "Groundfish Regions"}
+\item{poly_name}{String Identifying the shapefile name that was used as mask.
+Used to build file name.}
 }
 \value{
 
 }
 \description{
-Tool for accessing NSF OKN Demo Data Products from Box. Global time series,
-as well as regionally masked timeseries have been pre-processed and stored on box. Wuick access
+Tool for accessing oisst regional timeseries from Box.
+Regionally masked timeseries have been pre-processed and stored on box. Quick access
 is available here.
 
-Simply name the satellite data source, the desired extent or mask, and the function will return the corresponding table.
+Simply specify your personal path to the oisst_mainstays folder,
+the group of polygons your area is in, and the name of the region itself.
 }
 \examples{
-box_paths <- gmRi::research_access_paths(os.use = "unix", user.name = "not applicable I use a mac")
-agulhas_timeseries <- okn_access_timeseries(okn_path = box_paths$oisst_mainstays, sat_source = "oisst", region_family = "lme", poly_name = "agulhas current")
+#Not run:
+
+# box_paths <- gmRi::research_access_paths(os.use = "unix",
+#                                          user.name = "not applicable")
+# agulhas <- oisst_access_timeseries(res_path = box_paths$oisst_mainstays,
+#                                    region_family = "lme",
+#                                    poly_name = "agulhas current")
 }

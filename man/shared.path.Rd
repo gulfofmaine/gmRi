@@ -2,7 +2,7 @@
 % Please edit documentation in R/box_paths_allyn.R
 \name{shared.path}
 \alias{shared.path}
-\title{Access Shared Path}
+\title{Access Shared Path from Box Drive}
 \usage{
 shared.path(
   os.use = "unix",
@@ -11,9 +11,9 @@ shared.path(
 )
 }
 \arguments{
-\item{os.use}{Character string defining operating system. Either "unix" or "windows"}
+\item{os.use}{Character string defining operating system. Either "unix"/"mac" or "windows"}
 
-\item{group}{Character string defining where to load shared Data and Functions.
+\item{group}{Character string of top-level directory within box to open. Ex. Box/RES_Data
 Either RES (things shared across the entire research department) or
 Mills Lab (things shared within the Mills Lab). Additional shortcuts are NSF OKN
 for knowledge graph data resources and root for the minimal path to box.}
@@ -24,7 +24,8 @@ for knowledge graph data resources and root for the minimal path to box.}
 path.out Path to shared folder. We will then use these paths within shared code to load shared data or source shared functions.
 }
 \description{
-This function creates paths to shared Data and Functions folders stored either inside the Mills Lab folder or outside the Mills Lab folder
+This function creates paths to shared Data and Functions folders stored either inside the Mills
+Lab folder or outside the Mills Lab folder in other top level locations on box.
 }
 \examples{
 # res.data.path<- shared.path(os.use = os.use, group = "RES", folder = "Data/")

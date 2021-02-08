@@ -23,7 +23,10 @@ Suggests:
   rnaturalearth,
   sf,
   stars,
-  tidyverse
+  tidyverse,
+  purrr,
+  stringr,
+  tibble
 VignetteBuilder: knitr
 Imports:
   ggplot2 (>= 2.1.1),
