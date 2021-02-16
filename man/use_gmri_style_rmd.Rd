@@ -10,7 +10,7 @@ use_gmri_style_rmd(css_file = "gmri_rmarkdown.css")
 \item{css_file}{String indicating desired css filename.}
 }
 \value{
-
+Cascading style sheet text
 }
 \description{
 Use CSS File from gmRi package files - Rmd Implementation

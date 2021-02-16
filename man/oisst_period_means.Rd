@@ -15,7 +15,7 @@ oisst_period_means(stack_in, projection_crs = 26919, time_res_df)
 means for.}
 }
 \value{
-
+New raster stack with temporal means applied
 }
 \description{
 Generate average annual SST measurements from the daily OISST

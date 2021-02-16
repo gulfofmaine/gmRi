@@ -5,7 +5,7 @@
 #'
 #' @param css_file String indicating desired css filename.
 #'
-#' @return
+#' @return Cascading style sheet text
 #' @export
 #'
 #' @examples # Not Run use_gmri_style(gmri_rmarkdown.css)
@@ -24,7 +24,7 @@ use_gmri_style_rmd <- function(css_file = "gmri_rmarkdown.css"){
 #'
 #' @param header_file String indicating desired css filename.
 #'
-#' @return
+#' @return HTML text inserted as-is
 #' @export
 #'
 #' @examples # Not Run use_gmri_header(gmri_rmarkdown.css)
@@ -40,7 +40,7 @@ insert_gmri_header <- function(header_file = "gmri_logo_header.html"){
 #'
 #' @param footer_file String indicating desired css filename.
 #'
-#' @return
+#' @return HTML text to insert as is
 #' @export
 #'
 #' @examples # Not Run use_gmri_footer(gmri_rmarkdown.css)

@@ -23,15 +23,15 @@
 #'
 #'
 #' @param os.use String flag indicating what operating system the user is currently using.
-#'  Options are "unix" for mac users or "windows".
+#' Options are "unix" for mac users or "windows".
 #' @param user.name User name for navigating root directory structure on windows.
 #'
 #' @return res_paths List containing user-specific paths
+#' @export
 #'
 #' @examples
 #' # Not run:
 #' # box_paths <- research_access_paths(os.use = "unix", user.name = "NA, I use a mac")
-#'
 research_access_paths <- function(os.use = "unix", user.name = "not applicable, I use a mac."){
 
   # Pre-load a user name for windows
@@ -83,6 +83,7 @@ research_access_paths <- function(os.use = "unix", user.name = "not applicable, 
 #' Used to build file name.
 #'
 #' @return Time series dataframe for the selected region.
+#' @export
 #'
 #' @examples
 #' #Not run:
@@ -204,6 +205,7 @@ oisst_access_timeseries <- function(res_path,
 #' @param year_range optional vector of years for raw or anommalies data resources.
 #'
 #' @return resource_out Raster stack of the desired netcdf array
+#' @export
 #'
 #' @examples
 #' # Nor run

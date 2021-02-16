@@ -633,7 +633,7 @@ env_data_extract <- function(data.set = "OISST",
 #' @param anomalies Boolean indication of whether to return observed sst or anomalies.
 #' Default = TRUE.
 #'
-#' @return
+#' @return Raster stack of OISSTv2 data using desired dimensions to crop
 #' @export
 #'
 #'@examples
@@ -835,7 +835,7 @@ oisst_window_load <- function(oisst_path, data_window, anomalies = FALSE){
 #' @param time_res_df Dataframe detailing the time-period structure you wish to calculate SST
 #' means for.
 #'
-#' @return
+#' @return New raster stack with temporal means applied
 #' @export
 #'
 #'
@@ -972,7 +972,7 @@ oisst_period_means <- function(stack_in, projection_crs = 26919, time_res_df) {
 #' @param anom_period Character vector indicating start and end years to calculate climatology for.
 #' NULL defaults to 1982-2011.
 #'
-#' @return
+#' @return Climatology raster stack with daily climate averages for reference period
 #' @export
 #'
 calc_daily_climatologies <- function(stack_in, projection_crs = 26919, anom_period = NULL) {

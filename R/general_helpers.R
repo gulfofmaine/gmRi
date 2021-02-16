@@ -38,7 +38,7 @@ floor_decade <- function(year_vector, return_class = "factor"){
 #' @param x vector that you wish to check for matches
 #' @param table Table or vector containing strings that you wish to check x against.
 #'
-#' @return
+#' @return Boolean indication of whether x is not in table
 #' @export
 #'
 #' @examples # not run

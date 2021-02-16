@@ -10,7 +10,7 @@ insert_gmri_header(header_file = "gmri_logo_header.html")
 \item{header_file}{String indicating desired css filename.}
 }
 \value{
-
+HTML text inserted as-is
 }
 \description{
 Insert HTML Header File from gmRi package files - Rmd Implementation

@@ -17,7 +17,7 @@ the data desired.}
 Default = TRUE.}
 }
 \value{
-
+Raster stack of OISSTv2 data using desired dimensions to crop
 }
 \description{
 Returns a list of OISST raster stacks that

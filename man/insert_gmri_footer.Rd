@@ -10,7 +10,7 @@ insert_gmri_footer(footer_file = "akemberling_gmri_footer.html")
 \item{footer_file}{String indicating desired css filename.}
 }
 \value{
-
+HTML text to insert as is
 }
 \description{
 Insert HTML Header File from gmRi package files - Rmd Implementation
