@@ -31,7 +31,7 @@
 #' @examples
 #' # Not run:
 #' # box_paths <- research_access_paths(os.use = "unix", user.name = "NA, I use a mac")
-#' #'
+#'
 research_access_paths <- function(os.use = "unix", user.name = "not applicable, I use a mac."){
 
   # Pre-load a user name for windows
