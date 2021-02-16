@@ -25,4 +25,5 @@ resources. Includes the Mills lab, Res data, knowledge graph data, and oisst mai
 \examples{
 # Not run:
 # box_paths <- research_access_paths(os.use = "unix", user.name = "NA, I use a mac")
+#'
 }
