@@ -2,7 +2,7 @@
 % Please edit documentation in R/oisst_mainstays_data_access.R
 \name{research_access_paths}
 \alias{research_access_paths}
-\title{Connect to the NSF OKN, RES, and Mills Lab Folders}
+\title{Establish Research Box Paths}
 \usage{
 research_access_paths(
   os.use = "unix",
@@ -20,8 +20,9 @@ res_paths List containing user-specific paths
 }
 \description{
 Returns list of box resource paths for quick access to commonly accessed
-resources.
+resources. Includes the Mills lab, Res data, knowledge graph data, and oisst mainstays.
 }
 \examples{
-box_paths <- research_access_paths(os.use = "unix", user.name = "NA, I use a mac")
+# Not run:
+# box_paths <- research_access_paths(os.use = "unix", user.name = "NA, I use a mac")
 }
