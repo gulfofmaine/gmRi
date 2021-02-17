@@ -2,7 +2,7 @@
 % Please edit documentation in R/oisst_data_funs.R
 \name{make_stack_dates}
 \alias{make_stack_dates}
-\title{Make Valid Raster Stack Dates}
+\title{Add Valid Raster Stack Dates to Dataframe}
 \usage{
 make_stack_dates(point_location_df, year_col, month_col, day_col)
 }
@@ -20,7 +20,7 @@ raster stack}
 df_out Original dataframe with added "valid_dates" column
 }
 \description{
-Make Valid Raster Stack Dates
+Add Valid Raster Stack Dates to Dataframe
 }
 \details{
 Takes a dataframe object containing columns for the year, month, and day

@@ -2,7 +2,7 @@
 % Please edit documentation in R/oisst_data_funs.R
 \name{fix_raster}
 \alias{fix_raster}
-\title{Fix Raster}
+\title{Raster from Array}
 \usage{
 fix_raster(x, lons.use, lats.use, x.min.use, x.max.use, y.min.use, y.max.use)
 }
