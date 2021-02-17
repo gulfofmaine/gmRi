@@ -19,7 +19,6 @@ colorRampPalette(). This is the workhorse for scale_color_gmri()
 and for scale_fill_gmri().
 }
 \examples{
-
 #You can now get interpolated color ranges using the palettes
 gmri_pal("cool")(10)
 

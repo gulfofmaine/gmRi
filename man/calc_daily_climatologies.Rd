@@ -15,7 +15,7 @@ calc_daily_climatologies(stack_in, projection_crs = 26919, anom_period = NULL)
 NULL defaults to 1982-2011.}
 }
 \value{
-
+Climatology raster stack with daily climate averages for reference period
 }
 \description{
 Generate Daily 30-year climatologies for a given area.

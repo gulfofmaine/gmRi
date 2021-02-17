@@ -3,7 +3,7 @@ title: "OISST Mainstays Workflows"
 output: 
   rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{OISST Mainstays Workflow}
+  %\VignetteIndexEntry{OISST Mainstays Workflows}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---

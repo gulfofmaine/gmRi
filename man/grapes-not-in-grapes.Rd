@@ -12,7 +12,7 @@ x \%not in\% table
 \item{table}{Table or vector containing strings that you wish to check x against.}
 }
 \value{
-
+Boolean indication of whether x is not in table
 }
 \description{
 Negation of the `%in%` function.

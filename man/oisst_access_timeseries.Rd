@@ -20,7 +20,7 @@ Choices = "LME", "Groundfish Regions"}
 Used to build file name.}
 }
 \value{
-
+Time series dataframe for the selected region.
 }
 \description{
 Tool for accessing oisst regional timeseries from Box.

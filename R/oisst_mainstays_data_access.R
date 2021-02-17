@@ -7,30 +7,31 @@
 #### Usage may depend on the research objective, so functionality to return
 #### a netcdf/raster object or a table may be desired
 ####
-#### Data is stored on ~/Box/NSF OKN Demo Data/
+#### Data is stored on ~/Box/RES_Data/OISST/oisst_mainstays
 #### Acccess to this folder required for these paths to work.
 
 
 
 
+####  Research Access Paths  ####
 
-####  Research Data Access Paths  ####
-####  This will change for each user, but will be foundational to all these functions
-#' @title Connect to the NSF OKN, RES, and Mills Lab Folders
+#' @title Establish Research Box Paths
 #'
 #'
 #' @description Returns list of box resource paths for quick access to commonly accessed
-#' resources.
+#' resources. Includes the Mills lab, Res data, knowledge graph data, and oisst mainstays.
 #'
 #'
 #' @param os.use String flag indicating what operating system the user is currently using.
-#'  Options are "unix" for mac users or "windows".
+#' Options are "unix" for mac users or "windows".
 #' @param user.name User name for navigating root directory structure on windows.
 #'
 #' @return res_paths List containing user-specific paths
 #' @export
 #'
-#' @examples box_paths <- research_access_paths(os.use = "unix", user.name = "NA, I use a mac")
+#' @examples
+#' # Not run:
+#' # box_paths <- research_access_paths(os.use = "unix", user.name = "NA, I use a mac")
 research_access_paths <- function(os.use = "unix", user.name = "not applicable, I use a mac."){
 
   # Pre-load a user name for windows
@@ -54,6 +55,8 @@ research_access_paths <- function(os.use = "unix", user.name = "not applicable, 
                     res = res_path,
                     mills = mills_path,
                     oisst_mainstays = oisst_path)
+
+  # Return the list of directories
   return(res_paths)
 
 }
@@ -61,7 +64,7 @@ research_access_paths <- function(os.use = "unix", user.name = "not applicable, 
 
 
 
-####  Access Regional Timeseries, OISST  ####
+####  OISST Regional Timeseries  ####
 #' @title Access Regional Timeseries from OISSTv2 Mainstays
 #'
 #' @description Tool for accessing oisst regional timeseries from Box.
@@ -79,7 +82,7 @@ research_access_paths <- function(os.use = "unix", user.name = "not applicable, 
 #' @param poly_name String Identifying the shapefile name that was used as mask.
 #' Used to build file name.
 #'
-#' @return
+#' @return Time series dataframe for the selected region.
 #' @export
 #'
 #' @examples
@@ -94,38 +97,103 @@ oisst_access_timeseries <- function(res_path,
                                     region_family = c("nmfs trawl regions", "lme", "gmri focus areas"),
                                     poly_name = "gulf of maine"){
 
-  # set up data path for sat source, originally all in okn demo data folder
+  # Set up data path for sat source, originally all in okn demo data folder
+  # Now all the timeseries are in RES_Data/OISST/oisst_mainstays
   source_path <- res_path
   if(stringr::str_sub(source_path, -1, -1) != "/") {source_path <- paste0(source_path, "/")}
 
 
-  # Folder for the region group, path to polygon
+  # State the group options for "region family" if user provided option doesn't match
+  group_options <- c("nmfs trawl regions", "trawl regions",
+                     "lme", "large marine ecosystems",
+                     "gmri focus", "gulf of maine",
+                     "epu", "ecological production units")
+
+  # Return message with group options for the unfamiliar
+  if((tolower(region_family) %in% group_options) == FALSE){
+    message("Invalid region family.\nAvailable choices are:\n")
+    message(paste(group_options, collapse = "\n"))
+    return("invalid region choice selected.")}
+
+
+
+
+  # Build file path to group folder based on region family
+  timeseries_folder <-  switch(
+    EXPR = tolower(region_family),
+    "nmfs trawl regions"          = paste0(source_path, "regional_timeseries/nmfs_trawl_regions/"),
+    "trawl regions"               = paste0(source_path, "regional_timeseries/nmfs_trawl_regions/"),
+    "lme"                         = paste0(source_path, "regional_timeseries/large_marine_ecosystems/"),
+    "large marine ecosystems"     = paste0(source_path, "regional_timeseries/large_marine_ecosystems/"),
+    "epu"                         = paste0(source_path, "regional_timeseries/ecological_production_units/"),
+    "ecological production units" = paste0(source_path, "regional_timeseries/ecological_production_units/"),
+    "gmri focus"                  = paste0(source_path, "regional_timeseries/gmri_focus_areas/"),
+    "gulf of maine"               = paste0(source_path, "regional_timeseries/gmri_focus_areas/"))
+
+
+
+  # Generate list of options in case people don't know what is available
+  available_ts <- list.files(timeseries_folder, pattern = "csv")
+
+
+  # Format the file names to match against poly_name
+  available_polys <-  purrr::map_chr(available_ts, function(ts){
+    ts <- stringr::str_replace(ts, ".csv", "")
+    ts <- stringr::str_replace_all(ts, "_", " ")
+    ts <- stringr::str_replace(ts, "OISSTv2 anom ", "")})
+
+
+  # Check if the supplied polygon is in the list for that group
+  if( (tolower(poly_name) %in% available_polys) == FALSE){
+            message(paste0("Invalid poly_name of: ", poly_name, "\nAvailable Polygons for ",
+                   region_family, " group include: \n"))
+            message(paste0(available_polys, collapse = "\n"))
+            return("Invalid poly_name choice selected.")
+    }
+
+
+  # Name configuration for path to polygon's timeseries file
+  # from human literate -> file name
   poly_name <- tolower(poly_name)
   poly_name <- stringr::str_replace_all(poly_name, " ", "_")
   poly_name <- stringr::str_replace_all(poly_name, "-", "_")
   poly_name <- stringr::str_replace_all(poly_name, "___", "")
   poly_name <- stringr::str_replace_all(poly_name, "__", "")
   poly_name <- paste0("OISSTv2_anom_", poly_name, ".csv")
-  timeseries_path <-  switch(tolower(region_family),
-                        "nmfs trawl regions"          = paste0(source_path, "nmfs_trawl_regions/", poly_name),
-                        "trawl regions"               = paste0(source_path, "nmfs_trawl_regions/", poly_name),
-                        "lme"                         = paste0(source_path, "large_marine_ecosystems/", poly_name),
-                        "large marine ecosystems"     = paste0(source_path, "large_marine_ecosystems/", poly_name),
-                        "epu"                         = paste0(source_path, "ecological_production_units/", poly_name),
-                        "ecological production units" = paste0(source_path, "ecological_production_units/", poly_name),
-                        "gmri focus"                  = paste0(source_path, "gmri_focus_areas/", poly_name),
-                        "gulf of maine"               = paste0(source_path, "gmri_focus_areas/", poly_name))
 
-
-
+  # Build full file path
+  timeseries_path <-  paste0(timeseries_folder, poly_name)
 
   # Read Timeseries
   timeseries_out <- utils::read.csv(timeseries_path)
+
+  # Return it as output
   return(timeseries_out)
 
 
 }
 
+
+# # testing
+# box_paths <- gmRi::research_access_paths(os.use = "unix",
+#                                          user.name = "not applicable")
+#
+#
+# # testing an incorrect group name
+# oisst_access_timeseries(res_path = box_paths$oisst_mainstays,
+#                         region_family = "bad group",
+#                         poly_name = "incorrect polygon")
+#
+#
+# # testing an invalid polygon name
+# oisst_access_timeseries(res_path = box_paths$oisst_mainstays,
+#                         region_family = "trawl regions",
+#                         poly_name = "incorrect polygon")
+#
+# # testing a valid polygon name
+# oisst_access_timeseries(res_path = box_paths$oisst_mainstays,
+#                         region_family = "lme",
+#                         poly_name = "agulhas current")
 
 
 ####  Access OISST NETCDF's  ####
@@ -152,11 +220,11 @@ load_global_oisst <- function(oisst_path = "~Box/RES_Data/OISST/oisst_mainstays"
   # Redirect to resource folder
   resource <- tolower(resource)
   resource_folder <- switch(
-    resource,
+    EXPR = tolower(resource),
     "raw"           = paste0(oisst_path, "/annual_observations/"),
     "climatology82" = paste0(oisst_path, "/daily_climatologies/daily_clims_1982to2011.nc"),
     "climatology91" = paste0(oisst_path, "/daily_climatologies/daily_clims_1991to2020.nc"),
-    "anomalies"     = paste0(oisst_path, "/annual_anomalies/"),
+    "anomalies"     = paste0(oisst_path, "/annual_anomalies/1982to2011_climatology/"),
     "warming rates" = paste0(oisst_path, "/warming_rates/annual_warming_rates.nc"))
   resource_folder <- stringr::str_replace(resource_folder, "//", "/")
 

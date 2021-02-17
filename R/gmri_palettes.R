@@ -24,6 +24,7 @@ gmri_colors <- c(
 #' @param ... Character names of official GMRI colors
 #' @param as_char Boolean T/F determining how the values should be returned. Character values can be passed directly in places a color hexcode is desired.
 #' @export
+#'
 #' @examples
 #'
 #' #Pull a single Hex code
@@ -53,6 +54,7 @@ gmri_cols <- function(..., as_char = FALSE) {
   }
 
 
+  # If nothing is entered into the function return them all
   gmri_colors[cols]
 }
 
@@ -60,16 +62,17 @@ gmri_cols <- function(..., as_char = FALSE) {
 
 ####  Palettes  ####
 gmri_palettes <- list(
+  # Main palette
   `main`  = gmri_cols("gmri blue", "green", "gmri green",  "yellow", "orange"),
-
+  # Cool palette
   `cool`  = gmri_cols("gmri blue", "dark green", "teal"),
-
+  # Hot palette
   `hot`   = gmri_cols("gmri green", "yellow", "orange"),
-
+  # Mixed palette
   `mixed` = gmri_cols("orange", "yellow", "gmri green", "dark green", "green", "teal", "gmri blue"),
-
+  # Gray
   `gray`  = gmri_cols("light gray", "dark gray"),
-
+  # Grey for british people
   `grey`  = gmri_cols("light gray", "dark gray")
 )
 
@@ -84,10 +87,9 @@ gmri_palettes <- list(
 #' @param palette Character name of palette in gmri_palettes
 #' @param reverse Boolean indicating whether the palette should be reversed
 #' @param ... Additional arguments to pass to colorRampPalette()
-#'
 #' @export
-#' @examples
 #'
+#' @examples
 #' #You can now get interpolated color ranges using the palettes
 #' gmri_pal("cool")(10)
 #'
@@ -107,8 +109,8 @@ gmri_pal <- function(palette = "main", reverse = FALSE, ...) {
 #' @param reverse Boolean indicating whether the palette should be reversed
 #' @param ... Additional arguments passed to discrete_scale() or
 #'            scale_color_gradientn(), used respectively when discrete is TRUE or FALSE
-#'
 #' @export
+#'
 #' @examples
 #' #Color by discrete variable using default palette
 #' # ggplot2::ggplot(iris, ggplot2::aes(Sepal.Width, Sepal.Length, color = Species)) +
@@ -140,8 +142,8 @@ scale_color_gmri <- function(palette = "main", discrete = TRUE, reverse = FALSE,
 #' @param reverse Boolean indicating whether the palette should be reversed
 #' @param ... Additional arguments passed to discrete_scale() or
 #'            scale_fill_gradientn(), used respectively when discrete is TRUE or FALSE
-#'
 #' @export
+#'
 #' @examples
 #' #Fill by discrete variable with different palette + remove legend (guide)
 #' #ggplot2::ggplot(mpg, ggplot2::aes(manufacturer, fill = manufacturer)) +
