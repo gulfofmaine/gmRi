@@ -220,11 +220,11 @@ load_global_oisst <- function(oisst_path = "~Box/RES_Data/OISST/oisst_mainstays"
   # Redirect to resource folder
   resource <- tolower(resource)
   resource_folder <- switch(
-    resource,
+    EXPR = tolower(resource),
     "raw"           = paste0(oisst_path, "/annual_observations/"),
     "climatology82" = paste0(oisst_path, "/daily_climatologies/daily_clims_1982to2011.nc"),
     "climatology91" = paste0(oisst_path, "/daily_climatologies/daily_clims_1991to2020.nc"),
-    "anomalies"     = paste0(oisst_path, "/annual_anomalies/"),
+    "anomalies"     = paste0(oisst_path, "/annual_anomalies/1982to2011_climatology/"),
     "warming rates" = paste0(oisst_path, "/warming_rates/annual_warming_rates.nc"))
   resource_folder <- stringr::str_replace(resource_folder, "//", "/")
 

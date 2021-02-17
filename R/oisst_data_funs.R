@@ -32,9 +32,9 @@ make360 <- function(lon) {
 
 
 ####______________________________####
-####  Fix Raster from Array  ####
+####  Raster from Array  ####
 
-#' @title Fix Raster
+#' @title Raster from Array
 #'
 #' @description Helper function to convert an array (x, y, z)
 #' into raster layers with the correct dimensions and orientation for spatial analyses.
@@ -55,15 +55,16 @@ make360 <- function(lon) {
 #'
 fix_raster <- function(x, lons.use, lats.use, x.min.use, x.max.use, y.min.use, y.max.use) {
 
-  r.temp<- t(x)[ncol(x):1,]
-  rast.out<- raster::raster(r.temp,
+  # Work backwards through first dimension, of transposed array
+  r.temp <- t(x)[ncol(x):1,]
+  rast.out <- raster::raster(r.temp,
                             xmn = lons.use[x.min.use],
                             xmx = lons.use[x.max.use],
                             ymn = lats.use[y.min.use],
                             ymx = lats.use[y.max.use])
-  return(rast.out)
 
-  ## End function
+  # Return the raster
+  return(rast.out)
 }
 
 
@@ -72,7 +73,7 @@ fix_raster <- function(x, lons.use, lats.use, x.min.use, x.max.use, y.min.use, y
 #### Fix Raster Stack Names  ####
 
 
-#' @title Make Valid Raster Stack Dates
+#' @title Add Valid Raster Stack Dates to Dataframe
 #'
 #' @details Takes a dataframe object containing columns for the year, month, and day
 #' and creates a new "valid_dates" column that will match the naming convention for
@@ -141,42 +142,30 @@ make_stack_dates <- function(point_location_df, year_col, month_col, day_col) {
 #'
 oisst_list_to_stack <- function(box, times.window) {
 
-  ## Start function
-  # Install libraries
-  libraries <- c("ncdf4", "raster")
-  lapply(libraries, FUN = function(x) {
-    if (!require(x, character.only = TRUE)) {
-      utils::install.packages(x, dependencies = TRUE)
-      library(x, character.only = TRUE)
-    }
-  })
-
-
 
   # Set arguments for debugging -- this will NOT run when you call the function.
   # Though, you can run each line inside the {} and then you will have everything you need to walk
   # through the rest of the function.
-  if(FALSE){
-    x = oisst.files
-  }
+  if(FALSE){ x = oisst.files }
 
 
-  # OISST data stem
+  # OISST data stem to download using THREDDS
   data.stem <- "https://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/noaa.oisst.v2.highres/"
 
   # Connecting and extracting lat/lon/time variables from netcdf file
-  my.nc   <- ncdf4::nc_open(paste(data.stem, x, sep = ""))
+  my.nc   <- ncdf4::nc_open(paste0(data.stem, x))
   lats    <- ncdf4::ncvar_get(my.nc, var = "lat")
   lons    <- ncdf4::ncvar_get(my.nc, var = "lon")
   times   <- ncdf4::ncvar_get(my.nc, var = "time")
 
   # Make times a little bit easier to handle
-  dates.full <- as.Date(times, origin ='1800-01-01', tz = "GMT")
+  dates.full <- as.Date(times, origin = '1800-01-01', tz = "GMT")
 
   # Find indices and windows corresponding to spatial box of interest,
   # which are then used in the "start" and "count" arguments to the ncvar_get call
   # for the sst variable
   b.box    <- c(make360(box[1]), make360(box[2]), box[3], box[4])
+
   x.window <- which(lons > b.box[1] & lons < b.box[2])
   x.min    <- min(x.window)
   x.max    <- max(x.window)
@@ -188,23 +177,23 @@ oisst_list_to_stack <- function(box, times.window) {
   y.count  <- ifelse(y.max - y.min > 0, y.max - y.min, 1)
 
 
+  # Behavior for null time window
   if(!is.null(times)) {
     times.window <- which(dates.full > as.Date(times.window[1]) & dates.full < as.Date(times.window[2]))
-  } else {
-    times.window <- times
-  }
+  } else { times.window <- times }
 
+  # Get time indices
   time.min   <- which.min(times.window)
   time.max   <- which.max(times.window)
   time.count <- ifelse(time.max - time.min > 0, time.max - time.min, 1)
 
-  # Now we have the lon,lat,time indices and windows, but need to match up their order with how
+  # Now we have the lon,lat, time indicex windows, but need to match up their order with how
   # they are handled in the ncvar_get call
   dim.order <- sapply(my.nc$var$sst$dim, function(x) x$name)
 
   # Set start and counts
-  start.use<- c("lon" = x.min, "lat" = y.min, "time" = time.min)
-  count.use<- c("lon" = x.count, "lat" = y.count, "time" = time.count)
+  start.use <- c("lon" = x.min, "lat" = y.min, "time" = time.min)
+  count.use <- c("lon" = x.count, "lat" = y.count, "time" = time.count)
 
   # Run ncvar_get, adjusting order of start and count as needed
   temp <- ncdf4::ncvar_get(my.nc,
@@ -214,13 +203,15 @@ oisst_list_to_stack <- function(box, times.window) {
 
   # Moving from the array format of temp to a raster stack
   temp.list <- lapply(seq(dim(temp)[3]), function(x) {
-    fix_raster(temp[,,x],
-               lons.use = lons,
-               lats.use = lats,
+    fix_raster(temp[, , x],
+               lons.use  = lons,
+               lats.use  = lats,
                x.min.use = x.min,
                x.max.use = x.max,
                y.min.use = y.min,
                y.max.use = y.max)})
+
+  # rotate and stack
   rast.temp <- suppressWarnings(raster::rotate(raster::stack(temp.list)))
 
   #Output Stack
@@ -267,14 +258,7 @@ env_data_extract <- function(data.set = "OISST",
 
 
   ## Start function
-  # Install libraries
-  libraries <- c("ncdf4", "raster")
-  lapply(libraries, FUN = function(x) {
-    if (!require(x, character.only = TRUE)) {
-      utils::install.packages(x, dependencies = TRUE)
-      library(x, character.only = TRUE)
-    }
-  })
+
 
   # Set arguments for debugging -- this will NOT run when you call the function.
   # Though, you can run each line inside the {} and then you will have everything you need to
@@ -295,7 +279,7 @@ env_data_extract <- function(data.set = "OISST",
   if(data.set == "MURSST"){
 
     # Set path to THREDDS server
-    data.path<- "http://thredds.jpl.nasa.gov/thredds/dodsC/OceanTemperature/MUR-JPL-L4-GLOB-v4.1.nc"
+    data.path <- "http://thredds.jpl.nasa.gov/thredds/dodsC/OceanTemperature/MUR-JPL-L4-GLOB-v4.1.nc"
 
     # Some steps to make things cooperate with nc functions. MURSST is already in -180 to 180,
     # so we are good there..
@@ -321,9 +305,9 @@ env_data_extract <- function(data.set = "OISST",
     y.count  <- ifelse(y.max - y.min > 0, y.max - y.min, 1)
 
     if(!is.null(dates)) {
-      times.window<- which(dates.full > as.Date(dates[1]) & dates.full < as.Date(dates[2]))
+      times.window <- which(dates.full > as.Date(dates[1]) & dates.full < as.Date(dates[2]))
     } else {
-      times.window<- dates.full
+      times.window <- dates.full
     }
 
     time.min <- which.min(times.window)
@@ -338,11 +322,11 @@ env_data_extract <- function(data.set = "OISST",
       # Find indices and windows corresponding to spatial box of interest, which are then used
       # in the "start" and "count" arguments to the ncvar_get call for the sst variable
       if(i == 1){
-        time.count<- seq(from = 1, to = breaks[i], by = 1)
-        dates.use<- dates.full[1:breaks[i]]
+        time.count <- seq(from = 1, to = breaks[i], by = 1)
+        dates.use <- dates.full[1:breaks[i]]
       } else {
-        time.count<- seq(from = breaks[i-1]+1, to = breaks[i], by = 1)
-        dates.use<- dates.full[(breaks[i-1]+1):breaks[i]]
+        time.count <- seq(from = breaks[i-1]+1, to = breaks[i], by = 1)
+        dates.use <- dates.full[(breaks[i-1]+1):breaks[i]]
       }
 
       # Now we have the lon,lat,time indices and windows, but need to match up their order with
@@ -417,9 +401,9 @@ env_data_extract <- function(data.set = "OISST",
     y.count  <- ifelse(y.max - y.min > 0, y.max - y.min, 1)
 
     if(!is.null(dates)) {
-      times.window<- which(dates.full > as.Date(dates[1]) & dates.full < as.Date(dates[2]))
+      times.window <- which(dates.full > as.Date(dates[1]) & dates.full < as.Date(dates[2]))
     } else {
-      times.window<- dates.full
+      times.window <- dates.full
     }
 
     time.min   <- which.min(times.window)
@@ -459,7 +443,7 @@ env_data_extract <- function(data.set = "OISST",
     }
 
     stack.out <- suppressWarnings(raster::rotate(raster::stack(temp.list)))
-    stack.out[stack.out == 327.16]<- NA
+    stack.out[stack.out == 327.16] <- NA
     names(stack.out) <- dates.full[-length(dates.full)]
 
     # Write out raster stack
@@ -472,7 +456,7 @@ env_data_extract <- function(data.set = "OISST",
 
   ####  OISST Data  ####
   if(data.set == "OISST") {
-    stem.path<- "http://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/noaa.oisst.v2.highres/"
+    stem.path <- "http://www.esrl.noaa.gov/psd/thredds/dodsC/Datasets/noaa.oisst.v2.highres/"
 
     ####____Debug Null Box  ####
     #Behavior for box = NULL
@@ -657,8 +641,8 @@ oisst_window_load <- function(oisst_path, data_window, anomalies = FALSE){
 
     # Accessing Anomalies
     } else if(anomalies == TRUE){
-    file_names <- list.files(stringr::str_c(oisst_path, "annual_anomalies/"))
-    file_paths <- stringr::str_c(oisst_path, "annual_anomalies/", file_names)
+    file_names <- list.files(stringr::str_c(oisst_path, "annual_anomalies/1982to2011_climatology"))
+    file_paths <- stringr::str_c(oisst_path, "annual_anomalies/1982to2011_climatology", file_names)
     file_paths <- file_paths[stringr::str_detect(file_paths, ".nc")]     # No .zarr files
     file_years <- stringr::str_sub(file_paths, -7, -4)                   # Yr Labels
     file_paths <- stats::setNames(file_paths, file_years)
