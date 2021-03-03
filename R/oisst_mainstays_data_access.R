@@ -76,9 +76,9 @@ research_access_paths <- function(os.use = "unix", user.name = "not applicable, 
 #'
 #'
 #'
-#' @param res_path Personal path to ~Box/RES_Data/OISST/oisst_mainstays
+#' @param oisst_path Personal path to ~Box/RES_Data/OISST/oisst_mainstays
 #' @param region_family Identify the family of shapefiles that you are interested in.
-#' Choices = "LME", "Groundfish Regions"
+#' Choices = "LME", "nmfs trawl regions", "gmri focus areas"
 #' @param poly_name String Identifying the shapefile name that was used as mask.
 #' Used to build file name.
 #'
@@ -90,23 +90,23 @@ research_access_paths <- function(os.use = "unix", user.name = "not applicable, 
 #'
 #' # box_paths <- gmRi::research_access_paths(os.use = "unix",
 #' #                                          user.name = "not applicable")
-#' # agulhas <- oisst_access_timeseries(res_path = box_paths$oisst_mainstays,
+#' # agulhas <- oisst_access_timeseries(oisst_path = box_paths$oisst_mainstays,
 #' #                                    region_family = "lme",
 #' #                                    poly_name = "agulhas current")
-oisst_access_timeseries <- function(res_path,
+oisst_access_timeseries <- function(oisst_path,
                                     region_family = c("nmfs trawl regions", "lme", "gmri focus areas"),
                                     poly_name = "gulf of maine"){
 
   # Set up data path for sat source, originally all in okn demo data folder
   # Now all the timeseries are in RES_Data/OISST/oisst_mainstays
-  source_path <- res_path
+  source_path <- oisst_path
   if(stringr::str_sub(source_path, -1, -1) != "/") {source_path <- paste0(source_path, "/")}
 
 
   # State the group options for "region family" if user provided option doesn't match
   group_options <- c("nmfs trawl regions", "trawl regions",
                      "lme", "large marine ecosystems",
-                     "gmri focus", "gulf of maine",
+                     "gmri focus areas", "gulf of maine",
                      "epu", "ecological production units")
 
   # Return message with group options for the unfamiliar
@@ -127,8 +127,8 @@ oisst_access_timeseries <- function(res_path,
     "large marine ecosystems"     = paste0(source_path, "regional_timeseries/large_marine_ecosystems/"),
     "epu"                         = paste0(source_path, "regional_timeseries/ecological_production_units/"),
     "ecological production units" = paste0(source_path, "regional_timeseries/ecological_production_units/"),
-    "gmri focus"                  = paste0(source_path, "regional_timeseries/gmri_focus_areas/"),
-    "gulf of maine"               = paste0(source_path, "regional_timeseries/gmri_focus_areas/"))
+    "gmri focus areas"            = paste0(source_path, "regional_timeseries/gmri_sst_focal_areas/"),
+    "gulf of maine"               = paste0(source_path, "regional_timeseries/gmri_sst_focal_areas/"))
 
 
 
@@ -180,18 +180,18 @@ oisst_access_timeseries <- function(res_path,
 #
 #
 # # testing an incorrect group name
-# oisst_access_timeseries(res_path = box_paths$oisst_mainstays,
+# oisst_access_timeseries(oisst_path = box_paths$oisst_mainstays,
 #                         region_family = "bad group",
 #                         poly_name = "incorrect polygon")
 #
 #
 # # testing an invalid polygon name
-# oisst_access_timeseries(res_path = box_paths$oisst_mainstays,
+# oisst_access_timeseries(oisst_path = box_paths$oisst_mainstays,
 #                         region_family = "trawl regions",
 #                         poly_name = "incorrect polygon")
 #
 # # testing a valid polygon name
-# oisst_access_timeseries(res_path = box_paths$oisst_mainstays,
+# oisst_access_timeseries(oisst_path = box_paths$oisst_mainstays,
 #                         region_family = "lme",
 #                         poly_name = "agulhas current")
 
@@ -258,5 +258,112 @@ load_global_oisst <- function(oisst_path = "~Box/RES_Data/OISST/oisst_mainstays"
 
 
 
+####  CURRENT Development  ####
+# 3/2/2021
+
+
+#' #' @title Load Reference Shapefile for OISST Regional Timeseries
+#' #'
+#' #'
+#' #' @description Import shapefile as sf object for the desired oisst timeseries. Useful for
+#' #' validating what shapefile was used, and for adding maps to accompany timeseries.
+#' #'
+#' #' @param res_path character string indicating local path to Box/RES_Data directory
+#' #' @param region_family Character string indicating what family the shapefile is within.
+#' #' Choices = "LME", "nmfs trawl regions", "gmri focus areas"
+#' #' @param poly_name Specific name of the shape you wish to access
+#' #'
+#' #' @return
+#' #' @export
+#' #'
+#' #' @examples
+#' oisst_timeseries_poly <- function(res_path,
+#'                                   region_family = c("nmfs trawl regions", "lme", "gmri focus areas"),
+#'                                   poly_name = "gulf of maine"){
+#'
+#'
+#'
+#'   # Set up data path for sat source, originally all in okn demo data folder
+#'   # Now all the timeseries are in RES_Data/OISST/oisst_mainstays
+#'   source_path <- res_path
+#'   if(stringr::str_sub(source_path, -1, -1) != "/") {source_path <- paste0(source_path, "/")}
+#'
+#'
+#'   # State the group options for "region family" if user provided option doesn't match
+#'   group_options <- c("nmfs trawl regions", "trawl regions",
+#'                      #"lme", "large marine ecosystems",
+#'                      "gmri focus areas", "gulf of maine",
+#'                      "epu", "ecological production units")
+#'
+#'   # Return message with group options for the unfamiliar
+#'   if((tolower(region_family) %in% group_options) == FALSE){
+#'     message("Invalid region family.\nAvailable choices are:\n")
+#'     message(paste(group_options, collapse = "\n"))
+#'     return("invalid region choice selected.")}
+#'
+#'
+#'
+#'
+#'   # Build file path to group folder based on region family
+#'   poly_folder <-  switch(
+#'     EXPR = tolower(region_family),
+#'     "nmfs trawl regions"          = paste0(source_path, "Shapefiles/nmfs_trawl_regions/"),
+#'     "trawl regions"               = paste0(source_path, "Shapefiles/nmfs_trawl_regions/"),
+#'     #"lme"                         = paste0(source_path, "Shapefiles/large_marine_ecosystems/"),
+#'     #"large marine ecosystems"     = paste0(source_path, "Shapefiles/large_marine_ecosystems/"),
+#'     "epu"                         = paste0(source_path, "Shapefiles/EPU/"),
+#'     "ecological production units" = paste0(source_path, "Shapefiles/EPU/"),
+#'     "gmri focus areas"                  = paste0(source_path, "Shapefiles/gmri_sst_focal_areas/"),
+#'     "gulf of maine"               = paste0(source_path, "Shapefiles/gmri_sst_focal_areas/"))
+#'
+#'
+#'
+#'   # Generate list of options in case people don't know what is available
+#'   available_polys <- list.files(poly_folder, pattern = c("shp", ".geojson"))
+#'
+#'
+#'   # Format the file names to match against poly_name
+#'   available_polys <-  purrr::map_chr(available_polys, function(poly){
+#'     poly <- stringr::str_replace(poly, ".geojson", "")
+#'     poly <- stringr::str_replace(poly, ".shp", "")
+#'     poly <- stringr::str_replace_all(poly, "_", " ")
+#'   })
+#'
+#'
+#'   # Check if the supplied polygon is in the list for that group
+#'   if( (tolower(poly_name) %in% available_polys) == FALSE){
+#'     message(paste0("Invalid poly_name of: ", poly_name, "\nAvailable Polygons for ",
+#'                    region_family, " group include: \n"))
+#'     message(paste0(available_polys, collapse = "\n"))
+#'     return("Invalid poly_name choice selected.")
+#'   }
+#'
+#'
+#'   # Need some code to reverse engineer the actual shape names from human legible ones
+#'
+#'
+#'   # Then need to load them and export
+#'
+#'
+#'
+#'
+#' }
+
+
+# # testing
+# box_paths <- gmRi::research_access_paths(os.use = "unix",
+#                                          user.name = "not applicable")
+#
+#
+# # testing an incorrect group name:
+# oisst_timeseries_poly(res_path = box_paths$oisst_mainstays,
+#                       region_family = "bad group",
+#                       poly_name = "incorrect polygon")
+#
+#
+# # testing an incorrect polygon name:
+# oisst_timeseries_poly(res_path = box_paths$oisst_mainstays,
+#                       region_family = "gmri focus areas",
+#                       poly_name = "incorrect polygon")
 
 
