@@ -642,7 +642,7 @@ oisst_window_load <- function(oisst_path, data_window, anomalies = FALSE){
     # Accessing Anomalies
     } else if(anomalies == TRUE){
     file_names <- list.files(stringr::str_c(oisst_path, "annual_anomalies/1982to2011_climatology"))
-    file_paths <- stringr::str_c(oisst_path, "annual_anomalies/1982to2011_climatology", file_names)
+    file_paths <- stringr::str_c(oisst_path, "annual_anomalies/1982to2011_climatology/", file_names)
     file_paths <- file_paths[stringr::str_detect(file_paths, ".nc")]     # No .zarr files
     file_years <- stringr::str_sub(file_paths, -7, -4)                   # Yr Labels
     file_paths <- stats::setNames(file_paths, file_years)
