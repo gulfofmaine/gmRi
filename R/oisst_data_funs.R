@@ -703,6 +703,8 @@ oisst_window_load <- function(oisst_path, data_window, anomalies = FALSE){
 
 
     # Date Origin WAS different for each anomaly netcdf so we need to split here again
+
+
     time_idx <- which(
       as.Date(my_nc$dim$time$vals, origin = '1800-01-01', tz = "GMT") > time_min &
         as.Date(my_nc$dim$time$vals, origin = '1800-01-01', tz = "GMT") < time_max)
@@ -719,13 +721,13 @@ oisst_window_load <- function(oisst_path, data_window, anomalies = FALSE){
     #       as.Date(my_nc$dim$time$vals,
     #               origin = paste0(nc_year_label, '-01-01'), tz = "GMT") < time_max)
     # }
-    #
-    #
-    # # If time index is less than one, output message indicating that year will be empty
-    # if(length(time_idx) < 1){
-    #   message(paste0(nc_year_label, " outside data range, not included in stack."))
-    #   return("Year outside time extent of data")
-    # }
+
+
+    # If time index is less than one, output message indicating that year will be empty
+    if(length(time_idx) < 1){
+      message(paste0(nc_year_label, " outside data range, not included in stack."))
+      return("Year outside time extent of data")
+    }
 
     # Pull netcdf data that you need using indexes
     if(anomalies == FALSE){
