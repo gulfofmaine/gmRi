@@ -702,26 +702,30 @@ oisst_window_load <- function(oisst_path, data_window, anomalies = FALSE){
 
 
 
-    # Date Origin is different for each anomaly netcdf so we need to split here again
-    # That should be fixed, but this will work for now...
-    if(anomalies == FALSE){
-      time_idx <- which(
-        as.Date(my_nc$dim$time$vals, origin = '1800-01-01', tz = "GMT") > time_min &
-          as.Date(my_nc$dim$time$vals, origin = '1800-01-01', tz = "GMT") < time_max)
-    } else if(anomalies == TRUE){
-      time_idx <- which(
-        as.Date(my_nc$dim$time$vals,
-                origin = paste0(nc_year_label, '-01-01'), tz = "GMT") > time_min &
-          as.Date(my_nc$dim$time$vals,
-                  origin = paste0(nc_year_label, '-01-01'), tz = "GMT") < time_max)
-    }
+    # Date Origin WAS different for each anomaly netcdf so we need to split here again
+    time_idx <- which(
+      as.Date(my_nc$dim$time$vals, origin = '1800-01-01', tz = "GMT") > time_min &
+        as.Date(my_nc$dim$time$vals, origin = '1800-01-01', tz = "GMT") < time_max)
 
-
-    # If time index is less than one, output message indicating that year will be empty
-    if(length(time_idx) < 1){
-      message(paste0(nc_year_label, " outside data range, not included in stack."))
-      return("Year outside time extent of data")
-    }
+    # # That should be fixed, but this will work for now...
+    # if(anomalies == FALSE){
+    #   time_idx <- which(
+    #     as.Date(my_nc$dim$time$vals, origin = '1800-01-01', tz = "GMT") > time_min &
+    #       as.Date(my_nc$dim$time$vals, origin = '1800-01-01', tz = "GMT") < time_max)
+    # } else if(anomalies == TRUE){
+    #   time_idx <- which(
+    #     as.Date(my_nc$dim$time$vals,
+    #             origin = paste0(nc_year_label, '-01-01'), tz = "GMT") > time_min &
+    #       as.Date(my_nc$dim$time$vals,
+    #               origin = paste0(nc_year_label, '-01-01'), tz = "GMT") < time_max)
+    # }
+    #
+    #
+    # # If time index is less than one, output message indicating that year will be empty
+    # if(length(time_idx) < 1){
+    #   message(paste0(nc_year_label, " outside data range, not included in stack."))
+    #   return("Year outside time extent of data")
+    # }
 
     # Pull netcdf data that you need using indexes
     if(anomalies == FALSE){
@@ -744,7 +748,7 @@ oisst_window_load <- function(oisst_path, data_window, anomalies = FALSE){
                        tz = "GMT")
     } else if(anomalies == TRUE){
       dates <- as.Date(my_nc$dim$time$vals[time_idx],
-                       origin = paste0(nc_year_label, '-01-01'),
+                       origin = '1800-01-01', # This will change with origin info
                        tz = "GMT")
     }
 
@@ -791,9 +795,9 @@ oisst_window_load <- function(oisst_path, data_window, anomalies = FALSE){
 
 # Testing Code:
 # oisst_path <- shared.path(group = "RES_Data", folder = "OISST/oisst_mainstays")
-# data_window <- data.frame(lon = c(-72, -65), lat = c(42,44), time = as.Date(c("2019-08-01", "2020-12-31")))
+# data_window <- data.frame(lon = c(-72, -65), lat = c(42,44), time = as.Date(c("2019-08-01", "2021-12-31")))
 # oisst_stack <- oisst_window_load(oisst_path, data_window, anomalies = TRUE)
-
+# raster::plot(oisst_stack$`2021`$X2021.01.28)
 
 
 
