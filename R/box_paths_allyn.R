@@ -44,6 +44,7 @@ enter_user_name_func <- function() {
 #' Mills Lab (things shared within the Mills Lab). Additional shortcuts are NSF OKN
 #' for knowledge graph data resources and root for the minimal path to box.
 #' @param folder Sub-folder within box you wish to access
+#' @param user.name User name needed to set root directory for Windows users
 #'
 #' @return path.out Path to shared folder. We will then use these paths within shared code to load shared data or source shared functions.
 #' @export
@@ -55,7 +56,8 @@ enter_user_name_func <- function() {
 #' # gom.shapefile<- st_read(paste(res.data.path, "Shapefiles/GoM_sf.shp", sep = ""))
 shared.path <- function(os.use = "unix",
                         group = c("RES Data", "Mills Lab", "Climate Change Ecology Lab", "NSF OKN", "root"),
-                        folder = "Functions/") {
+                        folder = "Functions/",
+                        user.name = NULL) {
   # Mac Operating System Paths
   if (os.use %in% c("unix", "mac")) {
 
@@ -80,9 +82,9 @@ shared.path <- function(os.use = "unix",
       # If group is specified use switch() to set it
       if (!is.null(group)) {
       path.out <- switch(tolower(group),
-        "res data"                   = paste("C:/Users/", user.name, "/Box/RES_Data/", folder, sep = ""),
-        "res_data"                   = paste("C:/Users/", user.name, "/Box/RES_Data/", folder, sep = ""),
-        "res"                        = paste("C:/Users/", user.name, "/Box/RES_Data/", folder, sep = ""),
+        "res data"                   = paste("C:/Users/", user.name, "/Box/RES_Data/",  folder, sep = ""),
+        "res_data"                   = paste("C:/Users/", user.name, "/Box/RES_Data/",  folder, sep = ""),
+        "res"                        = paste("C:/Users/", user.name, "/Box/RES_Data/",  folder, sep = ""),
         "mills lab"                  = paste("C:/Users/", user.name, "/Box/Mills Lab/", folder, sep = ""),
         "mills"                      = paste("C:/Users/", user.name, "/Box/Mills Lab/", folder, sep = ""),
         "climate change ecology lab" = paste("C:/Users/", user.name, "/Box/Climate Change Ecology Lab/", folder, sep = ""),
