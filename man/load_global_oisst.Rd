@@ -25,7 +25,7 @@ resource_out Raster stack of the desired netcdf array
 Access OISST Mainstays Arrays
 }
 \examples{
-# Nor run
+# Not run
 # load_global_oisst(oisst_path = "~Box/RES_Data/OISST/oisst_mainstays",
 #                   resource = "warming rates", year_range = NULL)
 }

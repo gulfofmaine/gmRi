@@ -7,7 +7,8 @@
 shared.path(
   os.use = "unix",
   group = c("RES Data", "Mills Lab", "Climate Change Ecology Lab", "NSF OKN", "root"),
-  folder = "Functions/"
+  folder = "Functions/",
+  user.name = NULL
 )
 }
 \arguments{
@@ -19,6 +20,8 @@ Mills Lab (things shared within the Mills Lab). Additional shortcuts are NSF OKN
 for knowledge graph data resources and root for the minimal path to box.}
 
 \item{folder}{Sub-folder within box you wish to access}
+
+\item{user.name}{User name needed to set root directory for Windows users}
 }
 \value{
 path.out Path to shared folder. We will then use these paths within shared code to load shared data or source shared functions.
