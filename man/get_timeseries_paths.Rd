@@ -4,18 +4,11 @@
 \alias{get_timeseries_paths}
 \title{Timeseries and Shapefile Path Look-Up}
 \usage{
-get_timeseries_paths(
-  region_group,
-  region_list,
-  os.use = "unix",
-  user.name = NULL
-)
+get_timeseries_paths(region_group, os.use = "unix", user.name = NULL)
 }
 \arguments{
 \item{region_group}{Name of the region group used to fetch region names from
-gmRi::get_region_names()}
-
-\item{region_list}{The vector of region names returned by gmRi::get_region_names()}
+gmRi::get_region_names(): Options: gmri_sst_focal_areas, nelme_regions, nmfs_trawl_regions, lme}
 
 \item{os.use}{Operating system setting passed to gmRi::shared.path()}
 

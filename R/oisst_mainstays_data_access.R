@@ -199,8 +199,7 @@ get_region_names <- function(region_group = "gmri_sst_focal_areas"){
 #' This is a parallel to the python functions used to create them and ensure consistent names.
 #'
 #' @param region_group Name of the region group used to fetch region names from
-#' gmRi::get_region_names()
-#' @param region_list The vector of region names returned by gmRi::get_region_names()
+#' gmRi::get_region_names(): Options: gmri_sst_focal_areas, nelme_regions, nmfs_trawl_regions, lme
 #' @param os.use Operating system setting passed to gmRi::shared.path()
 #' @param user.name Optional configuration for Windows users trying to use shared.path
 #'
@@ -211,7 +210,7 @@ get_region_names <- function(region_group = "gmri_sst_focal_areas"){
 #' # Not Run:
 #' # r_group <- "lme"
 #' # get_timeseries_paths(region_group = r_group, region_list = get_region_names(r_group))
-get_timeseries_paths <- function(region_group, region_list, os.use = "unix", user.name = NULL){
+get_timeseries_paths <- function(region_group, os.use = "unix", user.name = NULL){
 
   # Set base box paths using shared.path()
   res_path  <- shared.path(os.use = os.use, group = "RES_Data", folder = "", user.name = user.name)
@@ -249,7 +248,6 @@ get_timeseries_paths <- function(region_group, region_list, os.use = "unix", use
   )
 
 
-
   ####  2. Timeseries Paths
 
   # Leading text on file names
@@ -267,12 +265,15 @@ get_timeseries_paths <- function(region_group, region_list, os.use = "unix", use
   )
 
 
-  # Set File Paths for all Regions
+  #### 3. Build list to contain all paths
+
+  # Get list of available polygons based on the group
+  region_list <- get_region_names(region_group = region_group)
+
+  # sort
   region_list <- sort(region_list)
 
-
-
-  #### 3. Build list to contain all paths
+  # For each one return the timeseries and polygon locations
   region_paths <- purrr::map(region_list, function(region_i){
 
     # Path to shapefile based on group and appropriate file ending
