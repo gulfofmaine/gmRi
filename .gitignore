@@ -7,3 +7,7 @@ R/oisst_climatology_testing.R
 inst/doc
 vignettes/www
 doc/www
+
+
+# Testing Space
+testing/

@@ -428,7 +428,7 @@ oisst_access_timeseries <- function(oisst_path,
 #' # Not run
 #' # load_global_oisst(oisst_path = "~Box/RES_Data/OISST/oisst_mainstays",
 #' #                   resource = "warming rates", year_range = NULL)
-load_global_oisst <- function(oisst_path = "~Box/RES_Data/OISST/oisst_mainstays",
+load_global_oisst <- function(oisst_path = "~/Box/RES_Data/OISST/oisst_mainstays",
                               resource = c("raw", "climatology82", "climatology91", "anomalies", "warming rates"),
                               year_range = seq(2010, 2020, 1)){
 

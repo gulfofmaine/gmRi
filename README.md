@@ -1,12 +1,11 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-<img src='man/figures/logo.png' align="right" height="44" />
+<img src='inst/stylesheets/gmri_hex_sticker_building.png' align="right" height="140" />
 
 # gmRi
 
 <!-- badges: start -->
-
 <!-- badges: end -->
 
 The goal of gmRi is to consolidate useful reasearch tools under one

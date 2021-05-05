@@ -5,7 +5,7 @@
 \title{Access OISST Mainstays Arrays}
 \usage{
 load_global_oisst(
-  oisst_path = "~Box/RES_Data/OISST/oisst_mainstays",
+  oisst_path = "~/Box/RES_Data/OISST/oisst_mainstays",
   resource = c("raw", "climatology82", "climatology91", "anomalies", "warming rates"),
   year_range = seq(2010, 2020, 1)
 )

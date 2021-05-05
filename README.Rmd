@@ -12,7 +12,7 @@ knitr::opts_chunk$set(
   out.width = "100%"
 )
 ```
-<img src='man/figures/logo.png' align="right" height="44" />
+<img src='inst/stylesheets/gmri_hex_sticker_building.png' align="right" height="140" />
 
 # gmRi
 
