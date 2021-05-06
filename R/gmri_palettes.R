@@ -40,7 +40,7 @@ gmri_colors <- c(
 #' ggplot2::ggplot(mtcars, ggplot2::aes(hp, mpg)) +
 #'   ggplot2::geom_point(color = gmri_cols("gmri blue"), size = 4, alpha = .8)
 #'
-gmri_cols <- function(..., as_char = FALSE) {
+gmri_cols <- function(...,  as_char = FALSE) {
   cols <- c(...)
 
   if (as_char == FALSE) {
