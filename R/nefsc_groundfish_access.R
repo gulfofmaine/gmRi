@@ -42,7 +42,7 @@
 gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent"){
 
   ####  Resource Paths
-  box_paths   <- research_access_paths(os.use = "unix")
+  box_paths   <- research_access_paths()
   mills_path  <- box_paths$mills
   res_path    <- box_paths$res
   nmfs_path   <- paste0(res_path, "NMFS_trawl/")
