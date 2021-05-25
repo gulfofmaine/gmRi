@@ -143,7 +143,8 @@ box_path <- function(box_group = NULL, subfolder = NULL){
     box_root <- paste0(box_root, subfolder)
   }
 
-  # Return the box path
+  # Return the Desired Path, ensure it ends with /
+  if(stringr::str_sub(box_root, -1, -1) != "/") {box_root <- paste0(box_root, "/")}
   return(box_root)
 
 }
