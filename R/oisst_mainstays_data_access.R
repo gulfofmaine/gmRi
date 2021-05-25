@@ -22,32 +22,26 @@
 #' resources. Includes the Mills lab, Res data, knowledge graph data, and oisst mainstays.
 #'
 #'
-#' @param os.use String flag indicating what operating system the user is currently using.
-#' Options are "unix" for mac users or "windows".
-#' @param user.name User name for navigating root directory structure on windows.
-#'
 #' @return res_paths List containing user-specific paths
 #' @export
 #'
 #' @examples
 #' # Not run:
 #' # box_paths <- research_access_paths(os.use = "unix", user.name = "NA, I use a mac")
-research_access_paths <- function(os.use = "unix", user.name = "not applicable, I use a mac."){
+research_access_paths <- function(){
 
-  # Pre-load a user name for windows
-  user.name <- user.name
 
   # Path to NSF OKN Demo Data
-  okn_path <- shared.path(os.use = os.use, group = "NSF OKN", folder = "")
+  okn_path <- box_path(box_group = "NSF OKN")
 
   # Path to Research Team Data
-  res_path   <- shared.path(os.use = os.use, group = "RES_Data", folder = NULL)
+  res_path   <- box_path(box_group = "RES_Data")
 
   # Path to Kathy Mills Research Lab
-  mills_path <- shared.path(os.use = os.use, group = "Mills Lab", folder = "")
+  mills_path <- box_path(box_group = "Mills Lab")
 
   # OISST Mainstays Folder
-  oisst_path <- shared.path(os.use = os.use, group = "RES_Data", folder = "OISST/oisst_mainstays/")
+  oisst_path <- box_path(box_group = "RES_Data", subfolder = "OISST/oisst_mainstays/")
 
 
   # group them all together for export
@@ -108,7 +102,14 @@ research_access_paths <- function(os.use = "unix", user.name = "not applicable, 
 #'
 #' @examples
 #' lme_areas <- get_region_names("lme")
-get_region_names <- function(region_group = "gmri_sst_focal_areas"){
+get_region_names <- function(region_group = NULL){
+
+  # Inform users of options
+  if(is.null(region_group)){
+    message("Available Region Groups Include: gmri_sst_focal_areas, lme, nmfs_trawl_regions, & nelme_regions")
+    return(NULL)
+  }
+
 
   # Make region names more forgiving
   # Add some text formatting so people can use spaces
@@ -128,7 +129,9 @@ get_region_names <- function(region_group = "gmri_sst_focal_areas"){
     "georges_bank",
     "gulf_of_maine",
     "southern_new_england",
-    "mid_atlantic_bight")
+    "mid_atlantic_bight",
+    "inuse_strata",
+    "regions_collection")
 
 
   # 3. NELME Regions
@@ -182,8 +185,15 @@ get_region_names <- function(region_group = "gmri_sst_focal_areas"){
       "nelme_regions"        = nelme_regions)
 
     # Return Selected List
-    region_selections <- region_catalog[[region_group]]
-    return(region_selections)
+    if(region_group %in% names(region_catalog)){
+      region_selections <- region_catalog[[region_group]]
+      return(region_selections)
+    } else{
+      message("Invalid Region Group")
+      message("Available Region Groups Include: gmri_sst_focal_areas, lme, nmfs_trawl_regions, & nelme_regions")
+      return(NULL)
+    }
+
 
 
 }
@@ -200,8 +210,6 @@ get_region_names <- function(region_group = "gmri_sst_focal_areas"){
 #'
 #' @param region_group Name of the region group used to fetch region names from
 #' gmRi::get_region_names(): Options: gmri_sst_focal_areas, nelme_regions, nmfs_trawl_regions, lme
-#' @param os.use Operating system setting passed to gmRi::shared.path()
-#' @param user.name Optional configuration for Windows users trying to use shared.path
 #'
 #' @return Returns list of file paths to both the shapefiles and their sst timeseries
 #' @export
@@ -209,11 +217,11 @@ get_region_names <- function(region_group = "gmri_sst_focal_areas"){
 #' @examples
 #' # Not Run:
 #' # r_group <- "lme"
-#' # get_timeseries_paths(region_group = r_group, region_list = get_region_names(r_group))
-get_timeseries_paths <- function(region_group, os.use = "unix", user.name = NULL){
+#' # get_timeseries_paths(region_group = r_group)
+get_timeseries_paths <- function(region_group){
 
-  # Set base box paths using shared.path()
-  res_path  <- shared.path(os.use = os.use, group = "RES_Data", folder = "", user.name = user.name)
+  # Set base box paths using box_path()
+  res_path <- box_path(box_group = "res")
 
   # Root location to all the shapefiles and timeseries
   poly_root <- paste0(res_path, "Shapefiles/")
@@ -222,6 +230,18 @@ get_timeseries_paths <- function(region_group, os.use = "unix", user.name = NULL
   # text formatting
   region_group <- stringr::str_replace_all(region_group, " ", "_")
   region_group <- tolower(region_group)
+
+  # Check if region groups match available options
+  group_options <- c("gmri_sst_focal_areas", "lme",
+                     "nmfs_trawl_regions", "nelme_regions")
+
+  if((region_group %in% group_options) == FALSE){
+    message("Invalid Region Group")
+    message("Available Region Groups Include: gmri_sst_focal_areas, lme, nmfs_trawl_regions, & nelme_regions")
+    return(NULL)
+  }
+
+
 
 
   ####  1. Polygon Paths
@@ -476,7 +496,7 @@ load_global_oisst <- function(oisst_path = "~/Box/RES_Data/OISST/oisst_mainstays
 
 
 ####  CURRENT Development  ####
-# 3/2/2021
+
 
 
 #' #' @title Load Reference Shapefile for OISST Regional Timeseries

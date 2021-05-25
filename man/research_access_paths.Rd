@@ -4,16 +4,7 @@
 \alias{research_access_paths}
 \title{Establish Research Box Paths}
 \usage{
-research_access_paths(
-  os.use = "unix",
-  user.name = "not applicable, I use a mac."
-)
-}
-\arguments{
-\item{os.use}{String flag indicating what operating system the user is currently using.
-Options are "unix" for mac users or "windows".}
-
-\item{user.name}{User name for navigating root directory structure on windows.}
+research_access_paths()
 }
 \value{
 res_paths List containing user-specific paths

@@ -4,15 +4,11 @@
 \alias{get_timeseries_paths}
 \title{Timeseries and Shapefile Path Look-Up}
 \usage{
-get_timeseries_paths(region_group, os.use = "unix", user.name = NULL)
+get_timeseries_paths(region_group)
 }
 \arguments{
 \item{region_group}{Name of the region group used to fetch region names from
 gmRi::get_region_names(): Options: gmri_sst_focal_areas, nelme_regions, nmfs_trawl_regions, lme}
-
-\item{os.use}{Operating system setting passed to gmRi::shared.path()}
-
-\item{user.name}{Optional configuration for Windows users trying to use shared.path}
 }
 \value{
 Returns list of file paths to both the shapefiles and their sst timeseries
@@ -26,5 +22,5 @@ This is a parallel to the python functions used to create them and ensure consis
 \examples{
 # Not Run:
 # r_group <- "lme"
-# get_timeseries_paths(region_group = r_group, region_list = get_region_names(r_group))
+# get_timeseries_paths(region_group = r_group)
 }
