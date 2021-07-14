@@ -42,7 +42,7 @@
 gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent"){
 
   ####  Resource Paths
-  box_paths   <- research_access_paths(os.use = "unix")
+  box_paths   <- research_access_paths()
   mills_path  <- box_paths$mills
   res_path    <- box_paths$res
   nmfs_path   <- paste0(res_path, "NMFS_trawl/")
@@ -128,7 +128,7 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent"){
     # Load sppclass codes and common names
     spp_classes <- readr::read_csv(
         paste0(nmfs_path, "spp_keys/sppclass.csv"),
-        col_types = cols()) %>%
+        col_types =readr::cols()) %>%
       janitor::clean_names() %>%
       dplyr::mutate(comname  = stringr::str_to_lower(common_name),
              scientific_name = stringr::str_to_lower(scientific_name)) %>%
@@ -419,7 +419,7 @@ add_lw_info <- function(survdat_clean, cutoff = FALSE){
   # This table is a combined table of wigley and fishbase L-W coefficients
   nmfs_path <- shared.path(group = "RES_Data", folder = "NMFS_trawl")
   lw_key_path <- paste0(nmfs_path, "length_weight_keys/fishbase_wigley_combined_key.csv")
-  lw_combined <- readr::read_csv(lw_key_path, col_types = cols()) %>%
+  lw_combined <- readr::read_csv(lw_key_path, col_types =readr::cols()) %>%
     dplyr::mutate(svspp = stringr::str_pad(svspp, 3, "left", "0"),
                   season = tolower(season))
 
@@ -678,8 +678,8 @@ add_area_stratification <- function(survdat_weights, include_epu = F){
   nmfs_path <- shared.path(group = "RES_Data", folder = "NMFS_trawl")
 
   # Stratum Area Information
-  stratum_area_path <- str_c(nmfs_path, "Metadata/strata_areas_km2.csv")
-  stratum_area      <- readr::read_csv(stratum_area_path, col_types = cols())  %>%
+  stratum_area_path <- stringr::str_c(nmfs_path, "Metadata/strata_areas_km2.csv")
+  stratum_area      <- readr::read_csv(stratum_area_path, col_types =readr::cols())  %>%
     dplyr::mutate(stratum = as.character(stratum))
 
 
@@ -794,8 +794,8 @@ add_area_stratification <- function(survdat_weights, include_epu = F){
 
 
     # EPU area information: source slucey_survdat_functions.R and {ecodata}
-    epu_area_path <- str_c(nmfs_path, "Metadata/EPU_areas_km2.csv")
-    epu_areas     <- readr::read_csv(epu_area_path, col_types = cols())
+    epu_area_path <- stringr::str_c(nmfs_path, "Metadata/EPU_areas_km2.csv")
+    epu_areas     <- readr::read_csv(epu_area_path, col_types =readr::cols())
 
     # Join to the file containing EPU areas in km2
     survdat_epu <- survdat_epu %>%

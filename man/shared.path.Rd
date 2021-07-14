@@ -34,5 +34,5 @@ Lab folder or outside the Mills Lab folder in other top level locations on box.
 # res.data.path<- shared.path(os.use = os.use, group = "RES", folder = "Data/")
 
 # Not Run
-# gom.shapefile<- st_read(paste(res.data.path, "Shapefiles/GoM_sf.shp", sep = ""))
+# gom.shapefile<- st_read(paste0(res.data.path, "Shapefiles/GoM_sf.shp"))
 }

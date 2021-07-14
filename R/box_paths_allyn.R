@@ -53,7 +53,7 @@ enter_user_name_func <- function() {
 #' # res.data.path<- shared.path(os.use = os.use, group = "RES", folder = "Data/")
 #'
 #' # Not Run
-#' # gom.shapefile<- st_read(paste(res.data.path, "Shapefiles/GoM_sf.shp", sep = ""))
+#' # gom.shapefile<- st_read(paste0(res.data.path, "Shapefiles/GoM_sf.shp"))
 shared.path <- function(os.use = "unix",
                         group = c("RES Data", "Mills Lab", "Climate Change Ecology Lab", "NSF OKN", "root"),
                         folder = "Functions/",
@@ -64,17 +64,17 @@ shared.path <- function(os.use = "unix",
     # If group is specified use switch() to set it
     if (!is.null(group)) {
       path.out <- switch(tolower(group),
-        "res_data"                   = paste("~/Box/RES_Data/", folder, sep = ""),
-        "res data"                   = paste("~/Box/RES_Data/", folder, sep = ""),
-        "res"                        = paste("~/Box/RES_Data/", folder, sep = ""),
-        "mills lab"                  = paste("~/Box/Mills Lab/", folder, sep = ""),
-        "mills"                      = paste("~/Box/Mills Lab/", folder, sep = ""),
-        "climate change ecology lab" = paste("~/Box/Climate Change Ecology Lab/", folder, sep = ""),
-        "nsf okn"                    = paste("~/Box/NSF OKN Demo Data/", folder, sep = ""),
-        "root"                       = paste("~/Box/", folder, sep = ""))
+        "res_data"                   = paste0("~/Box/RES_Data/", folder),
+        "res data"                   = paste0("~/Box/RES_Data/", folder),
+        "res"                        = paste0("~/Box/RES_Data/", folder),
+        "mills lab"                  = paste0("~/Box/Mills Lab/", folder),
+        "mills"                      = paste0("~/Box/Mills Lab/", folder),
+        "climate change ecology lab" = paste0("~/Box/Climate Change Ecology Lab/", folder),
+        "nsf okn"                    = paste0("~/Box/NSF OKN Demo Data/", folder),
+        "root"                       = paste0("~/Box/", folder))
 
       # Default Path is Mills Lab
-      } else { path.out <- paste("~/Box/Mills Lab/Projects/", sub(".*\\/", "", getwd()), "/", sep = "")}
+      } else { path.out <- paste0("~/Box/Mills Lab/Projects/", sub(".*\\/", "", getwd()), "/")}
 
     # Windows Operating System Paths
     } else if (os.use == "windows") {
@@ -82,18 +82,18 @@ shared.path <- function(os.use = "unix",
       # If group is specified use switch() to set it
       if (!is.null(group)) {
       path.out <- switch(tolower(group),
-        "res data"                   = paste("C:/Users/", user.name, "/Box/RES_Data/",  folder, sep = ""),
-        "res_data"                   = paste("C:/Users/", user.name, "/Box/RES_Data/",  folder, sep = ""),
-        "res"                        = paste("C:/Users/", user.name, "/Box/RES_Data/",  folder, sep = ""),
-        "mills lab"                  = paste("C:/Users/", user.name, "/Box/Mills Lab/", folder, sep = ""),
-        "mills"                      = paste("C:/Users/", user.name, "/Box/Mills Lab/", folder, sep = ""),
-        "climate change ecology lab" = paste("C:/Users/", user.name, "/Box/Climate Change Ecology Lab/", folder, sep = ""),
-        "nsf okn"                    = paste("C:/Users/", user.name, "/Box/NSF OKN Demo Data/", folder, sep = ""),
-        "root"                       = paste("C:/Users/", user.name, "/Box/", folder, sep = "")
+        "res data"                   = paste0("C:/Users/", user.name, "/Box/RES_Data/",  folder),
+        "res_data"                   = paste0("C:/Users/", user.name, "/Box/RES_Data/",  folder),
+        "res"                        = paste0("C:/Users/", user.name, "/Box/RES_Data/",  folder),
+        "mills lab"                  = paste0("C:/Users/", user.name, "/Box/Mills Lab/", folder),
+        "mills"                      = paste0("C:/Users/", user.name, "/Box/Mills Lab/", folder),
+        "climate change ecology lab" = paste0("C:/Users/", user.name, "/Box/Climate Change Ecology Lab/", folder),
+        "nsf okn"                    = paste0("C:/Users/", user.name, "/Box/NSF OKN Demo Data/", folder),
+        "root"                       = paste0("C:/Users/", user.name, "/Box/", folder)
       )
 
       # Default Path is Mills Lab
-      } else { path.out <- paste("C:/Users/", user.name, "/Box/Mills Lab/Projects/", sub(".*\\/", "", getwd()), "/", sep = "")}
+      } else { path.out <- paste0("C:/Users/", user.name, "/Box/Mills Lab/Projects/", sub(".*\\/", "", getwd()), "/")}
 
     # Incorrect OS Warning
     } else { print("OS not recognized")}
@@ -101,4 +101,50 @@ shared.path <- function(os.use = "unix",
   # Return the Desired Paths, ensure it ends with /
   if(stringr::str_sub(path.out, -1, -1) != "/") {path.out <- paste0(path.out, "/")}
   return(path.out)
+}
+
+
+
+#' @title Box Path Generator
+#'
+#' @description Create OS agnostic paths to different locations on box.
+#'
+#' @param box_group The top level directory name within Box
+#' @param subfolder Any subsequent sub-directory location you wish to access
+#'
+#' @return returns a path to box
+#' @export
+#'
+#' @examples
+#' oisst_path <- box_path(box_group = "res", subfolder = "OISST/oisst_mainstays")
+#' shapefile_path <- box_path(box_group = "res", subfolder = "Shapefiles")
+box_path <- function(box_group = NULL, subfolder = NULL){
+
+  # Base root to box
+  box_root <- paste0(normalizePath("~/"), "/Box/")
+
+  # If group is specified use switch() to set it
+  if (!is.null(box_group)) {
+    box_root <- switch(tolower(box_group),
+                       "res data"                   = paste0(box_root, "RES_Data/"),
+                       "res_data"                   = paste0(box_root, "RES_Data/"),
+                       "res"                        = paste0(box_root, "RES_Data/"),
+                       "mills lab"                  = paste0(box_root, "Mills Lab/"),
+                       "mills"                      = paste0(box_root, "Mills Lab/"),
+                       "climate change ecology lab" = paste0(box_root, "Climate Change Ecology Lab/"),
+                       "ccel"                       = paste0(box_root, "Climate Change Ecology Lab/"),
+                       "nsf okn"                    = paste0(box_root, "NSF OKN Demo Data/"),
+                       "okn"                        = paste0(box_root, "NSF OKN Demo Data/"),
+                       "root"                       = paste0(box_root, "") )
+  }
+
+  # If sub-directories are provided append those on:
+  if (!is.null(subfolder)) {
+    box_root <- paste0(box_root, subfolder)
+  }
+
+  # Return the Desired Path, ensure it ends with /
+  if(stringr::str_sub(box_root, -1, -1) != "/") {box_root <- paste0(box_root, "/")}
+  return(box_root)
+
 }

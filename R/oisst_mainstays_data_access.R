@@ -22,32 +22,26 @@
 #' resources. Includes the Mills lab, Res data, knowledge graph data, and oisst mainstays.
 #'
 #'
-#' @param os.use String flag indicating what operating system the user is currently using.
-#' Options are "unix" for mac users or "windows".
-#' @param user.name User name for navigating root directory structure on windows.
-#'
 #' @return res_paths List containing user-specific paths
 #' @export
 #'
 #' @examples
 #' # Not run:
 #' # box_paths <- research_access_paths(os.use = "unix", user.name = "NA, I use a mac")
-research_access_paths <- function(os.use = "unix", user.name = "not applicable, I use a mac."){
+research_access_paths <- function(){
 
-  # Pre-load a user name for windows
-  user.name <- user.name
 
   # Path to NSF OKN Demo Data
-  okn_path <- shared.path(os.use = os.use, group = "NSF OKN", folder = "")
+  okn_path <- box_path(box_group = "NSF OKN")
 
   # Path to Research Team Data
-  res_path   <- shared.path(os.use = os.use, group = "RES_Data", folder = NULL)
+  res_path   <- box_path(box_group = "RES_Data")
 
   # Path to Kathy Mills Research Lab
-  mills_path <- shared.path(os.use = os.use, group = "Mills Lab", folder = "")
+  mills_path <- box_path(box_group = "Mills Lab")
 
   # OISST Mainstays Folder
-  oisst_path <- shared.path(os.use = os.use, group = "RES_Data", folder = "OISST/oisst_mainstays/")
+  oisst_path <- box_path(box_group = "RES_Data", subfolder = "OISST/oisst_mainstays/")
 
 
   # group them all together for export
@@ -108,12 +102,19 @@ research_access_paths <- function(os.use = "unix", user.name = "not applicable, 
 #'
 #' @examples
 #' lme_areas <- get_region_names("lme")
-get_region_names <- function(region_group = "gmri_sst_focal_areas"){
+get_region_names <- function(region_group = NULL){
+
+  # Inform users of options
+  if(is.null(region_group)){
+    message("Available Region Groups Include:
+            gmri_sst_focal_areas, lme, nmfs_trawl_regions, nelme_regions, & gom_physio_regions")
+    return(NULL) }
+
 
   # Make region names more forgiving
   # Add some text formatting so people can use spaces
   name_tidy <- stringr::str_replace_all(region_group, " ", "_")
-  name_tidy <- stringr::str_to_lower(region_group)
+  name_tidy <- stringr::str_to_lower(name_tidy)
 
 
   # 1. GMRI SST Focal Areas
@@ -128,7 +129,9 @@ get_region_names <- function(region_group = "gmri_sst_focal_areas"){
     "georges_bank",
     "gulf_of_maine",
     "southern_new_england",
-    "mid_atlantic_bight")
+    "mid_atlantic_bight",
+    "inuse_strata",
+    "regions_collection")
 
 
   # 3. NELME Regions
@@ -174,19 +177,53 @@ get_region_names <- function(region_group = "gmri_sst_focal_areas"){
     "west_central_australian_shelf",          "yellow_sea")
 
 
+  # 5. Gulf of Maine Physio Regions
+  gom_physio_regions <- c(
+    "bay_of_fundy",           "bear_seamount",          "browns_bank",            "central_gulf_of_maine",
+    "continental_slope",      "eastern_coastal_shelf",  "georges_bank",           "georges_basin",
+    "jordan_basin",           "kelvin_seamount",        "manning_seamount",       "northern_coastal_shelf",
+    "scotian_coastal_shelf",  "scotian_shelf",          "southern_coastal_shelf", "wikinson_basin"
+  )
+
+
+
     # Dictionary Look-up
     region_catalog <- list(
       "gmri_sst_focal_areas" = gmri_focal_areas,
       "lme"                  = lme_regions,
       "nmfs_trawl_regions"   = nmfs_regions,
-      "nelme_regions"        = nelme_regions)
+      "nelme_regions"        = nelme_regions,
+      "gom_physio_regions"   = gom_physio_regions)
+
+
+
 
     # Return Selected List
-    region_selections <- region_catalog[[region_group]]
-    return(region_selections)
+    if(name_tidy %in% names(region_catalog)){
+      region_selections <- region_catalog[[name_tidy]]
+      return(region_selections)
+    } else{
+      message("Invalid Region Group")
+      message("Available Region Groups Include: gmri_sst_focal_areas, lme, nmfs_trawl_regions, nelme_regions, gom physio regions")
+      return(NULL)
+    }
+
 
 
 }
+
+
+
+# # Testing
+# get_region_names("gmri sst focal areas")
+# get_region_names("nelme regions")
+# get_region_names("nmfs trawl regions")
+# get_region_names("lme")
+# get_region_names("gom physio regions")
+
+
+
+
 
 
 ####  Timeseries Path Directory  ####
@@ -200,8 +237,6 @@ get_region_names <- function(region_group = "gmri_sst_focal_areas"){
 #'
 #' @param region_group Name of the region group used to fetch region names from
 #' gmRi::get_region_names(): Options: gmri_sst_focal_areas, nelme_regions, nmfs_trawl_regions, lme
-#' @param os.use Operating system setting passed to gmRi::shared.path()
-#' @param user.name Optional configuration for Windows users trying to use shared.path
 #'
 #' @return Returns list of file paths to both the shapefiles and their sst timeseries
 #' @export
@@ -209,11 +244,11 @@ get_region_names <- function(region_group = "gmri_sst_focal_areas"){
 #' @examples
 #' # Not Run:
 #' # r_group <- "lme"
-#' # get_timeseries_paths(region_group = r_group, region_list = get_region_names(r_group))
-get_timeseries_paths <- function(region_group, os.use = "unix", user.name = NULL){
+#' # get_timeseries_paths(region_group = r_group)
+get_timeseries_paths <- function(region_group){
 
-  # Set base box paths using shared.path()
-  res_path  <- shared.path(os.use = os.use, group = "RES_Data", folder = "", user.name = user.name)
+  # Set base box paths using box_path()
+  res_path <- box_path(box_group = "res")
 
   # Root location to all the shapefiles and timeseries
   poly_root <- paste0(res_path, "Shapefiles/")
@@ -222,6 +257,21 @@ get_timeseries_paths <- function(region_group, os.use = "unix", user.name = NULL
   # text formatting
   region_group <- stringr::str_replace_all(region_group, " ", "_")
   region_group <- tolower(region_group)
+
+  # Check if region groups match available options
+  group_options <- c("gmri_sst_focal_areas",
+                     "lme",
+                     "nmfs_trawl_regions",
+                     "nelme_regions",
+                     "gom_physio_regions")
+
+  if((region_group %in% group_options) == FALSE){
+    message("Invalid Region Group")
+    message("Available Region Groups Include: gmri_sst_focal_areas, lme, nmfs_trawl_regions, nelme_regions, & gom_physio_regions")
+    return(NULL)
+  }
+
+
 
 
   ####  1. Polygon Paths
@@ -237,14 +287,16 @@ get_timeseries_paths <- function(region_group, os.use = "unix", user.name = NULL
     "gmri_sst_focal_areas" = ".geojson",
     "lme"                  = "_exterior.geojson",
     "nmfs_trawl_regions"   = ".geojson",
-    "nelme_regions"        = "_sf.shp")
+    "nelme_regions"        = "_sf.shp",
+    "gom_physio_regions"   = ".geojson")
 
   # full path prior to region names
   poly_extensions <- list(
     "gmri_sst_focal_areas" = paste0(poly_root, "gmri_sst_focal_areas/", poly_start),
     "lme"                  = paste0(poly_root, "large_marine_ecosystems/", poly_start),
     "nmfs_trawl_regions"   = paste0(poly_root, "nmfs_trawl_regions/", poly_start),
-    "nelme_regions"        = paste0(poly_root, "NELME_regions/", poly_start)
+    "nelme_regions"        = paste0(poly_root, "NELME_regions/", poly_start),
+    "gom_physio_regions"   = paste0(poly_root, "GulfOfMainePhysioRegions/single_regions/", poly_start)
   )
 
 
@@ -261,7 +313,8 @@ get_timeseries_paths <- function(region_group, os.use = "unix", user.name = NULL
     "gmri_sst_focal_areas" = paste0(ts_root, "gmri_sst_focal_areas/", ts_start),
     "lme"                  = paste0(ts_root, "large_marine_ecosystems/", ts_start),
     "nmfs_trawl_regions"   = paste0(ts_root, "nmfs_trawl_regions/", ts_start),
-    "nelme_regions"        = paste0(ts_root, "NELME_regions/", ts_start)
+    "nelme_regions"        = paste0(ts_root, "NELME_regions/", ts_start),
+    "gom_physio_regions"   = paste0(ts_root, "GulfOfMainePhysioRegions/", ts_start)
   )
 
 
@@ -286,7 +339,10 @@ get_timeseries_paths <- function(region_group, os.use = "unix", user.name = NULL
     return(list("shape_path" = shape_path_i,
                 "timeseries_path" = ts_path_i))
 
-  }) %>% stats::setNames(region_list)
+  })
+
+  # Set the names
+  region_paths <- stats::setNames(region_paths, region_list)
 
   # Return the list of locations
   return(region_paths)
@@ -296,12 +352,29 @@ get_timeseries_paths <- function(region_group, os.use = "unix", user.name = NULL
 
 
 
+# # # Testing
+# oisst_path <- box_path("res", "OISST/oisst_mainstays")
+# get_timeseries_paths(region_group = "gmri sst focal areas")
+# get_timeseries_paths(region_group = "nelme regions")
+# get_timeseries_paths(region_group = "lme")
+# get_timeseries_paths(region_group = "nmfs trawl regions")
+# get_timeseries_paths(region_group = "gom physio regions")
+
+
+
+
+
+
+
 ####  OISST Regional Timeseries  ####
 #' @title Access Regional Timeseries from OISSTv2 Mainstays
 #'
 #' @description Tool for accessing oisst regional timeseries from Box.
 #' Regionally masked timeseries have been pre-processed and stored on box. Quick access
 #' is available here.
+#'
+#' This function is used primarily as a pass-through function for oisst_access_timeseries(),
+#' which relies on it to look-up file paths.
 #'
 #' Simply specify your personal path to the oisst_mainstays folder,
 #' the group of polygons your area is in, and the name of the region itself.
@@ -326,7 +399,7 @@ get_timeseries_paths <- function(region_group, os.use = "unix", user.name = NULL
 #' #                                    region_family = "lme",
 #' #                                    poly_name = "agulhas current")
 oisst_access_timeseries <- function(oisst_path,
-                                    region_family = c("nmfs trawl regions", "lme", "gmri focus areas"),
+                                    region_family = c("nmfs trawl regions", "lme", "gmri focus areas", "nelme regions", "gom physio regions"),
                                     poly_name = "gulf of maine"){
 
 
@@ -336,14 +409,20 @@ oisst_access_timeseries <- function(oisst_path,
   if(stringr::str_sub(source_path, -1, -1) != "/") {source_path <- paste0(source_path, "/")}
 
 
+  # do some string adjustment to account for underscores and caps
+  tidy_name <- tolower(region_family)
+  tidy_name <- stringr::str_replace_all(tidy_name, "_", " ")
+
   # State the group options for "region family" if user provided option doesn't match
   group_options <- c("nmfs trawl regions", "trawl regions",
                      "lme", "large marine ecosystems",
                      "gmri focus areas", "gulf of maine",
-                     "epu", "ecological production units")
+                     "epu", "ecological production units",
+                     "nelme regions",
+                     "gom physio regions")
 
   # Return message with group options for the unfamiliar
-  if((tolower(region_family) %in% group_options) == FALSE){
+  if((tidy_name %in% group_options) == FALSE){
     message("Invalid region family.\nAvailable choices are:\n")
     message(paste(group_options, collapse = "\n"))
     return("invalid region choice selected.")}
@@ -353,7 +432,7 @@ oisst_access_timeseries <- function(oisst_path,
 
   # Build file path to group folder based on region family
   timeseries_folder <-  switch(
-    EXPR = tolower(region_family),
+    EXPR = tidy_name,
     "nmfs trawl regions"          = paste0(source_path, "regional_timeseries/nmfs_trawl_regions/"),
     "trawl regions"               = paste0(source_path, "regional_timeseries/nmfs_trawl_regions/"),
     "lme"                         = paste0(source_path, "regional_timeseries/large_marine_ecosystems/"),
@@ -361,7 +440,9 @@ oisst_access_timeseries <- function(oisst_path,
     "epu"                         = paste0(source_path, "regional_timeseries/ecological_production_units/"),
     "ecological production units" = paste0(source_path, "regional_timeseries/ecological_production_units/"),
     "gmri focus areas"            = paste0(source_path, "regional_timeseries/gmri_sst_focal_areas/"),
-    "gulf of maine"               = paste0(source_path, "regional_timeseries/gmri_sst_focal_areas/"))
+    "gulf of maine"               = paste0(source_path, "regional_timeseries/gmri_sst_focal_areas/"),
+    "nelme regions"               = paste0(source_path, "regional_timeseries/NELME_regions/"),
+    "gom physio regions"          = paste0(source_path, "regional_timeseries/GulfOfMainePhysioRegions/"))
 
 
 
@@ -373,7 +454,8 @@ oisst_access_timeseries <- function(oisst_path,
   available_polys <-  purrr::map_chr(available_ts, function(ts){
     ts <- stringr::str_replace(ts, ".csv", "")
     ts <- stringr::str_replace_all(ts, "_", " ")
-    ts <- stringr::str_replace(ts, "OISSTv2 anom ", "")})
+    ts <- stringr::str_replace(ts, "OISSTv2 anom ", "")
+    ts <- tolower(ts)})
 
 
   # Check if the supplied polygon is in the list for that group
@@ -408,6 +490,203 @@ oisst_access_timeseries <- function(oisst_path,
 
 
 
+# # Testing
+# oisst_path <- box_path("res", "OISST/oisst_mainstays")
+# oisst_access_timeseries(oisst_path, region_family = "gom physio regions", poly_name = "georges bank")
+# oisst_access_timeseries(oisst_path, region_family = "gmri focus areas", poly_name = "apershing gulf of maine")
+# oisst_access_timeseries(oisst_path, region_family = "lme", poly_name = "baltic sea")
+# oisst_access_timeseries(oisst_path, region_family = "nmfs trawl regions", poly_name = "georges bank")
+# oisst_access_timeseries(oisst_path, region_family = "nelme regions", poly_name = "gom")
+
+
+
+
+
+
+
+
+
+
+#### OISST Data for area/time   ####
+
+
+#' @title Access OISST via Data Window of lat/lon/time
+#'
+#' @description Returns a list of OISST raster stacks that
+#' has been clipped to the desired lat/lon/time extent. Each list element
+#' is named according to year, and contains all daily measurements within the
+#' desired window of time, and clipped to the desired lat/lon extent.
+#'
+#'
+#' Useful for loading OISST observations from box, but only for a particular area and/or time.
+#'
+#' @param oisst_path User specific path to the OKN Demo Data Folder on Box.
+#' Can be obtained using shared.path function.
+#' @param data_window dataframe with columns for lat, lon, & time indicating the extent of
+#' the data desired.
+#' @param anomalies Boolean indication of whether to return observed sst or anomalies.
+#' Default = TRUE.
+#'
+#' @return Raster stack of OISSTv2 data using desired dimensions to crop
+#' @export
+#'
+#'@examples
+#'#not run
+#'# oisst_path <- shared.path(group = "RES_Data", folder = "OISST/oisst_mainstays")
+#'# data_window <- data.frame(lon = c(-72, -65),
+#'#                           lat = c(42,44),
+#'#                           time = as.Date(c("2016-08-01", "2020-12-31")))
+#'
+oisst_window_load <- function(oisst_path, data_window, anomalies = FALSE){
+
+  # Get OISST data  from Box
+
+  # Accessing Observed Temperatures
+  if(anomalies == FALSE){
+    file_names <- list.files(stringr::str_c(oisst_path, "annual_observations/"))
+    file_paths <- stringr::str_c(oisst_path, "annual_observations/", file_names)
+    file_paths <- file_paths[!stringr::str_detect(file_paths, ".zarr")]  # No .zarr files
+    file_years <- stringr::str_sub(file_paths, -10, -7)                  # Yr Labels
+    file_paths <- stats::setNames(file_paths, file_years)
+
+    # Accessing Anomalies
+  } else if(anomalies == TRUE){
+    file_names <- list.files(stringr::str_c(oisst_path, "annual_anomalies/1982to2011_climatology"))
+    file_paths <- stringr::str_c(oisst_path, "annual_anomalies/1982to2011_climatology/", file_names)
+    file_paths <- file_paths[stringr::str_detect(file_paths, ".nc")]     # No .zarr files
+    file_years <- stringr::str_sub(file_paths, -7, -4)                   # Yr Labels
+    file_paths <- stats::setNames(file_paths, file_years)
+  }
+
+
+  ###  Set limits based on desired data window
+
+  # Shift from -180 ~ 180 to 0 ~ 360
+  data_window$lon <- data_window$lon + 360
+  if (max(data_window$lon) > 540){ data_window$lon <- data_window$lon - 360 }
+
+  # Pull the min/max lat/lon to use as bbox
+  lon_min <- floor(min(data_window$lon))
+  lat_min <- floor(min(data_window$lat))
+  lon_max <- ceiling(max(data_window$lon))
+  lat_max <- ceiling(max(data_window$lat))
+
+  # Get year vector to subset list at end and remove empty years
+  start_year  <- min(lubridate::year(data_window$time))
+  end_year    <- max(lubridate::year(data_window$time))
+  year_vector <- as.character(c(start_year:end_year))
+
+
+  #  Format dates
+  if( class(data_window$time) == "Date") {
+    time_min <- min(data_window$time)
+    time_max <- max(data_window$time)
+  } else {
+    message("Time dimension not of class 'Date', all years returned.")
+    time_min <- as.Date("1981-01-01")
+    time_max <- as.Date("2020-12-31")
+  }
+
+
+
+  #### a.   Set up Rasters from Netcdf Files  ####
+  oisst_ras_list <- purrr::map(file_paths, function(nc_year){
+
+    # Open connection, get sub-setting indices from limits
+    my_nc <- ncdf4::nc_open(nc_year)
+
+    # Years are at different locations for the file names for anomalies
+    if(anomalies == FALSE){
+      nc_year_label <- stringr::str_sub(nc_year, -10, -7)
+    } else if(anomalies == TRUE){
+      nc_year_label <- stringr::str_sub(nc_year, -7, -4)
+    }
+
+
+    # Tester
+    #my_nc <- nc_open(file_paths["2018"]) ; nc_year_label <- "2018"
+
+    # Subset to area and times of interest
+    lon_idx  <- which( my_nc$dim$lon$vals > lon_min & my_nc$dim$lon$vals < lon_max)
+    lat_idx  <- which( my_nc$dim$lat$vals > lat_min & my_nc$dim$lat$vals < lat_max)
+
+
+
+    # Date Origin WAS different for each anomaly netcdf so we need to split here again
+    time_idx <- which(
+      as.Date(my_nc$dim$time$vals, origin = '1800-01-01', tz = "GMT") > time_min &
+        as.Date(my_nc$dim$time$vals, origin = '1800-01-01', tz = "GMT") < time_max)
+
+
+
+    # If time index is less than one, output message indicating that year will be empty
+    if(length(time_idx) < 1){
+      message(paste0(nc_year_label, " outside data range, not included in stack."))
+      return("Year outside time extent of data")
+    }
+
+    # Pull netcdf data that you need using indexes
+    if(anomalies == FALSE){
+      nc_data <- ncdf4::ncvar_get(nc = my_nc, varid = "sst")[lon_idx, lat_idx, time_idx]
+    } else if(anomalies == TRUE){
+      nc_data <- ncdf4::ncvar_get(nc = my_nc, varid = "sst")[lon_idx, lat_idx, time_idx]
+    }
+
+    #### b. Make raster Stack from subset array  ####
+
+    #Get lon/lat/time dimensions
+    xvals <- my_nc$dim$lon$vals[lon_idx] - 360
+    yvals <- my_nc$dim$lat$vals[lat_idx]
+    time_dims <- 1:dim(nc_data)[3]
+
+    # Get the dates that correspond in the least streamlined way possible, for naming purposes
+    if(anomalies == FALSE){
+      dates <- as.Date(my_nc$dim$time$vals[time_idx],
+                       origin = '1800-01-01',
+                       tz = "GMT")
+    } else if(anomalies == TRUE){
+      dates <- as.Date(my_nc$dim$time$vals[time_idx],
+                       origin = '1800-01-01', # This will change with origin info
+                       tz = "GMT")
+    }
+
+    # Convert Each day to a raster, rotate, and stack
+    nc_list <- purrr::map(time_dims, function(time_index){
+      single_date <- nc_data[, , time_index]
+      dimnames(single_date) <- list(lon = my_nc$dim$lon$vals[lon_idx],
+                                    lat = my_nc$dim$lat$vals[lat_idx])
+      # transpose
+      single_date <- t(single_date)
+
+      # make/configure raster
+      ras <- raster::raster(single_date,
+                            crs = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs",
+                            xmn = min(xvals),
+                            xmx = max(xvals),
+                            ymn = min(yvals),
+                            ymx = max(yvals))
+      ras <- raster::flip(ras, 2)
+      return(ras)})
+
+    # Stack and set names
+    nc_stack <- raster::stack(nc_list)
+    nc_stack <- stats::setNames(nc_stack, dates)
+
+    # Progress message
+    message(paste0(nc_year_label, " done"))
+
+    # Return the raster stack for the year
+    return(nc_stack)
+
+  })
+
+  # Drop empty years
+  out_stack <- oisst_ras_list[year_vector]
+  return(out_stack)
+
+
+
+}
 
 
 
@@ -476,7 +755,7 @@ load_global_oisst <- function(oisst_path = "~/Box/RES_Data/OISST/oisst_mainstays
 
 
 ####  CURRENT Development  ####
-# 3/2/2021
+
 
 
 #' #' @title Load Reference Shapefile for OISST Regional Timeseries

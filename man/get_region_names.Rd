@@ -4,7 +4,7 @@
 \alias{get_region_names}
 \title{Lookup Tool for Timeseries & Mask Locations}
 \usage{
-get_region_names(region_group = "gmri_sst_focal_areas")
+get_region_names(region_group = NULL)
 }
 \arguments{
 \item{region_group}{Name of the group of shapefiles of interest:
