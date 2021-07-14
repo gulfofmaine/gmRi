@@ -6,7 +6,8 @@
 \usage{
 oisst_access_timeseries(
   oisst_path,
-  region_family = c("nmfs trawl regions", "lme", "gmri focus areas"),
+  region_family = c("nmfs trawl regions", "lme", "gmri focus areas", "nelme regions",
+    "gom physio regions"),
   poly_name = "gulf of maine"
 )
 }
@@ -26,6 +27,9 @@ Time series dataframe for the selected region.
 Tool for accessing oisst regional timeseries from Box.
 Regionally masked timeseries have been pre-processed and stored on box. Quick access
 is available here.
+
+This function is used primarily as a pass-through function for oisst_access_timeseries(),
+which relies on it to look-up file paths.
 
 Simply specify your personal path to the oisst_mainstays folder,
 the group of polygons your area is in, and the name of the region itself.
