@@ -121,7 +121,8 @@ get_region_names <- function(region_group = NULL){
   gmri_focal_areas <- c(
     "apershing_gulf_of_maine",
     "cpr_gulf_of_maine",
-    "aak_northwest_atlantic")
+    "aak_northwest_atlantic",
+    "long_island_sound")
 
 
   # 2. NMFS Regions
@@ -493,6 +494,7 @@ oisst_access_timeseries <- function(oisst_path,
 # # Testing
 # oisst_path <- box_path("res", "OISST/oisst_mainstays")
 # oisst_access_timeseries(oisst_path, region_family = "gom physio regions", poly_name = "georges bank")
+# oisst_access_timeseries(oisst_path, region_family = "gmri focus areas", poly_name = "long island sound")
 # oisst_access_timeseries(oisst_path, region_family = "gmri focus areas", poly_name = "apershing gulf of maine")
 # oisst_access_timeseries(oisst_path, region_family = "lme", poly_name = "baltic sea")
 # oisst_access_timeseries(oisst_path, region_family = "nmfs trawl regions", poly_name = "georges bank")
