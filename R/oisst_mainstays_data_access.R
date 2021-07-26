@@ -382,7 +382,6 @@ get_timeseries_paths <- function(region_group){
 #'
 #'
 #'
-#' @param oisst_path Personal path to ~Box/RES_Data/OISST/oisst_mainstays
 #' @param region_family Identify the family of shapefiles that you are interested in.
 #' Choices = "LME", "nmfs trawl regions", "gmri focus areas"
 #' @param poly_name String Identifying the shapefile name that was used as mask.
@@ -399,13 +398,15 @@ get_timeseries_paths <- function(region_group){
 #' # agulhas <- oisst_access_timeseries(oisst_path = box_paths$oisst_mainstays,
 #' #                                    region_family = "lme",
 #' #                                    poly_name = "agulhas current")
-oisst_access_timeseries <- function(oisst_path,
-                                    region_family = c("nmfs trawl regions", "lme", "gmri focus areas", "nelme regions", "gom physio regions"),
+oisst_access_timeseries <- function(region_family = c("nmfs trawl regions", "lme", "gmri focus areas", "nelme regions", "gom physio regions"),
                                     poly_name = "gulf of maine"){
+
+
 
 
   # Set up data path for sat source, originally all in okn demo data folder
   # Now all the timeseries are in RES_Data/OISST/oisst_mainstays
+  oisst_path <- box_path(box_group = "res", subfolder = "OISST/oisst_mainstays")
   source_path <- oisst_path
   if(stringr::str_sub(source_path, -1, -1) != "/") {source_path <- paste0(source_path, "/")}
 
@@ -522,8 +523,6 @@ oisst_access_timeseries <- function(oisst_path,
 #'
 #' Useful for loading OISST observations from box, but only for a particular area and/or time.
 #'
-#' @param oisst_path User specific path to the OKN Demo Data Folder on Box.
-#' Can be obtained using shared.path function.
 #' @param data_window dataframe with columns for lat, lon, & time indicating the extent of
 #' the data desired.
 #' @param anomalies Boolean indication of whether to return observed sst or anomalies.
@@ -534,14 +533,15 @@ oisst_access_timeseries <- function(oisst_path,
 #'
 #'@examples
 #'#not run
-#'# oisst_path <- shared.path(group = "RES_Data", folder = "OISST/oisst_mainstays")
+#'# oisst_path <- box_path(box_group = "res", subfolder = "OISST/oisst_mainstays")
 #'# data_window <- data.frame(lon = c(-72, -65),
 #'#                           lat = c(42,44),
 #'#                           time = as.Date(c("2016-08-01", "2020-12-31")))
 #'
-oisst_window_load <- function(oisst_path, data_window, anomalies = FALSE){
+oisst_window_load <- function(data_window, anomalies = FALSE){
 
   # Get OISST data  from Box
+  oisst_path <- box_path(box_group = "res", subfolder = "OISST/oisst_mainstays")
 
   # Accessing Observed Temperatures
   if(anomalies == FALSE){
@@ -697,23 +697,22 @@ oisst_window_load <- function(oisst_path, data_window, anomalies = FALSE){
 ####  Access Global OISSTv2 Files  ####
 #' @title Access OISST Mainstays Arrays
 #'
-#' @param oisst_path Local path to oisst folder on box, subfolder of RES_Data/OISST/oisst_mainstays
 #' @param resource Name of the global extent resource, choices are raw, climatology, warming rates,
 #' and anomalies.
-#' @param year_range optional vector of years for raw or anommalies data resources.
+#' @param year_range optional vector of years for raw or anomalies data resources.
 #'
 #' @return resource_out Raster stack of the desired netcdf array
 #' @export
 #'
 #' @examples
 #' # Not run
-#' # load_global_oisst(oisst_path = "~Box/RES_Data/OISST/oisst_mainstays",
-#' #                   resource = "warming rates", year_range = NULL)
-load_global_oisst <- function(oisst_path = "~/Box/RES_Data/OISST/oisst_mainstays",
-                              resource = c("raw", "climatology82", "climatology91", "anomalies", "warming rates"),
+#' # load_global_oisst(resource = "warming rates", year_range = NULL)
+load_global_oisst <- function(resource = c("raw", "climatology82", "climatology91", "anomalies", "warming rates"),
                               year_range = seq(2010, 2020, 1)){
 
+  #
   message("Function currently in development.")
+  oisst_path <- box_path(box_group = "Res", subfolder = "OISST/oisst_mainstays")
 
   # Redirect to resource folder
   resource <- tolower(resource)
@@ -807,11 +806,11 @@ load_global_oisst <- function(oisst_path = "~/Box/RES_Data/OISST/oisst_mainstays
 #'     EXPR = tolower(region_family),
 #'     "nmfs trawl regions"          = paste0(source_path, "Shapefiles/nmfs_trawl_regions/"),
 #'     "trawl regions"               = paste0(source_path, "Shapefiles/nmfs_trawl_regions/"),
-#'     #"lme"                         = paste0(source_path, "Shapefiles/large_marine_ecosystems/"),
-#'     #"large marine ecosystems"     = paste0(source_path, "Shapefiles/large_marine_ecosystems/"),
+#'     #"lme"                        = paste0(source_path, "Shapefiles/large_marine_ecosystems/"),
+#'     #"large marine ecosystems"    = paste0(source_path, "Shapefiles/large_marine_ecosystems/"),
 #'     "epu"                         = paste0(source_path, "Shapefiles/EPU/"),
 #'     "ecological production units" = paste0(source_path, "Shapefiles/EPU/"),
-#'     "gmri focus areas"                  = paste0(source_path, "Shapefiles/gmri_sst_focal_areas/"),
+#'     "gmri focus areas"            = paste0(source_path, "Shapefiles/gmri_sst_focal_areas/"),
 #'     "gulf of maine"               = paste0(source_path, "Shapefiles/gmri_sst_focal_areas/"))
 #'
 #'

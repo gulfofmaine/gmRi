@@ -73,7 +73,7 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent"){
 
   # If providing a starting point for survdat pass it in:
   if(is.null(survdat) == FALSE){
-    trawldat <- survdat %>% janitor::clean_names()
+    trawldat <- janitor::clean_names(survdat)
   } else if(is.null(survdat) == TRUE){
 
     # If not then load using the correct path
@@ -90,7 +90,7 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent"){
       survdat <- survey$survdat }
 
     # clean names up for convenience
-    trawldat <- survdat %>% janitor::clean_names()
+    trawldat <- janitor::clean_names(survdat)
   }
 
   # remove survdat once the data is in
@@ -128,17 +128,17 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent"){
     # Load sppclass codes and common names
     spp_classes <- readr::read_csv(
         paste0(nmfs_path, "spp_keys/sppclass.csv"),
-        col_types =readr::cols()) %>%
-      janitor::clean_names() %>%
-      dplyr::mutate(comname  = stringr::str_to_lower(common_name),
-             scientific_name = stringr::str_to_lower(scientific_name)) %>%
-      dplyr::distinct(svspp, comname, scientific_name)
+        col_types = readr::cols())
+    spp_classes <- janitor::clean_names(spp_classes)
+    spp_classes <- dplyr::mutate(spp_classes,
+             comname  = stringr::str_to_lower(common_name),
+             scientific_name = stringr::str_to_lower(scientific_name))
+    spp_classes <- dplyr::distinct(spp_classes, svspp, comname, scientific_name)
 
 
     # Add the common names over and format for rest of build
-    trawldat <- trawldat %>%
-      dplyr::mutate(svspp = stringr::str_pad(svspp, 3, "left", "0")) %>%
-      dplyr::left_join(spp_classes, by = "svspp")
+    trawldat <- dplyr::mutate(trawldat, svspp = stringr::str_pad(svspp, 3, "left", "0"))
+    trawldat <- dplyr::left_join(trawldat, spp_classes, by = "svspp")
 
   }
 
@@ -147,11 +147,11 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent"){
   if(has_id_col == FALSE) {
     message("creating station id from cruise-station-stratum fields")
     # Build ID column
-    trawldat <- trawldat %>%
-      dplyr::mutate(cruise6 = stringr::str_pad(cruise6, 6, "left", "0"),
-                    station = stringr::str_pad(station, 3, "left", "0"),
-                    stratum = stringr::str_pad(stratum, 4, "left", "0"),
-                    id      = stringr::str_c(cruise6, station, stratum))}
+    trawldat <- dplyr::mutate(trawldat,
+      cruise6 = stringr::str_pad(cruise6, 6, "left", "0"),
+      station = stringr::str_pad(station, 3, "left", "0"),
+      stratum = stringr::str_pad(stratum, 4, "left", "0"),
+      id      = stringr::str_c(cruise6, station, stratum))}
 
 
   ####__ d. Field renaming  ####
@@ -179,29 +179,34 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent"){
                               est_month = stringr::str_sub(est_towdate, 6,7),
                               est_month = as.numeric(est_month),
                               est_day   = stringr::str_sub(est_towdate, -2, -1),
-                              est_day   = as.numeric(est_day))}
+                              est_day   = as.numeric(est_day), .before = season)}
 
 
 
   #### 4. Column Changes  ####
-  trawldat <- trawldat %>%
-    dplyr::mutate(
+  trawldat <- dplyr::mutate(trawldat,
 
       # Text Formatting
       comname = tolower(comname),
       id      = format(id, scientific = FALSE),
       svspp   = as.character(svspp),
       svspp   = stringr::str_pad(svspp, 3, "left", "0"),
-      season  = tolower(season),
+      season  = stringr::str_to_title(season),
 
       # Format Stratum number,
       # exclude leading and trailing codes for inshore/offshore,
       # used for matching to stratum areas
-      strat_num = stringr::str_sub(stratum, 2, 3)) %>%
+      strat_num = stringr::str_sub(stratum, 2, 3))
 
-    # Replace NA's where there is some biomass/abundance
-    dplyr::mutate(biomass   = ifelse(biomass == 0 & abundance > 0, 0.0001, biomass),
-                  abundance = ifelse(abundance == 0 & biomass > 0, 1, abundance))
+  # Rename to make units more clear
+  trawldat <- dplyr::rename(trawldat,
+    biomass_g = biomass,
+    length_cm = length)
+
+  # Replace 0's that must be greater than 0
+  trawldat <- dplyr::mutate(trawldat,
+    biomass_g = ifelse(biomass_g == 0 & abundance > 0, 0.0001, biomass_g),
+    abundance = ifelse(abundance == 0 & biomass_g > 0, 1, abundance))
 
 
 
@@ -218,41 +223,39 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent"){
   # 5. Species Exclusion
 
   # Eliminate Canadian Strata and Strata No longer in Use
-  trawldat <- trawldat %>%
-    dplyr::filter(stratum >= 01010,
-                  stratum <= 01760,
-                  stratum != 1310,
-                  stratum != 1320,
-                  stratum != 1330,
-                  stratum != 1350,
-                  stratum != 1410,
-                  stratum != 1420,
-                  stratum != 1490)
+  trawldat <- dplyr::filter(trawldat,
+      stratum >= 01010,
+      stratum <= 01760,
+      stratum != 1310,
+      stratum != 1320,
+      stratum != 1330,
+      stratum != 1350,
+      stratum != 1410,
+      stratum != 1420,
+      stratum != 1490)
 
   # Filter to just Spring and Fall
-  trawldat <- trawldat %>%
-    dplyr::filter(season %in% c("spring", "fall"))
+  trawldat <- dplyr::filter(trawldat, season %in% c("Spring", "Fall"))
+  trawldat <- dplyr::mutate(trawldat, season = factor(season, levels = c("Spring", "Fall")))
 
   # Filter years
-  trawldat <- trawldat %>%
-    dplyr::filter(est_year >= 1970,
-                  est_year < 2020)
+  trawldat <- dplyr::filter(trawldat,
+                            est_year >= 1970,
+                            est_year < 2020)
 
   # Drop NA Biomass and Abundance Records
-  trawldat <- trawldat %>%
-    dplyr::filter(!is.na(biomass),
-                  !is.na(abundance))
+  trawldat <- dplyr::filter(trawldat,
+                            !is.na(biomass_g),
+                            !is.na(abundance))
 
   # Exclude the Skrimps
-  trawldat <- trawldat %>%
-    dplyr::filter(svspp %not in% c(285:299, 305, 306, 307, 316, 323, 910:915, 955:961))
+  trawldat <-  dplyr::filter(trawldat, svspp %not in% c(285:299, 305, 306, 307, 316, 323, 910:915, 955:961))
 
   # Exclude the unidentified fish
-  trawldat <- trawldat %>%
-    dplyr::filter(svspp %not in% c(0, 978, 979, 980, 998))
+  trawldat <- dplyr::filter(trawldat, svspp %not in% c(0, 978, 979, 980, 998))
 
   # Only the Albatross and Henry Bigelow
-  #svvessel %in% c("AL", "HB"),
+  trawldat <- dplyr::filter(trawldat, svvessel %in% c("AL", "HB"))
 
 
 
@@ -275,14 +278,14 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent"){
 
 
   # Add the labels to the data
-  trawldat <- trawldat %>%
-    dplyr::mutate(
-      survey_area =  case_when(
-        strat_num %in% strata_key$`Georges Bank`         ~ "GB",
-        strat_num %in% strata_key$`Gulf of Maine`        ~ "GoM",
-        strat_num %in% strata_key$`Southern New England` ~ "SNE",
-        strat_num %in% strata_key$`Mid-Atlantic Bight`   ~ "MAB",
-        TRUE                                             ~ "stratum not in key"))
+  trawldat <- dplyr::mutate(
+    trawldat,
+    survey_area =  dplyr::case_when(
+      strat_num %in% strata_key$`Georges Bank`         ~ "GB",
+      strat_num %in% strata_key$`Gulf of Maine`        ~ "GoM",
+      strat_num %in% strata_key$`Southern New England` ~ "SNE",
+      strat_num %in% strata_key$`Mid-Atlantic Bight`   ~ "MAB",
+      TRUE                                             ~ "stratum not in key"))
 
 
   # Use strata_select to pull the strata we want individually
@@ -293,9 +296,8 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent"){
 
 
   # Filtering areas using strata_select
-  trawldat <- trawldat %>%
-    dplyr::filter(strat_num %in% strata_select) %>%
-    dplyr::mutate(stratum = as.character(stratum))
+  trawldat <- dplyr::filter(trawldat, strat_num %in% strata_select)
+  trawldat <- dplyr::mutate(trawldat, stratum = as.character(stratum))
 
 
 
@@ -303,8 +305,13 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent"){
 
   #### 8. Adjusting NumLength  ####
 
-  # Sometimes there are more/less measured than initially tallied* in abundance
-  # This section ensures that numlen totals out to be the same
+  # NOTE:
+  # numlen is not adjusted to correct for the change in survey vessels and gear
+  # these values consequently do not equal abundance, nor biomass which are adjusted
+
+  # Because of this and also some instances of bad data,
+  # there are cases of more/less measured than initially tallied* in abundance
+  # this section ensures that numlen totals out to be the same as abundance
 
 
   # If catchsex is not a column then total abundance is assumed pooled
@@ -317,30 +324,28 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent"){
 
   # Get the abundance value for each sex
   # arrived at by summing across each length
-  abundance_check <- trawldat %>%
-    dplyr::group_by(!!!rlang::syms(abundance_groups)) %>%
-    dplyr::summarise(
+  abundance_check <- dplyr::group_by(trawldat, !!!rlang::syms(abundance_groups))
+  abundance_check <- dplyr::summarise(abundance_check,
       abund_actual = sum(numlen),
-      n_len_class  = dplyr::n_distinct(length),
-      .groups      = "keep") %>%
-    dplyr::ungroup()
+      n_len_class  = dplyr::n_distinct(length_cm),
+      .groups      = "keep")
+  abundance_check <- dplyr::ungroup(abundance_check)
 
 
   # Get the ratio between the original abundance column
   # and the sum of numlen we just grabbed
-  conv_factor <- trawldat %>%
-    dplyr::distinct(!!!rlang::syms(abundance_groups), length) %>%
-    dplyr::inner_join(abundance_check, by = abundance_groups) %>%
-    dplyr::mutate(convers = abundance / abund_actual)
+  conv_factor <- dplyr::distinct(trawldat, !!!rlang::syms(abundance_groups), length_cm)
+  conv_factor <- dplyr::inner_join(conv_factor, abundance_check, by = abundance_groups)
+  conv_factor <- dplyr::mutate(conv_factor, convers = abundance / abund_actual)
 
 
 
   # Merge back and convert the numlen field
   # original numlen * conversion factor = numlength adjusted
-  survdat_processed <- trawldat %>%
-    dplyr::left_join(conv_factor, by = c(abundance_groups, "length")) %>%
-    dplyr::mutate(numlen_adj = numlen * convers, .after = numlen) %>%
-    dplyr::select(-c(abund_actual, convers))
+  survdat_processed <- dplyr::left_join(trawldat, conv_factor, by = c(abundance_groups, "length_cm"))
+  survdat_processed <- dplyr::mutate(survdat_processed, numlen_adj = numlen * convers, .after = numlen)
+  survdat_processed <- dplyr::select(survdat_processed, -c(abund_actual, convers))
+
 
   # remove conversion factor from environment
   rm(abundance_check, conv_factor, strata_key, strata_select)
@@ -352,13 +357,13 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent"){
   #### 9. Distinct Station & Species Length Info   ####
 
   # For each station we need unique combinations of
-  # station_id, species, catchsex, length, adjusted_numlen
+  # station_id, species, catchsex, length_cm, adjusted_numlen
   # to capture what and how many of each length fish is caught
 
   # Record of unique station catches:
-  # One row for every species * sex * length, combination in the data
-  trawl_lens <- survdat_processed %>%
-    dplyr::filter(is.na(length) == FALSE,
+  # One row for every species * sex * length_cm, combination in the data
+  trawl_lens <- dplyr::filter(survdat_processed,
+                  is.na(length_cm) == FALSE,
                   is.na(numlen) == FALSE,
                   numlen_adj > 0)
 
@@ -366,16 +371,16 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent"){
   # Do we want to just keep all the station info here as well?
   # question to answer is whether any other columns repeat,
   # or if these are the only ones
-  trawl_spectra <- trawl_lens %>%
-    dplyr::distinct(id, svspp, comname, catchsex, abundance, n_len_class,
-                    length, numlen, numlen_adj, biomass, .keep_all = TRUE)
+  trawl_clean <- dplyr::distinct(trawl_lens,
+    id, svspp, comname, catchsex, abundance, n_len_class,
+    length_cm, numlen, numlen_adj, biomass_g, .keep_all = TRUE)
 
 
 
 
   # Return the dataframe
   # Contains 1 Row for each length class of every species caught
-  return(trawl_spectra)
+  return(trawl_clean)
 
 }
 
@@ -385,7 +390,7 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent"){
 ######################################################_
 
 # Test
-# test_survdat <- survdat_prep_nodrop(survdat_source = "most recent")
+# test_survdat <- gmri_survdat_prep(survdat_source = "most recent")
 
 
 
@@ -405,7 +410,7 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent"){
 #' @param cutoff Flag for whether to remove species that have shown poor fit
 #' when compared to biomass data from the nmfs survey.
 #'
-#' @return
+#' @return survdat dataframe containing paired length-weight relationship details for species
 #' @export
 #'
 #' @examples
@@ -414,58 +419,60 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent"){
 add_lw_info <- function(survdat_clean, cutoff = FALSE){
 
 
-  #### 1. Match Species with Growth Coefficients  ####
+  #### 1. Match Species to LW Coefficients  ####
 
   # This table is a combined table of wigley and fishbase L-W coefficients
-  nmfs_path <- shared.path(group = "RES_Data", folder = "NMFS_trawl")
+  nmfs_path <- box_path(box_group = "RES_Data", subfolder = "NMFS_trawl")
   lw_key_path <- paste0(nmfs_path, "length_weight_keys/fishbase_wigley_combined_key.csv")
-  lw_combined <- readr::read_csv(lw_key_path, col_types =readr::cols()) %>%
-    dplyr::mutate(svspp = stringr::str_pad(svspp, 3, "left", "0"),
+  lw_combined <- readr::read_csv(lw_key_path, col_types = readr::cols())
+  lw_combined <- dplyr::mutate(lw_combined,
+                  svspp = stringr::str_pad(svspp, 3, "left", "0"),
                   season = tolower(season))
 
 
   # Do a priority pass with the dplyr::filter(lw_combined, source == "wigley)
   # merge on comname, season, and catchsex
-  wigley_coefficients <- dplyr::filter(lw_combined, source == "wigley") %>%
-    dplyr::select(source, season, svspp, comname, scientific_name, spec_class,
-                  hare_group, fishery, catchsex, a, b, ln_a)
+  wigley_coefficients <- dplyr::filter(lw_combined, source == "wigley")
+  wigley_coefficients <- dplyr::select(wigley_coefficients,
+      source, season, svspp, comname, scientific_name, spec_class,
+      hare_group, fishery, catchsex, a, b, ln_a)
 
 
   # Do a second pass with the dplyr::filter(lw_combined, source == "fishbase")
   # merge on common names only
-  fishbase_coefficients <- dplyr::filter(lw_combined, source == "fishbase") %>%
-    dplyr::select(source, -svspp, comname, scientific_name, spec_class,
-                  hare_group, fishery, a, b, ln_a)
+  fishbase_coefficients <- dplyr::filter(lw_combined, source == "fishbase")
+  fishbase_coefficients <- dplyr::select(fishbase_coefficients,
+      source, -svspp, comname, scientific_name, spec_class,
+      hare_group, fishery, a, b, ln_a)
 
 
   # First Pass - Wigley
   # Join just by svspp to account for name changes
-  pass_1 <- survdat_clean %>%
-    dplyr::select(-comname) %>%
-    dplyr::inner_join(wigley_coefficients)
+  pass_1 <- dplyr::select(survdat_clean, -comname)
+  pass_1 <- dplyr::inner_join(pass_1, wigley_coefficients)
 
 
   # Second Pass - Fishbase, for the stragglers if any
-  pass_2 <- survdat_clean %>%
-    dplyr::filter(comname %not in% wigley_coefficients$comname,
-                  svspp %not in% pass_1$svspp) %>%
-    dplyr::inner_join(fishbase_coefficients)
+  pass_2 <- dplyr::filter(survdat_clean,
+                  comname %not in% wigley_coefficients$comname,
+                  svspp %not in% pass_1$svspp)
+  pass_2 <- dplyr::inner_join(pass_2, fishbase_coefficients)
 
 
   # Join them with bind rows (implicitly drops things that don't have growth coefs)
-  trawl_weights <- bind_rows(pass_1, pass_2) %>%
-    dplyr::arrange(est_year, season) %>%
-    dplyr::mutate(
+  trawl_weights <- dplyr::bind_rows(pass_1, pass_2)
+  trawl_weights <- dplyr::arrange(trawl_weights, est_year, season)
+  trawl_weights <- dplyr::mutate(trawl_weights,
       b             = as.numeric(b),
       a             = as.numeric(a),
       a             = ifelse(is.na(a) & !is.na(ln_a), exp(ln_a), a),
       ln_a          = ifelse(is.na(ln_a), log(a), ln_a),  # log of a used if ln_a is isn't already there (some fish just had ln_a reported)
-      llen          = log(length),
+      llen          = log(length_cm),
       ind_log_wt    = ln_a + (b * llen),
-      ind_weight_kg = exp(ind_log_wt),                    # weight of an individual in size class
-      sum_weight_kg = ind_weight_kg * numlen_adj) %>%     # Individual weight * adjusted numlen
-    tidyr::drop_na(ind_weight_kg) %>%
-    dplyr::select(-ind_log_wt, -llen)
+      ind_weight_kg = exp(ind_log_wt),                # weight of an individual in size class
+      sum_weight_kg = ind_weight_kg * numlen_adj)     # Individual weight * adjusted numlen
+  trawl_weights <- tidyr::drop_na(trawl_weights, ind_weight_kg)
+  trawl_weights <- dplyr::select(trawl_weights, -ind_log_wt, -llen)
 
 
   # clean up environment
@@ -478,9 +485,8 @@ add_lw_info <- function(survdat_clean, cutoff = FALSE){
 
   # calculate total biomass again using weights from key
   # make a key for the length weight coefficient sources
-  survdat_weights <- trawl_weights %>%
-    dplyr::arrange(est_year, season, comname, length) %>%
-    dplyr::mutate(lw_group = stringr::str_c(comname, season, catchsex))
+  survdat_weights <- dplyr::arrange(trawl_weights, est_year, season, comname, length_cm)
+  survdat_weights <- dplyr::mutate(survdat_weights, lw_group = stringr::str_c(comname, season, catchsex))
 
 
 
@@ -530,7 +536,7 @@ add_lw_info <- function(survdat_clean, cutoff = FALSE){
   # Filter to use species that meet cutoff criteria
   # source: 02_survdat_stratification_validation
   if(cutoff == TRUE){
-    survdat_weights <- survdat_weights %>% dplyr::filter(comname %in% cutoff_25)
+    survdat_weights <- dplyr::filter(survdat_weights, comname %in% cutoff_25)
   }
 
 
@@ -565,7 +571,7 @@ add_lw_info <- function(survdat_clean, cutoff = FALSE){
 #' replace it with sf steps, but it wasn't worth the effort. This function exists to
 #' reduce clutter in the area stratification function
 #'
-#' @return
+#' @return survdat dataframe containing epu overlap information
 #' @export
 #'
 #' @examples
@@ -577,37 +583,36 @@ add_epu_info <- function(trawldat){
   #### EPU assignment for survdat stations - function from Sean Luceys "RSurvey" repo
   # This section assigns EPU's via overlay using Sean Lucey's code,
   # Area stratification code from Sean Lucey's Repo, renamed to signify what it is
-  nmfs_path <- shared.path(group = "RES_Data", folder = "NMFS_trawl")
+  nmfs_path <- box_path(box_group = "RES_Data", subfolder = "NMFS_trawl")
   source(paste0(nmfs_path, "slucey_functions/slucey_survdat_functions.R"))
 
 
   # EPU shapefiles can be loaded from ecodata package
   epu_sf <- ecodata::epu_sf
-  epu_sp <- suppressWarnings(as_Spatial(epu_sf))
+  epu_sp <- suppressWarnings(sf::as_Spatial(epu_sf))
 
 
   # Rename columns to match expected formats for Sean Lucey's poststrat()
-  trawldat <- trawldat %>%
-    dplyr::rename(CRUISE6 = cruise6,
+  trawldat <- dplyr::rename(trawldat,
+                  CRUISE6 = cruise6,
                   STATION = station,
                   STRATUM = stratum,
                   LAT     = decdeg_beglat,
                   LON     = decdeg_beglon)
 
   # Post stratify the station positions using EPU polygons
-  trawldat <- trawldat %>%
-    poststrat(survdat = .,
+  trawldat <- poststrat(survdat = trawldat,
               stratum = epu_sp,
               strata.col = "EPU")
 
   # re-name everything back to where it was
-  trawldat <- trawldat %>%
-    dplyr::rename(epu           = newstrata,
-                  cruise6       = CRUISE6,
-                  station       = STATION,
-                  stratum       = STRATUM,
-                  decdeg_beglat = LAT,
-                  decdeg_beglon = LON)
+  trawldat <- dplyr::rename(trawldat,
+    epu           = newstrata,
+    cruise6       = CRUISE6,
+    station       = STATION,
+    stratum       = STRATUM,
+    decdeg_beglat = LAT,
+    decdeg_beglon = LON)
 
   return(trawldat)
 
@@ -620,10 +625,10 @@ add_epu_info <- function(trawldat){
   # message("Joining EPU Fields for Area Stratification.")
   #
   # # Put EPU pairing here:
-  # # preferrably using our code and not Sean's so debugging is easier
+  # # preferably using our code and not Sean's so debugging is easier
   #
   # # Load EPU - CRS known from ecodata::epu_sf
-  # epu_path <- shared.path(group = "RES_Data", folder = "Shapefiles/EPU")
+  # epu_path <- box_path(box_group = "RES_Data", subfolder = "Shapefiles/EPU")
   # epu_sf <- read_sf(paste0(epu_path, "EPU_extended.shp")) %>% st_set_crs(4269)
   # epu_sf <- ecodata::epu_sf
   #
@@ -649,8 +654,8 @@ add_epu_info <- function(trawldat){
 }
 
 
-
-
+# testing
+# test_epu <- add_epu_info(trawldat = test_lw)
 
 
 
@@ -664,7 +669,7 @@ add_epu_info <- function(trawldat){
 #' @param survdat_weights Input dataframe, produced by add_lw_info
 #' @param include_epu Flag for calculating the EPU rates in addition to the stratum regions we use.
 #'
-#' @return
+#' @return survdat df with fields for area stratified values
 #' @export
 #'
 #' @examples
@@ -672,15 +677,16 @@ add_epu_info <- function(trawldat){
 #' # add_area_stratification(survdat_weights = survdat_lw, include_epu = F)
 add_area_stratification <- function(survdat_weights, include_epu = F){
 
+  # https://noaa-edab.github.io/survdat/articles/calc_strat_mean.html
 
 
   ####  1. Import supplemental files  ####
-  nmfs_path <- shared.path(group = "RES_Data", folder = "NMFS_trawl")
+  nmfs_path <- box_path(box_group = "RES_Data", subfolder = "NMFS_trawl")
 
   # Stratum Area Information
   stratum_area_path <- stringr::str_c(nmfs_path, "Metadata/strata_areas_km2.csv")
-  stratum_area      <- readr::read_csv(stratum_area_path, col_types =readr::cols())  %>%
-    dplyr::mutate(stratum = as.character(stratum))
+  stratum_area      <- readr::read_csv(stratum_area_path, col_types = readr::cols())
+  stratum_area      <- dplyr::mutate(stratum_area, stratum = as.character(stratum))
 
 
 
@@ -702,55 +708,50 @@ add_area_stratification <- function(survdat_weights, include_epu = F){
 
   # Merge in the area of strata in km2
   # (excludes ones we do not care about via left join)
-  survdat_weights <- survdat_weights %>%
-    dplyr::left_join(stratum_area, by = "stratum") %>%
-    dplyr::arrange(survdat_weights, id)
+  survdat_weights <- dplyr::left_join(survdat_weights, stratum_area, by = "stratum")
+  survdat_weights <- dplyr::arrange(survdat_weights, survdat_weights, id)
 
 
   # Get Total area of all strata sampled in each year
-  total_stratum_areas <- survdat_weights %>%
-    dplyr::group_by(est_year) %>%
-    dplyr::distinct(stratum, .keep_all = T) %>%
-    dplyr::summarise(tot_s_area =  sum(s_area_km2, na.rm = T),
-                     .groups = "keep") %>%
-    dplyr::ungroup()
+  total_stratum_areas <- dplyr::group_by(survdat_weights, est_year)
+  total_stratum_areas <- dplyr::distinct(total_stratum_areas, stratum, .keep_all = T)
+  total_stratum_areas <- dplyr::summarise(total_stratum_areas,
+                     tot_s_area =  sum(s_area_km2, na.rm = T),
+                     .groups = "keep")
+  total_stratum_areas <- dplyr::ungroup(total_stratum_areas)
 
 
   # Calculate strata area relative to total area i.e. stratio or stratum weights
-  survdat_weights <- survdat_weights %>%
-    dplyr::left_join(total_stratum_areas, by = "est_year") %>%
-    dplyr::mutate(st_ratio = s_area_km2 / tot_s_area)
+  survdat_weights <- dplyr::left_join(survdat_weights, total_stratum_areas, by = "est_year")
+  survdat_weights <- dplyr::mutate(survdat_weights, st_ratio = s_area_km2 / tot_s_area)
 
 
   # We have total areas, now we want effort within each
   # Number of unique tows per stratum
-  yr_strat_effort <- survdat_weights %>%
-    dplyr::group_by(est_year, stratum) %>%
-    dplyr::summarise(strat_ntows = dplyr::n_distinct(id),
-                     .groups = "keep") %>%
-    dplyr::ungroup()
+  yr_strat_effort <- dplyr::group_by(survdat_weights, est_year, stratum)
+  yr_strat_effort <- dplyr::summarise(yr_strat_effort, strat_ntows = dplyr::n_distinct(id), .groups = "keep")
+  yr_strat_effort <- dplyr::ungroup(yr_strat_effort)
 
 
 
   # Add those yearly effort counts back for later
   #(area stratified abundance)
-  survdat_weights <- survdat_weights %>%
-    dplyr::left_join(yr_strat_effort, by = c("est_year", "stratum"))
+  survdat_weights <- dplyr::left_join(survdat_weights, yr_strat_effort, by = c("est_year", "stratum"))
 
 
 
 
   ####  4. Derived Stratum Area Estimates ####
-  survdat_weights <- survdat_weights  %>%
-    dplyr::mutate(
+  survdat_weights <-  dplyr::mutate(survdat_weights,
+
       # Abundance / ntows for the year within that strata/epu
       abund_tow_s   = numlen_adj / strat_ntows,
 
       # Biomass is repeated across length classes at each station by species
       # the number of length classes is tallied where the conversion factor is done
-      biom_per_lclass = (biomass / n_len_class),
+      biom_per_lclass = (biomass_g / n_len_class),
 
-      # Mean biomass/tow for the "biomass" column
+      # Mean biomass/tow for the "biomass" column (in grams)
       biom_tow_s = biom_per_lclass / strat_ntows,
 
       # Stratified mean abundance, weighted by the stratum areas
@@ -795,41 +796,37 @@ add_area_stratification <- function(survdat_weights, include_epu = F){
 
     # EPU area information: source slucey_survdat_functions.R and {ecodata}
     epu_area_path <- stringr::str_c(nmfs_path, "Metadata/EPU_areas_km2.csv")
-    epu_areas     <- readr::read_csv(epu_area_path, col_types =readr::cols())
+    epu_areas     <- readr::read_csv(epu_area_path, col_types = readr::cols())
 
     # Join to the file containing EPU areas in km2
-    survdat_epu <- survdat_epu %>%
-      dplyr::left_join(epu_areas, by = "epu")
+    survdat_epu <-  dplyr::left_join(survdat_epu, epu_areas, by = "epu")
 
 
     # Get total area of EPU's sampled in each year
-    total_epu_areas <- survdat_epu %>%
-      dplyr::group_by(est_year) %>%
-      dplyr::distinct(epu, .keep_all = T) %>%
-      dplyr::summarise(tot_epu_area =  sum(epu_area_km2, na.rm = T),
-                       .groups = "keep") %>% dplyr::ungroup()
+    total_epu_areas <- dplyr::group_by(survdat_epu, est_year)
+    total_epu_areas <- dplyr::distinct(total_epu_areas, epu, .keep_all = T)
+    total_epu_areas <- dplyr::summarise(total_epu_areas, tot_epu_area =  sum(epu_area_km2, na.rm = T),
+                       .groups = "keep")
+    total_epu_areas <- dplyr::ungroup(total_epu_areas)
 
 
 
     # Calculate epu area relative to total area i.e. epu_ratio or area weights
-    survdat_epu <- survdat_epu %>%
-      dplyr::left_join(total_epu_areas, by = "est_year") %>%
-      dplyr::mutate(epu_ratio  = epu_area_km2 / tot_epu_area)
+    survdat_epu <- dplyr::left_join(survdat_epu, total_epu_areas, by = "est_year")
+    survdat_epu <- dplyr::mutate(survdat_epu, epu_ratio  = epu_area_km2 / tot_epu_area)
 
     # Number of unique tows per EPU
-    yr_epu_effort <-  survdat_epu %>%
-      dplyr::group_by(est_year, epu) %>%
-      dplyr::summarise(epu_ntows = dplyr::n_distinct(id), .groups = "keep") %>%
-      dplyr::ungroup()
+    yr_epu_effort <- dplyr::group_by(survdat_epu, est_year, epu)
+    yr_epu_effort <- dplyr::summarise(yr_epu_effort, epu_ntows = dplyr::n_distinct(id), .groups = "keep")
+    yr_epu_effort <- dplyr::ungroup(yr_epu_effort)
 
     # join back
-    survdat_epu <- survdat_epu %>%
-      dplyr::left_join(yr_epu_effort, by = c("est_year", "epu"))
+    survdat_epu <- dplyr::left_join(survdat_epu, yr_epu_effort, by = c("est_year", "epu"))
 
 
     # Process Area Stratified values
-    survdat_weights <- survdat_epu  %>%
-      dplyr::mutate(
+    survdat_weights <- dplyr::mutate(survdat_epu,
+
         # Abundance per tow
         abund_tow_epu = numlen_adj / epu_ntows,
         # Mean biomass/tow for the BIOMASS column

@@ -5,14 +5,11 @@
 \title{Access OISST Mainstays Arrays}
 \usage{
 load_global_oisst(
-  oisst_path = "~/Box/RES_Data/OISST/oisst_mainstays",
   resource = c("raw", "climatology82", "climatology91", "anomalies", "warming rates"),
   year_range = seq(2010, 2020, 1)
 )
 }
 \arguments{
-\item{oisst_path}{Local path to oisst folder on box, subfolder of RES_Data/OISST/oisst_mainstays}
-
 \item{resource}{Name of the global extent resource, choices are raw, climatology, warming rates,
 and anomalies.}
 
@@ -26,6 +23,5 @@ Access OISST Mainstays Arrays
 }
 \examples{
 # Not run
-# load_global_oisst(oisst_path = "~Box/RES_Data/OISST/oisst_mainstays",
-#                   resource = "warming rates", year_range = NULL)
+# load_global_oisst(resource = "warming rates", year_range = NULL)
 }

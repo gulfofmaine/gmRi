@@ -12,7 +12,7 @@ as_fahrenheit(temp_c, data_type = "temperature")
 \item{data_type}{T/F Toggle to convert temperatures or anomalies}
 }
 \value{
-
+temperature in fahrenheit
 }
 \description{
 Convert temperature in Celsius to Fahrenheit.

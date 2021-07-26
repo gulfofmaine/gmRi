@@ -10,7 +10,7 @@ make_monthly(daily_ras)
 \item{daily_ras}{Raster stack with daily time step}
 }
 \value{
-
+Raster stack with monthly time step
 }
 \description{
 Takes a stack of daily data with names of "XYYYY.MM.DD" and

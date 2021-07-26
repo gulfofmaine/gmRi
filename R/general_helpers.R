@@ -54,7 +54,7 @@ floor_decade <- function(year_vector, return_class = "factor"){
 #' @param temp_c Values of temperature or anomalies in Deg C
 #' @param data_type T/F Toggle to convert temperatures or anomalies
 #'
-#' @return
+#' @return temperature in fahrenheit
 #' @export
 #'
 #' @examples as_fahrenheit(c(15,20), data_type = "temperature")
@@ -86,32 +86,32 @@ as_fahrenheit <- function(temp_c, data_type = "temperature"){
 #'
 #' @param daily_ras Raster stack with daily time step
 #'
-#' @return
+#' @return Raster stack with monthly time step
 #' @export
 #'
 #' @examples # not run
 make_monthly <- function(daily_ras){
 
   # Months to subset with
-  month_key <- str_pad(c(1:12), 2, "left", 0) %>% setNames(month.abb)
+  month_key <- stringr::str_pad(c(1:12), 2, "left", 0)
+  month_key <- stats::setNames(month_key, month.abb)
 
   # names to match index to
   layer_index <- names(daily_ras)
-  month_index <- str_sub(layer_index, 7, 8)
+  month_index <- stringr::str_sub(layer_index, 7, 8)
 
   # Pull distinct months
   months_present <- unique(month_index)
   month_key <- month_key[which(month_key %in% months_present)]
 
   # Pull the indices that match, take means
-  map(month_key, function(x){
+  month_avgs <- purrr::map(month_key, function(x){
 
     # Pull days in month
     days_in_month <- which(month_index == x)
 
     # Take mean of those days
-    month_avg <- mean(daily_ras[[days_in_month]])
-  }) %>%
-    setNames(names(month_key))
+    month_avg <- mean(daily_ras[[days_in_month]]) })
+  month_avgs <- stats::setNames(month_avgs, names(month_key))
 
 }

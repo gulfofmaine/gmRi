@@ -4,12 +4,9 @@
 \alias{oisst_window_load}
 \title{Access OISST via Data Window of lat/lon/time}
 \usage{
-oisst_window_load(oisst_path, data_window, anomalies = FALSE)
+oisst_window_load(data_window, anomalies = FALSE)
 }
 \arguments{
-\item{oisst_path}{User specific path to the OKN Demo Data Folder on Box.
-Can be obtained using shared.path function.}
-
 \item{data_window}{dataframe with columns for lat, lon, & time indicating the extent of
 the data desired.}
 
@@ -30,7 +27,7 @@ Useful for loading OISST observations from box, but only for a particular area a
 }
 \examples{
 #not run
-# oisst_path <- shared.path(group = "RES_Data", folder = "OISST/oisst_mainstays")
+# oisst_path <- box_path(box_group = "res", subfolder = "OISST/oisst_mainstays")
 # data_window <- data.frame(lon = c(-72, -65),
 #                           lat = c(42,44),
 #                           time = as.Date(c("2016-08-01", "2020-12-31")))

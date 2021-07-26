@@ -15,7 +15,7 @@ of the annual effort in each.}
 when compared to biomass data from the nmfs survey.}
 }
 \value{
-
+survdat dataframe containing paired length-weight relationship details for species
 }
 \description{
 Add species length weight information, calculate expected biomass
