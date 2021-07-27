@@ -427,7 +427,7 @@ add_lw_info <- function(survdat_clean, cutoff = FALSE){
   lw_combined <- readr::read_csv(lw_key_path, col_types = readr::cols())
   lw_combined <- dplyr::mutate(lw_combined,
                   svspp = stringr::str_pad(svspp, 3, "left", "0"),
-                  season = tolower(season))
+                  season = stringr::str_to_title(season))
 
 
   # Do a priority pass with the dplyr::filter(lw_combined, source == "wigley)
@@ -679,7 +679,6 @@ add_area_stratification <- function(survdat_weights, include_epu = F){
 
   # https://noaa-edab.github.io/survdat/articles/calc_strat_mean.html
 
-
   ####  1. Import supplemental files  ####
   nmfs_path <- box_path(box_group = "RES_Data", subfolder = "NMFS_trawl")
 
@@ -716,8 +715,8 @@ add_area_stratification <- function(survdat_weights, include_epu = F){
   total_stratum_areas <- dplyr::group_by(survdat_weights, est_year)
   total_stratum_areas <- dplyr::distinct(total_stratum_areas, stratum, .keep_all = T)
   total_stratum_areas <- dplyr::summarise(total_stratum_areas,
-                     tot_s_area =  sum(s_area_km2, na.rm = T),
-                     .groups = "keep")
+    tot_s_area =  sum(s_area_km2, na.rm = T),
+    .groups = "keep")
   total_stratum_areas <- dplyr::ungroup(total_stratum_areas)
 
 
@@ -727,59 +726,72 @@ add_area_stratification <- function(survdat_weights, include_epu = F){
 
 
   # We have total areas, now we want effort within each
-  # Number of unique tows per stratum
-  yr_strat_effort <- dplyr::group_by(survdat_weights, est_year, stratum)
+  # Number of unique tows per stratum, within each season
+  yr_strat_effort <- dplyr::group_by(survdat_weights, est_year, season, stratum)
   yr_strat_effort <- dplyr::summarise(yr_strat_effort, strat_ntows = dplyr::n_distinct(id), .groups = "keep")
   yr_strat_effort <- dplyr::ungroup(yr_strat_effort)
 
 
 
   # Add those yearly effort counts back for later
-  #(area stratified abundance)
-  survdat_weights <- dplyr::left_join(survdat_weights, yr_strat_effort, by = c("est_year", "stratum"))
+  # (area stratified abundance)
+  survdat_weights <- dplyr::left_join(survdat_weights, yr_strat_effort, by = c("est_year", "season", "stratum"))
 
 
 
 
   ####  4. Derived Stratum Area Estimates ####
+
+  # a. Catch / tow, for that year & season
   survdat_weights <-  dplyr::mutate(survdat_weights,
 
-      # Abundance / ntows for the year within that strata/epu
+      # Abundance
       abund_tow_s   = numlen_adj / strat_ntows,
 
+      # All size biomass
       # Biomass is repeated across length classes at each station by species
       # the number of length classes is tallied where the conversion factor is done
       biom_per_lclass = (biomass_g / n_len_class),
-
-      # Mean biomass/tow for the "biomass" column (in grams)
       biom_tow_s = biom_per_lclass / strat_ntows,
 
-      # Stratified mean abundance, weighted by the stratum areas
-      wt_abund_s = abund_tow_s * st_ratio,
+      # Length specific biomass
+      lwbio_tow_s = sum_weight_kg / strat_ntows)
 
-      # Stratified mean BIOMASS
-      wt_biom_s = biom_tow_s * st_ratio,
 
-      # convert from catch rate by area swept to total catch for entire stratum
-      # So catch/tow times the total area, divided by how many tows would cover that area
-      expanded_abund_s = round((wt_abund_s * tot_s_area / alb_tow_km2) / q),
+  # b. Stratified Mean Catch Rates
+  survdat_weights <-  dplyr::mutate(survdat_weights,
 
-      # Total BIOMASS from the weighted biomass
-      expanded_biom_s = (wt_biom_s * tot_s_area / alb_tow_km2) / q,
+      # Stratified mean abundance CPUE, weighted by the stratum areas
+      strat_mean_abund_s = abund_tow_s * st_ratio,
 
-      # Two options for lw biomass
+      # Stratified mean BIOMASS CPUE
+      strat_mean_biom_s = biom_tow_s * st_ratio,
+
+      # Stratified mean LW Biomass
+      strat_mean_lwbio_s = lwbio_tow_s * st_ratio)
+
+
+  # c. Stratified Total Abundance/Biomass
+  # convert from catch rate by area swept to total catch for entire stratum
+  survdat_weights <-  dplyr::mutate(survdat_weights,
+
+      # Total Abundance
+      strat_total_abund_s = round((strat_mean_abund_s * tot_s_area / alb_tow_km2) / q),
+
+      # Total BIOMASS from the biomass of all lengths
+      strat_total_biom_s = (strat_mean_biom_s * tot_s_area / alb_tow_km2) / q,
+
+      # Two options for to estimate lw biomass
       # Result is the same 4/20/2021
-
       # Option 1: Individual LW Biomass * expanded abundance at length
-      expanded_lwbio_s = ind_weight_kg * expanded_abund_s,
+      strat_total_lwbio_s = ind_weight_kg * strat_total_abund_s,
+
 
       # # Option 2: Size specific lw biomass / tow, expanded to total area
-      # lwbio_tow_s       = sum_weight_kg / strat_ntows,
-      # wt_lwbio_s        = lwbio_tow_s * st_ratio,
-      # expanded_lwbio_s  = (wt_lwbio_s * tot_s_area / alb_tow_km2) / q
-    )
-
-
+      # lwbio_tow_s          = sum_weight_kg / strat_ntows,
+      # strat_mean_lwbio_s   = lwbio_tow_s * st_ratio,
+      # strat_total_lwbio_s  = (strat_mean_lwbio_s * tot_s_area / alb_tow_km2) / q
+  )
 
 
 
@@ -789,10 +801,8 @@ add_area_stratification <- function(survdat_weights, include_epu = F){
     # Explain what is taking so long:
     message("Joining EPU Fields for Area Stratification.")
 
-
     # Add EPU details using sp::over() and Sean's code
     survdat_epu <- add_epu_info(survdat_weights)
-
 
     # EPU area information: source slucey_survdat_functions.R and {ecodata}
     epu_area_path <- stringr::str_c(nmfs_path, "Metadata/EPU_areas_km2.csv")
@@ -805,7 +815,7 @@ add_area_stratification <- function(survdat_weights, include_epu = F){
     # Get total area of EPU's sampled in each year
     total_epu_areas <- dplyr::group_by(survdat_epu, est_year)
     total_epu_areas <- dplyr::distinct(total_epu_areas, epu, .keep_all = T)
-    total_epu_areas <- dplyr::summarise(total_epu_areas, tot_epu_area =  sum(epu_area_km2, na.rm = T),
+    total_epu_areas <- dplyr::summarise(total_epu_areas, tot_epu_area = sum(epu_area_km2, na.rm = T),
                        .groups = "keep")
     total_epu_areas <- dplyr::ungroup(total_epu_areas)
 
@@ -816,35 +826,29 @@ add_area_stratification <- function(survdat_weights, include_epu = F){
     survdat_epu <- dplyr::mutate(survdat_epu, epu_ratio  = epu_area_km2 / tot_epu_area)
 
     # Number of unique tows per EPU
-    yr_epu_effort <- dplyr::group_by(survdat_epu, est_year, epu)
+    yr_epu_effort <- dplyr::group_by(survdat_epu, est_year, season, epu)
     yr_epu_effort <- dplyr::summarise(yr_epu_effort, epu_ntows = dplyr::n_distinct(id), .groups = "keep")
     yr_epu_effort <- dplyr::ungroup(yr_epu_effort)
 
     # join back
-    survdat_epu <- dplyr::left_join(survdat_epu, yr_epu_effort, by = c("est_year", "epu"))
+    survdat_epu <- dplyr::left_join(survdat_epu, yr_epu_effort, by = c("est_year", "season", "epu"))
 
 
     # Process Area Stratified values
     survdat_weights <- dplyr::mutate(survdat_epu,
 
-        # Abundance per tow
+        # Catch / tow
         abund_tow_epu = numlen_adj / epu_ntows,
-        # Mean biomass/tow for the BIOMASS column
-        biom_tow_epu = biom_per_lclass / epu_ntows,
-        # Stratified mean abundances, weighted by the stratum areas
-        wt_abund_epu = abund_tow_epu * epu_ratio,
-        # Stratified mean BIOMASS
-        wt_biom_epu = biom_tow_epu * epu_ratio,
-        # Total catch for entire stratum
-        expanded_abund_epu = round((wt_abund_epu * tot_epu_area/ alb_tow_km2) / q),
-        # Total Biomass from the weighted biomass
-        expanded_biom_epu = (wt_biom_epu * tot_epu_area/ alb_tow_km2) / q,
-        # LW Biomass from Expanded abundances: Biomass = abundance * lw_weight
-        expanded_lwbio_epu  = ind_weight_kg * expanded_abund_epu)}
-
-
-  # Remove instances where there were fish that were measured but not weighed
-  # survdat_weights <- survdat_weights %>% dplyr::filter(expanded_lwbio_s != -Inf)
+        biom_tow_epu  = biom_per_lclass / epu_ntows,
+        lwbio_tow_epu = sum_weight_kg / epu_ntows,
+        # Stratified Mean Catch/tow
+        strat_mean_abund_epu = abund_tow_epu * epu_ratio,
+        strat_mean_biom_epu  = biom_tow_epu * epu_ratio,
+        strat_mean_lwbio_epu = lwbio_tow_epu * epu_ratio,
+        # Stratified Total Catch
+        strat_total_abund_epu = round((strat_mean_abund_epu * tot_epu_area/ alb_tow_km2) / q),
+        strat_total_biom_epu  = (strat_mean_biom_epu * tot_epu_area/ alb_tow_km2) / q,
+        strat_total_lwbio_epu = ind_weight_kg * strat_total_abund_epu)}
 
   return(survdat_weights)
 }

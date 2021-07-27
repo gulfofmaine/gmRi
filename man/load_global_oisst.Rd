@@ -13,7 +13,7 @@ load_global_oisst(
 \item{resource}{Name of the global extent resource, choices are raw, climatology, warming rates,
 and anomalies.}
 
-\item{year_range}{optional vector of years for raw or anommalies data resources.}
+\item{year_range}{optional vector of years for raw or anomalies data resources.}
 }
 \value{
 resource_out Raster stack of the desired netcdf array
