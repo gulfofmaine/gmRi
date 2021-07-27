@@ -5,15 +5,12 @@
 \title{Access Regional Timeseries from OISSTv2 Mainstays}
 \usage{
 oisst_access_timeseries(
-  oisst_path,
   region_family = c("nmfs trawl regions", "lme", "gmri focus areas", "nelme regions",
     "gom physio regions"),
   poly_name = "gulf of maine"
 )
 }
 \arguments{
-\item{oisst_path}{Personal path to ~Box/RES_Data/OISST/oisst_mainstays}
-
 \item{region_family}{Identify the family of shapefiles that you are interested in.
 Choices = "LME", "nmfs trawl regions", "gmri focus areas"}
 

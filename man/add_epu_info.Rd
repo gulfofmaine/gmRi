@@ -10,7 +10,7 @@ add_epu_info(trawldat)
 \item{trawldat}{Survdat data with decdeg_beglat and decdeg_beglon coordinates}
 }
 \value{
-
+survdat dataframe containing epu overlap information
 }
 \description{
 Uses Sean Lucey's Poststrat function to add the correct EPU designation

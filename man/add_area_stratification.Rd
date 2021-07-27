@@ -12,7 +12,7 @@ add_area_stratification(survdat_weights, include_epu = F)
 \item{include_epu}{Flag for calculating the EPU rates in addition to the stratum regions we use.}
 }
 \value{
-
+survdat df with fields for area stratified values
 }
 \description{
 Take the survdat data paired with length weight relationships and
