@@ -42,10 +42,8 @@
 gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent"){
 
   ####  Resource Paths
-  box_paths   <- research_access_paths()
-  mills_path  <- box_paths$mills
-  res_path    <- box_paths$res
-  nmfs_path   <- paste0(res_path, "NMFS_trawl/")
+  mills_path  <- box_path("mills")
+  nmfs_path   <- box_path("res", "NMFS_trawl")
 
 
 
@@ -254,8 +252,8 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent"){
   # Exclude the unidentified fish
   trawldat <- dplyr::filter(trawldat, svspp %not in% c(0, 978, 979, 980, 998))
 
-  # Only the Albatross and Henry Bigelow
-  trawldat <- dplyr::filter(trawldat, svvessel %in% c("AL", "HB"))
+  # # Only the Albatross and Henry Bigelow?
+  # trawldat_t <- dplyr::filter(trawldat, svvessel %in% c("AL", "HB"))
 
 
 
