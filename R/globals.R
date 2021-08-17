@@ -11,7 +11,7 @@ utils::globalVariables(
     "biom_tow_epu",
     "biom_tow_s",
     "biomass",
-    "biomass_g",
+    "biomass_kg",
     "catchsex",
     "common_name",
     "comname",

@@ -198,13 +198,13 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent"){
 
   # Rename to make units more clear
   trawldat <- dplyr::rename(trawldat,
-    biomass_g = biomass,
+    biomass_kg = biomass,
     length_cm = length)
 
   # Replace 0's that must be greater than 0
   trawldat <- dplyr::mutate(trawldat,
-    biomass_g = ifelse(biomass_g == 0 & abundance > 0, 0.0001, biomass_g),
-    abundance = ifelse(abundance == 0 & biomass_g > 0, 1, abundance))
+    biomass_kg = ifelse(biomass_kg == 0 & abundance > 0, 0.0001, biomass_kg),
+    abundance = ifelse(abundance == 0 & biomass_kg > 0, 1, abundance))
 
 
 
@@ -243,7 +243,7 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent"){
 
   # Drop NA Biomass and Abundance Records
   trawldat <- dplyr::filter(trawldat,
-                            !is.na(biomass_g),
+                            !is.na(biomass_kg),
                             !is.na(abundance))
 
   # Exclude the Skrimps
@@ -252,7 +252,7 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent"){
   # Exclude the unidentified fish
   trawldat <- dplyr::filter(trawldat, svspp %not in% c(0, 978, 979, 980, 998))
 
-  # # Only the Albatross and Henry Bigelow?
+  # # Only the Albatross and Henry Bigelow? - eliminates 1989-1991
   # trawldat_t <- dplyr::filter(trawldat, svvessel %in% c("AL", "HB"))
 
 
@@ -371,7 +371,7 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent"){
   # or if these are the only ones
   trawl_clean <- dplyr::distinct(trawl_lens,
     id, svspp, comname, catchsex, abundance, n_len_class,
-    length_cm, numlen, numlen_adj, biomass_g, .keep_all = TRUE)
+    length_cm, numlen, numlen_adj, biomass_kg, .keep_all = TRUE)
 
 
 
@@ -749,7 +749,7 @@ add_area_stratification <- function(survdat_weights, include_epu = F){
       # All size biomass
       # Biomass is repeated across length classes at each station by species
       # the number of length classes is tallied where the conversion factor is done
-      biom_per_lclass = (biomass_g / n_len_class),
+      biom_per_lclass = (biomass_kg / n_len_class),
       biom_tow_s = biom_per_lclass / strat_ntows,
 
       # Length specific biomass
@@ -786,8 +786,6 @@ add_area_stratification <- function(survdat_weights, include_epu = F){
 
 
       # # Option 2: Size specific lw biomass / tow, expanded to total area
-      # lwbio_tow_s          = sum_weight_kg / strat_ntows,
-      # strat_mean_lwbio_s   = lwbio_tow_s * st_ratio,
       # strat_total_lwbio_s  = (strat_mean_lwbio_s * tot_s_area / alb_tow_km2) / q
   )
 
