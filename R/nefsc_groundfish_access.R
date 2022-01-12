@@ -32,6 +32,7 @@
 #'
 #' @param survdat optional starting dataframe in the R environment to run through size spectra build.
 #' @param survdat_source String indicating which survdat file to load from box
+#' @param mac_os String indicating value to pass to `os_fun_switch`
 #'
 #' @return Returns a dataframe filtered and tidy-ed for size spectrum analysis.
 #' @export
@@ -39,11 +40,14 @@
 #' @examples
 #' # not run
 #' # gmri_survdat_prep(survdat_source = "most recent")
-gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent"){
+gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent", mac_os = "pre_mojave"){
+
+  # Switch for Mojave users or other mac versions with CloudStorage folder
+  path_fun <- os_fun_switch(mac_os = mac_os)
 
   ####  Resource Paths
-  mills_path  <- box_path("mills")
-  nmfs_path   <- box_path("res", "NMFS_trawl")
+  mills_path  <- path_fun("mills")
+  nmfs_path   <- path_fun("res", "NMFS_trawl")
 
 
 
@@ -58,14 +62,15 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent"){
 
 
   # Build Paths to survdat for standard options
-  survdat_path <- switch(EXPR = survdat_source,
-                         "2016"        = paste0(mills_path, "Projects/WARMEM/Old survey data/Survdat_Nye2016.RData"),
-                         "2019"        = paste0(nmfs_path,  "prior_survdat_data/Survdat_Nye_allseason.RData"),
-                         "2020"        = paste0(nmfs_path,  "prior_survdat_data/Survdat_Nye_Aug 2020.RData"),
-                         "2021"        = paste0(nmfs_path,  "prior_survdat_data/survdat_slucey_01152021.RData"),
-                         "bigelow"     = paste0(nmfs_path,  "2021_survdat/survdat_Bigelow_slucey_01152021.RData"),
-                         "most recent" = paste0(nmfs_path,  "2021_survdat/NEFSC_BTS_all_seasons_03032021.RData"),
-                         "bio"         = paste0(nmfs_path,  "2021_survdat/NEFSC_BTS_2021_bio_03192021.RData") )
+  survdat_path <- switch(
+    EXPR = survdat_source,
+    "2016"        = paste0(mills_path, "Projects/WARMEM/Old survey data/Survdat_Nye2016.RData"),
+    "2019"        = paste0(nmfs_path,  "SURVDAT_archived/Survdat_Nye_allseason.RData"),
+    "2020"        = paste0(nmfs_path,  "SURVDAT_archived/Survdat_Nye_Aug 2020.RData"),
+    "2021"        = paste0(nmfs_path,  "SURVDAT_archived/survdat_slucey_01152021.RData"),
+    "bigelow"     = paste0(nmfs_path,  "SURVDAT_current/survdat_Bigelow_slucey_01152021.RData"),
+    "most recent" = paste0(nmfs_path,  "SURVDAT_current/NEFSC_BTS_all_seasons_03032021.RData"),
+    "bio"         = paste0(nmfs_path,  "SURVDAT_current/NEFSC_BTS_2021_bio_03192021.RData") )
 
 
 
@@ -301,7 +306,7 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent"){
 
 
 
-  #### 8. Adjusting NumLength  ####
+  #### 7. Adjusting NumLength  ####
 
   # NOTE:
   # numlen is not adjusted to correct for the change in survey vessels and gear
@@ -352,7 +357,7 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent"){
 
 
 
-  #### 9. Distinct Station & Species Length Info   ####
+  #### 8. Distinct Station & Species Length Info   ####
 
   # For each station we need unique combinations of
   # station_id, species, catchsex, length_cm, adjusted_numlen
@@ -420,7 +425,7 @@ add_lw_info <- function(survdat_clean, cutoff = FALSE){
   #### 1. Match Species to LW Coefficients  ####
 
   # This table is a combined table of wigley and fishbase L-W coefficients
-  nmfs_path <- box_path(box_group = "RES_Data", subfolder = "NMFS_trawl")
+  nmfs_path <- path_fun(box_group = "RES_Data", subfolder = "NMFS_trawl")
   lw_key_path <- paste0(nmfs_path, "length_weight_keys/fishbase_wigley_combined_key.csv")
   lw_combined <- readr::read_csv(lw_key_path, col_types = readr::cols())
   lw_combined <- dplyr::mutate(lw_combined,
@@ -494,47 +499,89 @@ add_lw_info <- function(survdat_clean, cutoff = FALSE){
   ####  3. Filter Bad Fits  ####
   # Drop comnames that don't align well with BIOMASS
 
-  # these species were dropped at 50% mismatch threshold
-  # code: 02_survdat_stratification_validation
-  # list updated : 3/24/2021
-  cutoff_25 <- c(
-    "acadian redfish"          ,      "alewife"                 ,
-    "american plaice"          ,      "american shad"           ,
-    "atlantic angel shark"     ,      "atlantic cod"            ,
-    "atlantic croaker"         ,      "atlantic halibut"        ,
-    "atlantic herring"         ,      "atlantic mackerel"       ,
-    "atlantic sharpnose shark" ,      "atlantic sturgeon"       ,
-    "atlantic wolffish"        ,      "barndoor skate"          ,
-    "black sea bass"           ,      "bluefish"                ,
-    "bluntnose stingray"       ,      "buckler dory"            ,
-    "bullnose ray"             ,      "butterfish"              ,
-    "chain dogfish"            ,      "clearnose skate"         ,
-    "cownose ray"              ,      "cunner"                  ,
-    "cusk"                     ,      "fawn cusk-eel"           ,
-    "fourspot flounder"        ,      "haddock"                 ,
-    "little skate"             ,      "longhorn sculpin"        ,
-    "northern kingfish"        ,      "northern searobin"       ,
-    "ocean pout"               ,      "offshore hake"           ,
-    "pollock"                  ,      "red hake"                ,
-    "rosette skate"            ,      "roughtail stingray"      ,
-    "round herring"            ,      "sandbar shark"           ,
-    "sea raven"                ,      "silver hake"             ,
-    "smooth butterfly ray"     ,      "smooth dogfish"          ,
-    "smooth skate"             ,      "southern stingray"       ,
-    "spanish mackerel"         ,      "spiny butterfly ray"     ,
-    "spiny dogfish"            ,      "spot"                    ,
-    "spotted hake"             ,      "striped bass"            ,
-    "summer flounder"          ,      "tautog"                  ,
-    "thorny skate"             ,      "weakfish"                ,
-    "white hake"               ,      "windowpane flounder"     ,
-    "winter flounder"          ,      "winter skate"            ,
-    "witch flounder"           ,      "yellowtail flounder"
-  )
+  # Length weight biomasses were checked against survdat$biomass using data prior to the vessel change
+  # 15% difference in either direction were flagged for removal
+  # code: github.com/adamkemberling/nefsc_trawl/R/qa_qc_reports/stratification_validation
+  # list updated : 8/27/2021
+  #
+  cutoff_15 <- c(
+    "acadian redfish", "american plaice",
+    "american shad",
+    "atlantic angel shark",
+    "atlantic cod",
+    "atlantic croaker",
+    "atlantic halibut",
+    "atlantic herring",
+    "atlantic mackerel",
+    "atlantic sharpnose shark",
+    "atlantic spadefish",
+    "atlantic sturgeon",
+    "atlantic thread herring",
+    "atlantic wolffish",
+    "barndoor skate",
+    "black sea bass",
+    "blackbelly rosefish",
+    "blueback herring",
+    "bluefish",
+    "buckler dory",
+    "bullnose ray",
+    "butterfish",
+    "chain dogfish",
+    "clearnose skate",
+    "cownose ray",
+    "cunner",
+    "cusk",
+    "fawn cusk-eel",
+    "fourspot flounder",
+    "goosefish",
+    "greater amberjack",
+    "haddock",
+    "little skate",
+    "longhorn sculpin",
+    "northern kingfish",
+    "northern searobin",
+    "ocean pout",
+    "offshore hake",
+    "pollock",
+    "red hake",
+    "rosette skate",
+    "roughtail stingray",
+    "round herring",
+    "sand tiger",
+    "sandbar shark",
+    "scup",
+    "sea raven",
+    "silver hake",
+    "smooth butterfly ray",
+    "smooth dogfish",
+    "smooth skate",
+    "southern kingfish",
+    "spanish mackerel",
+    "spanish sardine",
+    "spiny butterfly ray",
+    "spiny dogfish",
+    "spot",
+    "spotted hake",
+    "striped bass",
+    "summer flounder",
+    "thorny skate",
+    "weakfish",
+    "white hake",
+    "windowpane flounder",
+    "winter flounder",
+    "winter skate",
+    "witch flounder",
+    "yellowtail flounder")
+
+  # these species were dropped, for the record:
+  cutoff_15_dropped <-c(
+    "alewife", "atlantic torpedo", "bluntnose stingray",
+    "southern stingray", "tautog", "vermillion snapper")
 
   # Filter to use species that meet cutoff criteria
   # source: 02_survdat_stratification_validation
   if(cutoff == TRUE){
-    survdat_weights <- dplyr::filter(survdat_weights, comname %in% cutoff_25)
+    survdat_weights <- dplyr::filter(survdat_weights, comname %in% cutoff_15)
   }
 
 
@@ -564,6 +611,7 @@ add_lw_info <- function(survdat_clean, cutoff = FALSE){
 #' to the survey station locations.
 #'
 #' @param trawldat Survdat data with decdeg_beglat and decdeg_beglon coordinates
+#' @param mac_os String indicating value to pass to `os_fun_switch`
 #'
 #' @description Uses Sean Lucey's "poststrat" function to overlay EPU's. Tried to
 #' replace it with sf steps, but it wasn't worth the effort. This function exists to
@@ -575,13 +623,13 @@ add_lw_info <- function(survdat_clean, cutoff = FALSE){
 #' @examples
 #' #' # not run
 #' # add_epu_info(trawldat = survdat_lw)
-add_epu_info <- function(trawldat){
+add_epu_info <- function(trawldat, mac_os = "pre_mojave"){
 
 
   #### EPU assignment for survdat stations - function from Sean Luceys "RSurvey" repo
   # This section assigns EPU's via overlay using Sean Lucey's code,
   # Area stratification code from Sean Lucey's Repo, renamed to signify what it is
-  nmfs_path <- box_path(box_group = "RES_Data", subfolder = "NMFS_trawl")
+  nmfs_path <- path_fun(box_group = "RES_Data", subfolder = "NMFS_trawl")
   source(paste0(nmfs_path, "slucey_functions/slucey_survdat_functions.R"))
 
 
@@ -626,7 +674,7 @@ add_epu_info <- function(trawldat){
   # # preferably using our code and not Sean's so debugging is easier
   #
   # # Load EPU - CRS known from ecodata::epu_sf
-  # epu_path <- box_path(box_group = "RES_Data", subfolder = "Shapefiles/EPU")
+  # epu_path <- path_fun(box_group = "RES_Data", subfolder = "Shapefiles/EPU")
   # epu_sf <- read_sf(paste0(epu_path, "EPU_extended.shp")) %>% st_set_crs(4269)
   # epu_sf <- ecodata::epu_sf
   #
@@ -666,6 +714,7 @@ add_epu_info <- function(trawldat){
 #'
 #' @param survdat_weights Input dataframe, produced by add_lw_info
 #' @param include_epu Flag for calculating the EPU rates in addition to the stratum regions we use.
+#' @param mac_os String indicating value to pass to `os_fun_switch`
 #'
 #' @return survdat df with fields for area stratified values
 #' @export
@@ -673,12 +722,16 @@ add_epu_info <- function(trawldat){
 #' @examples
 #' # not run
 #' # add_area_stratification(survdat_weights = survdat_lw, include_epu = F)
-add_area_stratification <- function(survdat_weights, include_epu = F){
+add_area_stratification <- function(survdat_weights, include_epu = F, mac_os = "pre_mojave"){
 
   # https://noaa-edab.github.io/survdat/articles/calc_strat_mean.html
 
+  # Switch for Mojave users or other mac versions with CloudStorage folder
+  path_fun <- os_fun_switch(mac_os = mac_os)
+
+
   ####  1. Import supplemental files  ####
-  nmfs_path <- box_path(box_group = "RES_Data", subfolder = "NMFS_trawl")
+  nmfs_path <- path_fun(box_group = "RES_Data", subfolder = "NMFS_trawl")
 
   # Stratum Area Information
   stratum_area_path <- stringr::str_c(nmfs_path, "Metadata/strata_areas_km2.csv")

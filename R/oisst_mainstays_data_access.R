@@ -21,27 +21,32 @@
 #' @description Returns list of box resource paths for quick access to commonly accessed
 #' resources. Includes the Mills lab, Res data, knowledge graph data, and oisst mainstays.
 #'
+#' @param mac_os String indicating value to pass to `os_fun_switch`
 #'
 #' @return res_paths List containing user-specific paths
 #' @export
 #'
 #' @examples
 #' # Not run:
-#' # box_paths <- research_access_paths(os.use = "unix", user.name = "NA, I use a mac")
-research_access_paths <- function(){
+#' # box_paths <- research_access_paths(mac_os = "not_mojave)
+research_access_paths <- function(mac_os = "not_mojave"){
+
+
+  # Switch for Mojave users or other mac versions with CloudStorage folder
+  path_fun <- os_fun_switch(mac_os = mac_os)
 
 
   # Path to NSF OKN Demo Data
-  okn_path <- box_path(box_group = "NSF OKN")
+  okn_path <- path_fun(box_group = "NSF OKN")
 
   # Path to Research Team Data
-  res_path   <- box_path(box_group = "RES_Data")
+  res_path   <- path_fun(box_group = "RES_Data")
 
   # Path to Kathy Mills Research Lab
-  mills_path <- box_path(box_group = "Mills Lab")
+  mills_path <- path_fun(box_group = "Mills Lab")
 
   # OISST Mainstays Folder
-  oisst_path <- box_path(box_group = "RES_Data", subfolder = "OISST/oisst_mainstays/")
+  oisst_path <- path_fun(box_group = "RES_Data", subfolder = "OISST/oisst_mainstays/")
 
 
   # group them all together for export
@@ -62,8 +67,7 @@ research_access_paths <- function(){
 
 
 # # testing
-# box_paths <- gmRi::research_access_paths(os.use = "unix",
-#                                          user.name = "not applicable")
+# box_paths <- gmRi::research_access_paths()
 #
 #
 # # testing an incorrect group name
@@ -238,6 +242,7 @@ get_region_names <- function(region_group = NULL){
 #'
 #' @param region_group Name of the region group used to fetch region names from
 #' gmRi::get_region_names(): Options: gmri_sst_focal_areas, nelme_regions, nmfs_trawl_regions, lme
+#' @param mac_os String indicating value to pass to `os_fun_switch`
 #'
 #' @return Returns list of file paths to both the shapefiles and their sst timeseries
 #' @export
@@ -246,10 +251,15 @@ get_region_names <- function(region_group = NULL){
 #' # Not Run:
 #' # r_group <- "lme"
 #' # get_timeseries_paths(region_group = r_group)
-get_timeseries_paths <- function(region_group){
+get_timeseries_paths <- function(region_group, mac_os = "not_mojave"){
 
   # Set base box paths using box_path()
-  res_path <- box_path(box_group = "res")
+
+  # Switch for Mojave users or other mac versions with CloudStorage folder
+  path_fun <- os_fun_switch(mac_os = mac_os)
+
+  # RES_Data path
+  res_path <- path_fun(box_group = "res")
 
   # Root location to all the shapefiles and timeseries
   poly_root <- paste0(res_path, "Shapefiles/")
@@ -386,6 +396,7 @@ get_timeseries_paths <- function(region_group){
 #' Choices = "LME", "nmfs trawl regions", "gmri focus areas"
 #' @param poly_name String Identifying the shapefile name that was used as mask.
 #' Used to build file name.
+#' @param mac_os String indicating value to pass to `os_fun_switch`
 #'
 #' @return Time series dataframe for the selected region.
 #' @export
@@ -399,14 +410,19 @@ get_timeseries_paths <- function(region_group){
 #' #                                    region_family = "lme",
 #' #                                    poly_name = "agulhas current")
 oisst_access_timeseries <- function(region_family = c("nmfs trawl regions", "lme", "gmri focus areas", "nelme regions", "gom physio regions"),
-                                    poly_name = "gulf of maine"){
+                                    poly_name = "gulf of maine",
+                                    mac_os = "not_mojave"){
 
 
 
 
   # Set up data path for sat source, originally all in okn demo data folder
+  # Switch for Mojave users or other mac versions with CloudStorage folder
+  path_fun <- os_fun_switch(mac_os = mac_os)
+
+
   # Now all the timeseries are in RES_Data/OISST/oisst_mainstays
-  oisst_path <- box_path(box_group = "res", subfolder = "OISST/oisst_mainstays")
+  oisst_path <- path_fun(box_group = "res", subfolder = "OISST/oisst_mainstays")
   source_path <- oisst_path
   if(stringr::str_sub(source_path, -1, -1) != "/") {source_path <- paste0(source_path, "/")}
 
@@ -493,7 +509,7 @@ oisst_access_timeseries <- function(region_family = c("nmfs trawl regions", "lme
 
 
 # # Testing
-# oisst_path <- box_path("res", "OISST/oisst_mainstays")
+# oisst_path <- path_fun("res", "OISST/oisst_mainstays")
 # oisst_access_timeseries(oisst_path, region_family = "gom physio regions", poly_name = "georges bank")
 # oisst_access_timeseries(oisst_path, region_family = "gmri focus areas", poly_name = "long island sound")
 # oisst_access_timeseries(oisst_path, region_family = "gmri focus areas", poly_name = "apershing gulf of maine")
@@ -527,6 +543,7 @@ oisst_access_timeseries <- function(region_family = c("nmfs trawl regions", "lme
 #' the data desired.
 #' @param anomalies Boolean indication of whether to return observed sst or anomalies.
 #' Default = TRUE.
+#' @param mac_os String indicating value to pass to `os_fun_switch`
 #'
 #' @return Raster stack of OISSTv2 data using desired dimensions to crop
 #' @export
@@ -538,10 +555,14 @@ oisst_access_timeseries <- function(region_family = c("nmfs trawl regions", "lme
 #'#                           lat = c(42,44),
 #'#                           time = as.Date(c("2016-08-01", "2020-12-31")))
 #'
-oisst_window_load <- function(data_window, anomalies = FALSE){
+oisst_window_load <- function(data_window, anomalies = FALSE, mac_os = "not_mojave"){
+
+  # Switch for Mojave users or other mac versions with CloudStorage folder
+  path_fun <- os_fun_switch(mac_os = mac_os)
+
 
   # Get OISST data  from Box
-  oisst_path <- box_path(box_group = "res", subfolder = "OISST/oisst_mainstays")
+  oisst_path <- path_fun(box_group = "res", subfolder = "OISST/oisst_mainstays")
 
   # Accessing Observed Temperatures
   if(anomalies == FALSE){
@@ -700,6 +721,7 @@ oisst_window_load <- function(data_window, anomalies = FALSE){
 #' @param resource Name of the global extent resource, choices are raw, climatology, warming rates,
 #' and anomalies.
 #' @param year_range optional vector of years for raw or anomalies data resources.
+#' @param mac_os String indicating value to pass to `os_fun_switch`
 #'
 #' @return resource_out Raster stack of the desired netcdf array
 #' @export
@@ -708,11 +730,17 @@ oisst_window_load <- function(data_window, anomalies = FALSE){
 #' # Not run
 #' # load_global_oisst(resource = "warming rates", year_range = NULL)
 load_global_oisst <- function(resource = c("raw", "climatology82", "climatology91", "anomalies", "warming rates"),
-                              year_range = seq(2010, 2020, 1)){
+                              year_range = seq(2010, 2020, 1),
+                              mac_os = "not_mojave"){
 
-  #
+  # Still testing
   message("Function currently in development.")
-  oisst_path <- box_path(box_group = "Res", subfolder = "OISST/oisst_mainstays")
+
+  # Path to data
+  # Switch for Mojave users or other mac versions with CloudStorage folder
+  path_fun <- os_fun_switch(mac_os = mac_os)
+
+  oisst_path <- path_fun(box_group = "Res", subfolder = "OISST/oisst_mainstays")
 
   # Redirect to resource folder
   resource <- tolower(resource)
@@ -794,7 +822,7 @@ load_global_oisst <- function(resource = c("raw", "climatology82", "climatology9
 #'
 #'   # Return message with group options for the unfamiliar
 #'   if((tolower(region_family) %in% group_options) == FALSE){
-#'     message("Invalid region family.\nAvailable choices are:\n")
+#'     message("Invalid region family.\n Available choices are:\n")
 #'     message(paste(group_options, collapse = "\n"))
 #'     return("invalid region choice selected.")}
 #'

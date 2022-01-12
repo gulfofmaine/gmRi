@@ -4,10 +4,12 @@
 \alias{add_epu_info}
 \title{Add EPU Details to Station Info}
 \usage{
-add_epu_info(trawldat)
+add_epu_info(trawldat, mac_os = "pre_mojave")
 }
 \arguments{
 \item{trawldat}{Survdat data with decdeg_beglat and decdeg_beglon coordinates}
+
+\item{mac_os}{String indicating value to pass to `os_fun_switch`}
 }
 \value{
 survdat dataframe containing epu overlap information

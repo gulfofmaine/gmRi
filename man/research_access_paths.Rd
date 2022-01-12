@@ -4,7 +4,10 @@
 \alias{research_access_paths}
 \title{Establish Research Box Paths}
 \usage{
-research_access_paths()
+research_access_paths(mac_os = "not_mojave")
+}
+\arguments{
+\item{mac_os}{String indicating value to pass to `os_fun_switch`}
 }
 \value{
 res_paths List containing user-specific paths
@@ -15,5 +18,5 @@ resources. Includes the Mills lab, Res data, knowledge graph data, and oisst mai
 }
 \examples{
 # Not run:
-# box_paths <- research_access_paths(os.use = "unix", user.name = "NA, I use a mac")
+# box_paths <- research_access_paths(mac_os = "not_mojave)
 }

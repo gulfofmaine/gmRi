@@ -7,7 +7,8 @@
 oisst_access_timeseries(
   region_family = c("nmfs trawl regions", "lme", "gmri focus areas", "nelme regions",
     "gom physio regions"),
-  poly_name = "gulf of maine"
+  poly_name = "gulf of maine",
+  mac_os = "not_mojave"
 )
 }
 \arguments{
@@ -16,6 +17,8 @@ Choices = "LME", "nmfs trawl regions", "gmri focus areas"}
 
 \item{poly_name}{String Identifying the shapefile name that was used as mask.
 Used to build file name.}
+
+\item{mac_os}{String indicating value to pass to `os_fun_switch`}
 }
 \value{
 Time series dataframe for the selected region.

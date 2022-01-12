@@ -4,11 +4,13 @@
 \alias{get_timeseries_paths}
 \title{Timeseries and Shapefile Path Look-Up}
 \usage{
-get_timeseries_paths(region_group)
+get_timeseries_paths(region_group, mac_os = "not_mojave")
 }
 \arguments{
 \item{region_group}{Name of the region group used to fetch region names from
 gmRi::get_region_names(): Options: gmri_sst_focal_areas, nelme_regions, nmfs_trawl_regions, lme}
+
+\item{mac_os}{String indicating value to pass to `os_fun_switch`}
 }
 \value{
 Returns list of file paths to both the shapefiles and their sst timeseries

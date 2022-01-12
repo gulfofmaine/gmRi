@@ -6,7 +6,8 @@
 \usage{
 load_global_oisst(
   resource = c("raw", "climatology82", "climatology91", "anomalies", "warming rates"),
-  year_range = seq(2010, 2020, 1)
+  year_range = seq(2010, 2020, 1),
+  mac_os = "not_mojave"
 )
 }
 \arguments{
@@ -14,6 +15,8 @@ load_global_oisst(
 and anomalies.}
 
 \item{year_range}{optional vector of years for raw or anomalies data resources.}
+
+\item{mac_os}{String indicating value to pass to `os_fun_switch`}
 }
 \value{
 resource_out Raster stack of the desired netcdf array
