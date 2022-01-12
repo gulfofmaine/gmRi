@@ -4,12 +4,18 @@
 \alias{gmri_survdat_prep}
 \title{Load survdat file with standard data filters, keep all columns}
 \usage{
-gmri_survdat_prep(survdat = NULL, survdat_source = "most recent")
+gmri_survdat_prep(
+  survdat = NULL,
+  survdat_source = "most recent",
+  mac_os = "pre_mojave"
+)
 }
 \arguments{
 \item{survdat}{optional starting dataframe in the R environment to run through size spectra build.}
 
 \item{survdat_source}{String indicating which survdat file to load from box}
+
+\item{mac_os}{String indicating value to pass to `os_fun_switch`}
 }
 \value{
 Returns a dataframe filtered and tidy-ed for size spectrum analysis.

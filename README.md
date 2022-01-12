@@ -8,10 +8,10 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of gmRi is to consolidate useful reasearch tools under one
-consistent repository. Things like official GMRI colors or stylesheets
+The goal of {gmRi} is to consolidate useful research tools under one
+consistent repository. Things like official GMRI colors or style sheets
 for Rmarkdown documents are easy first steps in creating consistent and
-professsional looking documents. Consistent workflows for creating
+professional looking documents. Consistent work flows for creating
 datasets from outside sources like from satellite SST or NERACOOS buoy
 arrays will make our work take less time and be consistent in-house.
 
@@ -87,8 +87,8 @@ ggplot(mpg, aes(manufacturer, fill = manufacturer)) +
 
 # Additional Vignettes:
 
-1.  Details on accessing stylesheets and GMRI branded materials refer to
-    [vignette 1 : GMRI Style
+1.  Details on accessing style sheets and GMRI branded materials refer
+    to: [vignette 1 : GMRI Style
     Doc](http://gulfofmaine.github.io/gmRi/doc/GMRI_Style_Doc.html)
 
 2.  Accessing OISST data via thredds and performing common tasks.

@@ -33,7 +33,7 @@ enter_user_name_func <- function() {
 
 
 
-#' @title Access Shared Path from Box Drive
+#' @title Access Shared Path from Box Drive for Mojave Users
 #'
 #' @description This function creates paths to shared Data and Functions folders stored either inside the Mills
 #' Lab folder or outside the Mills Lab folder in other top level locations on box.
@@ -123,6 +123,12 @@ box_path <- function(box_group = NULL, subfolder = NULL){
   # Base root to box
   box_root <- paste0(normalizePath("~/"), "/Box/")
 
+  # check if box group is valid:
+  group_valid <- tolower(box_group) %in% c("res", "res_data", "res data", "mills", "mills lab", "mills_lab", "ccel", "nsf okn", "okn", "root")
+  if(group_valid == FALSE){
+    stop("box_group not accepted. Please select from c(res, mills, ccel, okn, or root)")
+  }
+
   # If group is specified use switch() to set it
   if (!is.null(box_group)) {
     box_root <- switch(tolower(box_group),
@@ -146,5 +152,77 @@ box_path <- function(box_group = NULL, subfolder = NULL){
   # Return the Desired Path, ensure it ends with /
   if(stringr::str_sub(box_root, -1, -1) != "/") {box_root <- paste0(box_root, "/")}
   return(box_root)
+
+}
+
+
+
+#' @title CloudStorage Box Path Generator
+#'
+#' @description Create Mac OS path to Box for Mojave users
+#'
+#' @param box_group The top level directory name within Box
+#' @param subfolder Any subsequent sub-directory location you wish to access
+#'
+#' @return returns a path to box
+#' @export
+#'
+#' @examples
+#' oisst_path <- cs_path(box_group = "res", subfolder = "OISST/oisst_mainstays")
+#' shapefile_path <- cs_path(box_group = "res", subfolder = "Shapefiles")
+cs_path <- function(box_group = NULL, subfolder = NULL){
+
+  # Base root to box
+  box_root <- paste0(normalizePath("~/"), "/Library/CloudStorage/Box-Box/")
+
+  # check if box group is valid:
+  group_valid <- tolower(box_group) %in% c("res", "res_data", "res data", "mills", "mills lab", "mills_lab", "ccel", "nsf okn", "okn", "root")
+  if(group_valid == FALSE){
+    stop("box_group not accepted. Please select from c(res, mills, ccel, okn, or root)")
+  }
+
+  # If group is specified use switch() to set it
+  if (!is.null(box_group)) {
+    box_root <- switch(tolower(box_group),
+                       "res data"                   = paste0(box_root, "RES_Data/"),
+                       "res_data"                   = paste0(box_root, "RES_Data/"),
+                       "res"                        = paste0(box_root, "RES_Data/"),
+                       "mills lab"                  = paste0(box_root, "Mills Lab/"),
+                       "mills"                      = paste0(box_root, "Mills Lab/"),
+                       "climate change ecology lab" = paste0(box_root, "Climate Change Ecology Lab/"),
+                       "ccel"                       = paste0(box_root, "Climate Change Ecology Lab/"),
+                       "nsf okn"                    = paste0(box_root, "NSF OKN Demo Data/"),
+                       "okn"                        = paste0(box_root, "NSF OKN Demo Data/"),
+                       "root"                       = paste0(box_root, "") )
+  }
+
+  # If sub-directories are provided append those on:
+  if (!is.null(subfolder)) {
+    box_root <- paste0(box_root, subfolder)
+  }
+
+  # Return the Desired Path, ensure it ends with /
+  if(stringr::str_sub(box_root, -1, -1) != "/") {box_root <- paste0(box_root, "/")}
+  return(box_root)
+
+}
+
+
+
+#' @title Mac OS Box Path Switch
+#'
+#' @description Toggles the root location of Box cloud storage based on whether a user is running
+#'
+#' @param mac_os String indicating Mac OS system. Only valid value is "mojave", all other values
+#' will use `box_path` and not `cs_path`
+#'
+#' @return
+#' @export
+#'
+#' @examples
+os_fun_switch <- function(mac_os = "pre_mojave"){
+
+  path_fun <- ifelse(tolower(mac_os) == "mojave", cs_path, box_path)
+  return(path_fun)
 
 }

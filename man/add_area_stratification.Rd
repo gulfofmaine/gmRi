@@ -4,12 +4,18 @@
 \alias{add_area_stratification}
 \title{Add Survey Area Stratified Abundances and Biomasses}
 \usage{
-add_area_stratification(survdat_weights, include_epu = F)
+add_area_stratification(
+  survdat_weights,
+  include_epu = F,
+  mac_os = "pre_mojave"
+)
 }
 \arguments{
 \item{survdat_weights}{Input dataframe, produced by add_lw_info}
 
 \item{include_epu}{Flag for calculating the EPU rates in addition to the stratum regions we use.}
+
+\item{mac_os}{String indicating value to pass to `os_fun_switch`}
 }
 \value{
 survdat df with fields for area stratified values

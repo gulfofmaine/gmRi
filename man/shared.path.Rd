@@ -2,7 +2,7 @@
 % Please edit documentation in R/box_paths_allyn.R
 \name{shared.path}
 \alias{shared.path}
-\title{Access Shared Path from Box Drive}
+\title{Access Shared Path from Box Drive for Mojave Users}
 \usage{
 shared.path(
   os.use = "unix",
