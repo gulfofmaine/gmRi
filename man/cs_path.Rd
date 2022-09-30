@@ -15,7 +15,9 @@ cs_path(box_group = NULL, subfolder = NULL)
 returns a path to box
 }
 \description{
-Create Mac OS path to Box for Mojave users
+Create Mac OS path to Box when Box is mounted under "CloudStorage". When box is
+installed under the cloudstorage path its root directory is different from the default location
+used in gmRi::box_path. These function is a direct swap for that situation.
 }
 \examples{
 oisst_path <- cs_path(box_group = "res", subfolder = "OISST/oisst_mainstays")

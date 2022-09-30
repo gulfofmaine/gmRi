@@ -2,9 +2,9 @@
 % Please edit documentation in R/nefsc_groundfish_access.R
 \name{add_lw_info}
 \alias{add_lw_info}
-\title{Add species length weight information, calculate expected biomass}
+\title{Add species length weight information to cleaned SURVDAT trawl data}
 \usage{
-add_lw_info(survdat_clean, cutoff = FALSE)
+add_lw_info(survdat_clean, cutoff = FALSE, box_location = "root|cloudstorage")
 }
 \arguments{
 \item{survdat_clean}{Survdat data, after usual preparations are completed.
@@ -13,12 +13,15 @@ of the annual effort in each.}
 
 \item{cutoff}{Flag for whether to remove species that have shown poor fit
 when compared to biomass data from the nmfs survey.}
+
+\item{box_location}{String indicating value to pass to `boxpath_switch`}
 }
 \value{
 survdat dataframe containing paired length-weight relationship details for species
 }
 \description{
-Add species length weight information, calculate expected biomass
+calculate expected biomass-at-length for species based on
+published length-weight relationships.
 }
 \examples{
 # not run

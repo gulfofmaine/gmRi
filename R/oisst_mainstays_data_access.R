@@ -21,19 +21,19 @@
 #' @description Returns list of box resource paths for quick access to commonly accessed
 #' resources. Includes the Mills lab, Res data, knowledge graph data, and oisst mainstays.
 #'
-#' @param mac_os String indicating value to pass to `os_fun_switch`
+#' @param box_location String indicating value to pass to `boxpath_switch`
 #'
 #' @return res_paths List containing user-specific paths
 #' @export
 #'
 #' @examples
 #' # Not run:
-#' # box_paths <- research_access_paths(mac_os = "not_mojave)
-research_access_paths <- function(mac_os = "not_mojave"){
+#' # box_paths <- research_access_paths(box_location = "default_boxpath|cloudstorage)
+research_access_paths <- function(box_location = "default_boxpath|cloudstorage"){
 
 
   # Switch for Mojave users or other mac versions with CloudStorage folder
-  path_fun <- os_fun_switch(mac_os = mac_os)
+  path_fun <- boxpath_switch(box_location = box_location)
 
 
   # Path to NSF OKN Demo Data
@@ -68,24 +68,6 @@ research_access_paths <- function(mac_os = "not_mojave"){
 
 # # testing
 # box_paths <- gmRi::research_access_paths()
-#
-#
-# # testing an incorrect group name
-# oisst_access_timeseries(oisst_path = box_paths$oisst_mainstays,
-#                         region_family = "bad group",
-#                         poly_name = "incorrect polygon")
-#
-#
-# # testing an invalid polygon name
-# oisst_access_timeseries(oisst_path = box_paths$oisst_mainstays,
-#                         region_family = "trawl regions",
-#                         poly_name = "incorrect polygon")
-#
-# # testing a valid polygon name
-# oisst_access_timeseries(oisst_path = box_paths$oisst_mainstays,
-#                         region_family = "lme",
-#                         poly_name = "agulhas current")
-
 
 
 
@@ -111,7 +93,7 @@ get_region_names <- function(region_group = NULL){
   # Inform users of options
   if(is.null(region_group)){
     message("Available Region Groups Include:
-            gmri_sst_focal_areas, lme, nmfs_trawl_regions, nelme_regions, & gom_physio_regions")
+            gmri_sst_focal_areas, lme, epu, nmfs_trawl_regions, nelme_regions, & gom_physio_regions")
     return(NULL) }
 
 
@@ -192,13 +174,19 @@ get_region_names <- function(region_group = NULL){
 
 
 
+  # 6. Northeast Ecological Production Units
+  ne_epu_regions <- c("GB", "GOM", "SS", "MAB")
+
+
+
     # Dictionary Look-up
     region_catalog <- list(
       "gmri_sst_focal_areas" = gmri_focal_areas,
       "lme"                  = lme_regions,
       "nmfs_trawl_regions"   = nmfs_regions,
       "nelme_regions"        = nelme_regions,
-      "gom_physio_regions"   = gom_physio_regions)
+      "gom_physio_regions"   = gom_physio_regions,
+      "epu"                  = ne_epu_regions)
 
 
 
@@ -209,7 +197,7 @@ get_region_names <- function(region_group = NULL){
       return(region_selections)
     } else{
       message("Invalid Region Group")
-      message("Available Region Groups Include: gmri_sst_focal_areas, lme, nmfs_trawl_regions, nelme_regions, gom physio regions")
+      message("Available Region Groups Include: gmri_sst_focal_areas, lme, nmfs_trawl_regions, nelme_regions, gom physio regions, & epu")
       return(NULL)
     }
 
@@ -242,7 +230,7 @@ get_region_names <- function(region_group = NULL){
 #'
 #' @param region_group Name of the region group used to fetch region names from
 #' gmRi::get_region_names(): Options: gmri_sst_focal_areas, nelme_regions, nmfs_trawl_regions, lme
-#' @param mac_os String indicating value to pass to `os_fun_switch`
+#' @param box_location String indicating value to pass to `boxpath_switch`
 #'
 #' @return Returns list of file paths to both the shapefiles and their sst timeseries
 #' @export
@@ -251,12 +239,14 @@ get_region_names <- function(region_group = NULL){
 #' # Not Run:
 #' # r_group <- "lme"
 #' # get_timeseries_paths(region_group = r_group)
-get_timeseries_paths <- function(region_group, mac_os = "not_mojave"){
+get_timeseries_paths <- function(
+    region_group = "gmri",
+    box_location = "default_boxpath|cloudstorage"){
 
   # Set base box paths using box_path()
 
   # Switch for Mojave users or other mac versions with CloudStorage folder
-  path_fun <- os_fun_switch(mac_os = mac_os)
+  path_fun <- boxpath_switch(box_location = box_location)
 
   # RES_Data path
   res_path <- path_fun(box_group = "res")
@@ -274,11 +264,12 @@ get_timeseries_paths <- function(region_group, mac_os = "not_mojave"){
                      "lme",
                      "nmfs_trawl_regions",
                      "nelme_regions",
-                     "gom_physio_regions")
+                     "gom_physio_regions",
+                     "epu")
 
   if((region_group %in% group_options) == FALSE){
     message("Invalid Region Group")
-    message("Available Region Groups Include: gmri_sst_focal_areas, lme, nmfs_trawl_regions, nelme_regions, & gom_physio_regions")
+    message("Available Region Groups Include: gmri_sst_focal_areas, lme, nmfs_trawl_regions, nelme_regions, epu, & gom_physio_regions")
     return(NULL)
   }
 
@@ -299,7 +290,8 @@ get_timeseries_paths <- function(region_group, mac_os = "not_mojave"){
     "lme"                  = "_exterior.geojson",
     "nmfs_trawl_regions"   = ".geojson",
     "nelme_regions"        = "_sf.shp",
-    "gom_physio_regions"   = ".geojson")
+    "gom_physio_regions"   = ".geojson",
+    "epu"                  = ".geojson")
 
   # full path prior to region names
   poly_extensions <- list(
@@ -307,7 +299,8 @@ get_timeseries_paths <- function(region_group, mac_os = "not_mojave"){
     "lme"                  = paste0(poly_root, "large_marine_ecosystems/", poly_start),
     "nmfs_trawl_regions"   = paste0(poly_root, "nmfs_trawl_regions/", poly_start),
     "nelme_regions"        = paste0(poly_root, "NELME_regions/", poly_start),
-    "gom_physio_regions"   = paste0(poly_root, "GulfOfMainePhysioRegions/single_regions/", poly_start)
+    "gom_physio_regions"   = paste0(poly_root, "GulfOfMainePhysioRegions/single_regions/", poly_start),
+    "epu"                  = paste0(poly_root, "EPU/individual_epus/", poly_start)
   )
 
 
@@ -325,7 +318,8 @@ get_timeseries_paths <- function(region_group, mac_os = "not_mojave"){
     "lme"                  = paste0(ts_root, "large_marine_ecosystems/", ts_start),
     "nmfs_trawl_regions"   = paste0(ts_root, "nmfs_trawl_regions/", ts_start),
     "nelme_regions"        = paste0(ts_root, "NELME_regions/", ts_start),
-    "gom_physio_regions"   = paste0(ts_root, "GulfOfMainePhysioRegions/", ts_start)
+    "gom_physio_regions"   = paste0(ts_root, "GulfOfMainePhysioRegions/", ts_start),
+    "epu"                  = paste0(ts_root, "EPU/", ts_start)
   )
 
 
@@ -396,7 +390,7 @@ get_timeseries_paths <- function(region_group, mac_os = "not_mojave"){
 #' Choices = "LME", "nmfs trawl regions", "gmri focus areas"
 #' @param poly_name String Identifying the shapefile name that was used as mask.
 #' Used to build file name.
-#' @param mac_os String indicating value to pass to `os_fun_switch`
+#' @param box_location String indicating value to pass to `boxpath_switch`
 #'
 #' @return Time series dataframe for the selected region.
 #' @export
@@ -406,35 +400,33 @@ get_timeseries_paths <- function(region_group, mac_os = "not_mojave"){
 #'
 #' # box_paths <- gmRi::research_access_paths(os.use = "unix",
 #' #                                          user.name = "not applicable")
-#' # agulhas <- oisst_access_timeseries(oisst_path = box_paths$oisst_mainstays,
-#' #                                    region_family = "lme",
-#' #                                    poly_name = "agulhas current")
-oisst_access_timeseries <- function(region_family = c("nmfs trawl regions", "lme", "gmri focus areas", "nelme regions", "gom physio regions"),
-                                    poly_name = "gulf of maine",
-                                    mac_os = "not_mojave"){
-
+#' # agulhas <- oisst_access_timeseries(
+#' #    region_family = "lme",
+#' #    poly_name = "agulhas current",
+#' #    box_location = "default_boxpath|cloudstorage)
+oisst_access_timeseries <- function(
+    region_family = "gmri",
+    poly_name = "gulf of maine",
+    box_location = "default_boxpath|cloudstorage"){
 
 
 
   # Set up data path for sat source, originally all in okn demo data folder
   # Switch for Mojave users or other mac versions with CloudStorage folder
-  path_fun <- os_fun_switch(mac_os = mac_os)
+  path_fun <- boxpath_switch(box_location = box_location)
 
 
-  # Now all the timeseries are in RES_Data/OISST/oisst_mainstays
-  oisst_path <- path_fun(box_group = "res", subfolder = "OISST/oisst_mainstays")
-  source_path <- oisst_path
-  if(stringr::str_sub(source_path, -1, -1) != "/") {source_path <- paste0(source_path, "/")}
-
+  # Timeseries live in RES_Data/OISST/oisst_mainstays
+  source_path <- path_fun(box_group = "res", subfolder = "OISST/oisst_mainstays")
 
   # do some string adjustment to account for underscores and caps
   tidy_name <- tolower(region_family)
   tidy_name <- stringr::str_replace_all(tidy_name, "_", " ")
 
   # State the group options for "region family" if user provided option doesn't match
-  group_options <- c("nmfs trawl regions", "trawl regions",
+  group_options <- c("nmfs trawl regions", "trawl regions", "trawl", "trawl survey",
                      "lme", "large marine ecosystems",
-                     "gmri focus areas", "gulf of maine",
+                     "gmri focus areas", "gmri", "gmri focal areas",
                      "epu", "ecological production units",
                      "nelme regions",
                      "gom physio regions")
@@ -443,7 +435,7 @@ oisst_access_timeseries <- function(region_family = c("nmfs trawl regions", "lme
   if((tidy_name %in% group_options) == FALSE){
     message("Invalid region family.\nAvailable choices are:\n")
     message(paste(group_options, collapse = "\n"))
-    return("invalid region choice selected.")}
+    return("If no options appear try changing box_location between 'default' & 'cloudstorage'")}
 
 
 
@@ -452,13 +444,17 @@ oisst_access_timeseries <- function(region_family = c("nmfs trawl regions", "lme
   timeseries_folder <-  switch(
     EXPR = tidy_name,
     "nmfs trawl regions"          = paste0(source_path, "regional_timeseries/nmfs_trawl_regions/"),
+    "trawl survey"                = paste0(source_path, "regional_timeseries/nmfs_trawl_regions/"),
+    "trawl"                       = paste0(source_path, "regional_timeseries/nmfs_trawl_regions/"),
     "trawl regions"               = paste0(source_path, "regional_timeseries/nmfs_trawl_regions/"),
     "lme"                         = paste0(source_path, "regional_timeseries/large_marine_ecosystems/"),
     "large marine ecosystems"     = paste0(source_path, "regional_timeseries/large_marine_ecosystems/"),
-    "epu"                         = paste0(source_path, "regional_timeseries/ecological_production_units/"),
-    "ecological production units" = paste0(source_path, "regional_timeseries/ecological_production_units/"),
+    "epu"                         = paste0(source_path, "regional_timeseries/EPU/"),
+    "ecological production units" = paste0(source_path, "regional_timeseries/EPU/"),
     "gmri focus areas"            = paste0(source_path, "regional_timeseries/gmri_sst_focal_areas/"),
+    "gmri focal areas"            = paste0(source_path, "regional_timeseries/gmri_sst_focal_areas/"),
     "gulf of maine"               = paste0(source_path, "regional_timeseries/gmri_sst_focal_areas/"),
+    "gmri"               = paste0(source_path, "regional_timeseries/gmri_sst_focal_areas/"),
     "nelme regions"               = paste0(source_path, "regional_timeseries/NELME_regions/"),
     "gom physio regions"          = paste0(source_path, "regional_timeseries/GulfOfMainePhysioRegions/"))
 
@@ -481,7 +477,7 @@ oisst_access_timeseries <- function(region_family = c("nmfs trawl regions", "lme
     message(paste0("Invalid poly_name of: ", poly_name, "\nAvailable Polygons for ",
                    region_family, " group include: \n"))
     message(paste0(available_polys, collapse = "\n"))
-    return("Invalid poly_name choice selected.")
+    return("If no options appear try changing box_location between 'default' & 'cloudstorage'")
   }
 
 
@@ -508,14 +504,23 @@ oisst_access_timeseries <- function(region_family = c("nmfs trawl regions", "lme
 
 
 
-# # Testing
-# oisst_path <- path_fun("res", "OISST/oisst_mainstays")
-# oisst_access_timeseries(oisst_path, region_family = "gom physio regions", poly_name = "georges bank")
-# oisst_access_timeseries(oisst_path, region_family = "gmri focus areas", poly_name = "long island sound")
-# oisst_access_timeseries(oisst_path, region_family = "gmri focus areas", poly_name = "apershing gulf of maine")
-# oisst_access_timeseries(oisst_path, region_family = "lme", poly_name = "baltic sea")
-# oisst_access_timeseries(oisst_path, region_family = "nmfs trawl regions", poly_name = "georges bank")
-# oisst_access_timeseries(oisst_path, region_family = "nelme regions", poly_name = "gom")
+
+
+
+# # # Testing
+#
+# # wrong box path
+# oisst_access_timeseries(region_family = "gom physio regions")
+#
+# # invalid group name
+# oisst_access_timeseries(region_family = "1", box_location = "cloudstorage")
+#
+# # invalid region
+# oisst_access_timeseries(region_family = "gmri focus areas", poly_name = "gulf of maine", box_location = "cloudstorage")
+#
+# # successfull use
+# oisst_access_timeseries(region_family = "lme", poly_name = "baltic sea", box_location = "cloudstorage")
+#
 
 
 
@@ -543,7 +548,7 @@ oisst_access_timeseries <- function(region_family = c("nmfs trawl regions", "lme
 #' the data desired.
 #' @param anomalies Boolean indication of whether to return observed sst or anomalies.
 #' Default = TRUE.
-#' @param mac_os String indicating value to pass to `os_fun_switch`
+#' @param box_location String indicating value to pass to `boxpath_switch`
 #'
 #' @return Raster stack of OISSTv2 data using desired dimensions to crop
 #' @export
@@ -555,10 +560,10 @@ oisst_access_timeseries <- function(region_family = c("nmfs trawl regions", "lme
 #'#                           lat = c(42,44),
 #'#                           time = as.Date(c("2016-08-01", "2020-12-31")))
 #'
-oisst_window_load <- function(data_window, anomalies = FALSE, mac_os = "not_mojave"){
+oisst_window_load <- function(data_window, anomalies = FALSE, box_location = "default_boxpath|cloudstorage"){
 
   # Switch for Mojave users or other mac versions with CloudStorage folder
-  path_fun <- os_fun_switch(mac_os = mac_os)
+  path_fun <- boxpath_switch(box_location = box_location)
 
 
   # Get OISST data  from Box
@@ -721,7 +726,7 @@ oisst_window_load <- function(data_window, anomalies = FALSE, mac_os = "not_moja
 #' @param resource Name of the global extent resource, choices are raw, climatology, warming rates,
 #' and anomalies.
 #' @param year_range optional vector of years for raw or anomalies data resources.
-#' @param mac_os String indicating value to pass to `os_fun_switch`
+#' @param box_location String indicating value to pass to `boxpath_switch`
 #'
 #' @return resource_out Raster stack of the desired netcdf array
 #' @export
@@ -731,14 +736,14 @@ oisst_window_load <- function(data_window, anomalies = FALSE, mac_os = "not_moja
 #' # load_global_oisst(resource = "warming rates", year_range = NULL)
 load_global_oisst <- function(resource = c("raw", "climatology82", "climatology91", "anomalies", "warming rates"),
                               year_range = seq(2010, 2020, 1),
-                              mac_os = "not_mojave"){
+                              box_location = "default_boxpath|cloudstorage"){
 
   # Still testing
   message("Function currently in development.")
 
   # Path to data
   # Switch for Mojave users or other mac versions with CloudStorage folder
-  path_fun <- os_fun_switch(mac_os = mac_os)
+  path_fun <- boxpath_switch(box_location = box_location)
 
   oisst_path <- path_fun(box_group = "Res", subfolder = "OISST/oisst_mainstays")
 
@@ -834,10 +839,10 @@ load_global_oisst <- function(resource = c("raw", "climatology82", "climatology9
 #'     EXPR = tolower(region_family),
 #'     "nmfs trawl regions"          = paste0(source_path, "Shapefiles/nmfs_trawl_regions/"),
 #'     "trawl regions"               = paste0(source_path, "Shapefiles/nmfs_trawl_regions/"),
-#'     #"lme"                        = paste0(source_path, "Shapefiles/large_marine_ecosystems/"),
-#'     #"large marine ecosystems"    = paste0(source_path, "Shapefiles/large_marine_ecosystems/"),
-#'     "epu"                         = paste0(source_path, "Shapefiles/EPU/"),
-#'     "ecological production units" = paste0(source_path, "Shapefiles/EPU/"),
+#'     "lme"                         = paste0(source_path, "Shapefiles/large_marine_ecosystems/"),
+#'     "large marine ecosystems"     = paste0(source_path, "Shapefiles/large_marine_ecosystems/"),
+#'     "epu"                         = paste0(source_path, "Shapefiles/EPU/individual_epus/"),
+#'     "ecological production units" = paste0(source_path, "Shapefiles/EPU/individual_epus/"),
 #'     "gmri focus areas"            = paste0(source_path, "Shapefiles/gmri_sst_focal_areas/"),
 #'     "gulf of maine"               = paste0(source_path, "Shapefiles/gmri_sst_focal_areas/"))
 #'

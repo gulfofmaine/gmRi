@@ -160,3 +160,18 @@ scale_fill_gmri <- function(palette = "main", discrete = TRUE, reverse = FALSE, 
     ggplot2::scale_fill_gradientn(colours = pal(256), ...)
   }
 }
+
+
+
+####  Blog theme
+
+# # Adding Logo to plot
+#
+# logo_path <- paste0(system.file("stylesheets", package = "gmRi"), "/gmri_logo.png")
+# lab_logo <- magick::image_read(logo_path)
+# (test_plot <- ggplot(palmerpenguins::penguins, aes(bill_length_mm, flipper_length_mm, color = species)) +
+#     geom_point(show.legend = F) + labs(x = "Bill length", y = "Flipper Length", subtitle = "Penguin Example Plot",
+#                                        caption = "Source: Gulf of Maine Research Institute") +
+#     gmRi::scale_color_gmri() +
+#     theme(plot.caption = element_text(colour = "gray25", size = 6)))
+# grid::grid.raster(lab_logo, x = 0.08, y = 0.03, just = c('left', 'bottom'), width = unit(0.8, 'inches'))
