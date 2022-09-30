@@ -5,10 +5,9 @@
 \title{Access Regional Timeseries from OISSTv2 Mainstays}
 \usage{
 oisst_access_timeseries(
-  region_family = c("nmfs trawl regions", "lme", "gmri focus areas", "nelme regions",
-    "gom physio regions"),
+  region_family = "gmri",
   poly_name = "gulf of maine",
-  mac_os = "not_mojave"
+  box_location = "default_boxpath|cloudstorage"
 )
 }
 \arguments{
@@ -18,7 +17,7 @@ Choices = "LME", "nmfs trawl regions", "gmri focus areas"}
 \item{poly_name}{String Identifying the shapefile name that was used as mask.
 Used to build file name.}
 
-\item{mac_os}{String indicating value to pass to `os_fun_switch`}
+\item{box_location}{String indicating value to pass to `boxpath_switch`}
 }
 \value{
 Time series dataframe for the selected region.
@@ -39,7 +38,8 @@ the group of polygons your area is in, and the name of the region itself.
 
 # box_paths <- gmRi::research_access_paths(os.use = "unix",
 #                                          user.name = "not applicable")
-# agulhas <- oisst_access_timeseries(oisst_path = box_paths$oisst_mainstays,
-#                                    region_family = "lme",
-#                                    poly_name = "agulhas current")
+# agulhas <- oisst_access_timeseries(
+#    region_family = "lme",
+#    poly_name = "agulhas current",
+#    box_location = "default_boxpath|cloudstorage)
 }

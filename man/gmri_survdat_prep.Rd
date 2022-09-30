@@ -7,7 +7,7 @@
 gmri_survdat_prep(
   survdat = NULL,
   survdat_source = "most recent",
-  mac_os = "pre_mojave"
+  box_location = "root|cloudstorage"
 )
 }
 \arguments{
@@ -15,14 +15,15 @@ gmri_survdat_prep(
 
 \item{survdat_source}{String indicating which survdat file to load from box}
 
-\item{mac_os}{String indicating value to pass to `os_fun_switch`}
+\item{box_location}{String indicating value to pass to `boxpath_switch`}
 }
 \value{
 Returns a dataframe filtered and tidy-ed for size spectrum analysis.
 }
 \description{
 Processing function to prepare survdat data for size spectra analyses.
-Options to select various survdat pulls, or provide your own available.
+Options to select various survdat pulls, or provide your own as a dataframe
+from the environment if available.
 }
 \examples{
 # not run

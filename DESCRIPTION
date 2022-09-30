@@ -23,12 +23,13 @@ Suggests:
     patchwork,
     rnaturalearth,
     sf,
-    stars,
     purrr,
     stringr,
     tibble,
     data.table,
     ecodata,
+    stars,
+    tidyverse,
     testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Imports:
@@ -39,8 +40,10 @@ Imports:
     ncdf4,
     raster,
     rlang,
+    magick,
     sp,
     lubridate,
+    ggthemes,
     shiny,
     janitor,
     readr,

@@ -67,7 +67,12 @@ as_fahrenheit <- function(temp_c, data_type = "temperature"){
   conv_fun <- switch (
     data_type,
     "temperature" = temp_convers,
-    "anomalies" = anom_convers
+    "temp" = temp_convers,
+    "temps" = temp_convers,
+    "anomalies" = anom_convers,
+    "anomaly" = anom_convers,
+    "anom" = anom_convers,
+    "anoms" = anom_convers
   )
 
   # Do conversion

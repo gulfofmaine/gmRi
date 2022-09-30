@@ -159,7 +159,9 @@ box_path <- function(box_group = NULL, subfolder = NULL){
 
 #' @title CloudStorage Box Path Generator
 #'
-#' @description Create Mac OS path to Box for Mojave users
+#' @description Create Mac OS path to Box when Box is mounted under "CloudStorage". When box is
+#' installed under the cloudstorage path its root directory is different from the default location
+#' used in gmRi::box_path. These function is a direct swap for that situation.
 #'
 #' @param box_group The top level directory name within Box
 #' @param subfolder Any subsequent sub-directory location you wish to access
@@ -209,20 +211,26 @@ cs_path <- function(box_group = NULL, subfolder = NULL){
 
 
 
-#' @title Mac OS Box Path Switch
+#' @title Box Path Switcher for Mac Storage Location
 #'
-#' @description Toggles the root location of Box cloud storage based on whether a user is running
+#' @description Toggles the root location of Box cloud storage based on whether a box was mounted
+#' under libraries or under cloudstorage
 #'
-#' @param mac_os String indicating Mac OS system. Only valid value is "mojave", all other values
-#' will use `box_path` and not `cs_path`
+#' @param box_location String where Mac OS system mounted path to box. Accepts "cloudstorage" &
+#' "mojave" to be backwards compatible with code that mistook this for a mojave issue,
+#' all other values will use `box_path` and not `cs_path`
 #'
-#' @return
+#' @return Returns path function based on operating system
 #' @export
 #'
 #' @examples
-os_fun_switch <- function(mac_os = "pre_mojave"){
+#' boxpath_fun <- boxpath_switch(box_location = "cloudstorage")
+boxpath_switch <- function(box_location = "base"){
 
-  path_fun <- ifelse(tolower(mac_os) == "mojave", cs_path, box_path)
+  # Toggle function to use based on how Box is mounted on computer
+  path_fun <- ifelse(tolower(box_location) %in% c("cloudstorage", "mojave"),
+                     gmRi::cs_path,
+                     gmRi::box_path)
   return(path_fun)
 
 }

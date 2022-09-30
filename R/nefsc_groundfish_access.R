@@ -19,20 +19,17 @@
 
 ######################################################_
 
-######################################################__####
-
-######################################################_
-
 #' @title  Load survdat file with standard data filters, keep all columns
 #'
 #'
 #' @description Processing function to prepare survdat data for size spectra analyses.
-#' Options to select various survdat pulls, or provide your own available.
+#' Options to select various survdat pulls, or provide your own as a dataframe
+#' from the environment if available.
 #'
 #'
 #' @param survdat optional starting dataframe in the R environment to run through size spectra build.
 #' @param survdat_source String indicating which survdat file to load from box
-#' @param mac_os String indicating value to pass to `os_fun_switch`
+#' @param box_location String indicating value to pass to `boxpath_switch`
 #'
 #' @return Returns a dataframe filtered and tidy-ed for size spectrum analysis.
 #' @export
@@ -40,10 +37,10 @@
 #' @examples
 #' # not run
 #' # gmri_survdat_prep(survdat_source = "most recent")
-gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent", mac_os = "pre_mojave"){
+gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent", box_location = "root|cloudstorage"){
 
-  # Switch for Mojave users or other mac versions with CloudStorage folder
-  path_fun <- os_fun_switch(mac_os = mac_os)
+  # Switch for mac users with different box storage location
+  path_fun <- boxpath_switch(box_location = box_location)
 
   ####  Resource Paths
   mills_path  <- path_fun("mills")
@@ -76,21 +73,25 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent", ma
 
   # If providing a starting point for survdat pass it in:
   if(is.null(survdat) == FALSE){
+    survdat <- as.data.frame(survdat)
     trawldat <- janitor::clean_names(survdat)
   } else if(is.null(survdat) == TRUE){
 
     # If not then load using the correct path
     load(survdat_path)
+    survdat <- as.data.frame(survdat)
 
 
     # Bigelow data doesn't load in as "survdat"
     if(survdat_source == "bigelow"){
       survdat <- survdat.big
+      survdat <- as.data.frame(survdat)
       rm(survdat.big)}
 
     # Most recent pulls load a list containing survdat
     if(survdat_source %in% c("bio", "most recent")){
-      survdat <- survey$survdat }
+      survdat <- survey$survdat
+      survdat <- as.data.frame(survdat)}
 
     # clean names up for convenience
     trawldat <- janitor::clean_names(survdat)
@@ -106,16 +107,16 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent", ma
   ####__ a. Missing column flags  ####
 
   # Flags for missing columns that need to be merged in or built
-  has_comname  <- "comname" %in% names(trawldat)
-  has_id_col   <- "id" %in% names(trawldat)
+  has_comname  <- "comname"     %in% names(trawldat)
+  has_id_col   <- "id"          %in% names(trawldat)
   has_towdate  <- "est_towdate" %in% names(trawldat)
-  has_month    <- "est_month" %in% names(trawldat)
+  has_month    <- "est_month"   %in% names(trawldat)
 
   # Flags for renaming or subsetting the data due to presence/absence of columns
-  has_year      <- "est_year" %in% names(trawldat)
-  has_catchsex  <- "catchsex" %in% names(trawldat)
+  has_year      <- "est_year"      %in% names(trawldat)
+  has_catchsex  <- "catchsex"      %in% names(trawldat)
   has_decdeg    <- "decdeg_beglat" %in% names(trawldat)
-  has_avg_depth <- "avgdepth" %in% names(trawldat)
+  has_avg_depth <- "avgdepth"      %in% names(trawldat)
 
 
 
@@ -128,14 +129,16 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent", ma
   # Use SVSPP to get common names for species
   if(has_comname == FALSE){
     message("no comnames found, merging records in with spp_keys/sppclass.csv")
+
     # Load sppclass codes and common names
     spp_classes <- readr::read_csv(
-        paste0(nmfs_path, "spp_keys/sppclass.csv"),
-        col_types = readr::cols())
+      paste0(nmfs_path, "spp_keys/sppclass.csv"),
+      col_types = readr::cols())
     spp_classes <- janitor::clean_names(spp_classes)
-    spp_classes <- dplyr::mutate(spp_classes,
-             comname  = stringr::str_to_lower(common_name),
-             scientific_name = stringr::str_to_lower(scientific_name))
+    spp_classes <- dplyr::mutate(
+      .data = spp_classes,
+      comname  = stringr::str_to_lower(common_name),
+      scientific_name = stringr::str_to_lower(scientific_name))
     spp_classes <- dplyr::distinct(spp_classes, svspp, comname, scientific_name)
 
 
@@ -150,7 +153,8 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent", ma
   if(has_id_col == FALSE) {
     message("creating station id from cruise-station-stratum fields")
     # Build ID column
-    trawldat <- dplyr::mutate(trawldat,
+    trawldat <- dplyr::mutate(
+      .data = trawldat,
       cruise6 = stringr::str_pad(cruise6, 6, "left", "0"),
       station = stringr::str_pad(station, 3, "left", "0"),
       stratum = stringr::str_pad(stratum, 4, "left", "0"),
@@ -178,38 +182,44 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent", ma
   ####____ d. build date structure for quick grab of date components
   if(has_towdate == TRUE) {
     message("building month/day columns from est_towdate")
-    trawldat <- dplyr::mutate(trawldat,
-                              est_month = stringr::str_sub(est_towdate, 6,7),
-                              est_month = as.numeric(est_month),
-                              est_day   = stringr::str_sub(est_towdate, -2, -1),
-                              est_day   = as.numeric(est_day), .before = season)}
+    trawldat <- dplyr::mutate(
+      .data = trawldat,
+      est_month = stringr::str_sub(est_towdate, 6,7),
+      est_month = as.numeric(est_month),
+      est_day   = stringr::str_sub(est_towdate, -2, -1),
+      est_day   = as.numeric(est_day), .before = season)}
 
 
 
   #### 4. Column Changes  ####
-  trawldat <- dplyr::mutate(trawldat,
 
-      # Text Formatting
-      comname = tolower(comname),
-      id      = format(id, scientific = FALSE),
-      svspp   = as.character(svspp),
-      svspp   = stringr::str_pad(svspp, 3, "left", "0"),
-      season  = stringr::str_to_title(season),
 
-      # Format Stratum number,
-      # exclude leading and trailing codes for inshore/offshore,
-      # used for matching to stratum areas
-      strat_num = stringr::str_sub(stratum, 2, 3))
+  # a. Text Formatting
+  trawldat <- dplyr::mutate(
+    .data = trawldat,
+    comname = tolower(comname),
+    id      = format(id, scientific = FALSE),
+    svspp   = as.character(svspp),
+    svspp   = stringr::str_pad(svspp, 3, "left", "0"),
+    season  = stringr::str_to_title(season),
 
-  # Rename to make units more clear
-  trawldat <- dplyr::rename(trawldat,
+    # Format Stratum number,
+    # exclude leading and trailing codes for inshore/offshore,
+    # used for matching to stratum areas
+    strat_num = stringr::str_sub(stratum, 2, 3))
+
+
+  # b. Rename to make units more clear
+  trawldat <- dplyr::rename(
+    .data = trawldat,
     biomass_kg = biomass,
-    length_cm = length)
+    length_cm  = length)
 
-  # Replace 0's that must be greater than 0
-  trawldat <- dplyr::mutate(trawldat,
+  # c. Replace 0's that must be greater than 0
+  trawldat <- dplyr::mutate(
+    .data = trawldat,
     biomass_kg = ifelse(biomass_kg == 0 & abundance > 0, 0.0001, biomass_kg),
-    abundance = ifelse(abundance == 0 & biomass_kg > 0, 1, abundance))
+    abundance  = ifelse(abundance == 0 & biomass_kg > 0, 1, abundance))
 
 
 
@@ -226,38 +236,46 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent", ma
   # 5. Species Exclusion
 
   # Eliminate Canadian Strata and Strata No longer in Use
-  trawldat <- dplyr::filter(trawldat,
-      stratum >= 01010,
-      stratum <= 01760,
-      stratum != 1310,
-      stratum != 1320,
-      stratum != 1330,
-      stratum != 1350,
-      stratum != 1410,
-      stratum != 1420,
-      stratum != 1490)
+  trawldat <- dplyr::filter(
+    .data = trawldat,
+    stratum >= 01010,
+    stratum <= 01760,
+    stratum != 1310,
+    stratum != 1320,
+    stratum != 1330,
+    stratum != 1350,
+    stratum != 1410,
+    stratum != 1420,
+    stratum != 1490)
+
 
   # Filter to just Spring and Fall
   trawldat <- dplyr::filter(trawldat, season %in% c("Spring", "Fall"))
   trawldat <- dplyr::mutate(trawldat, season = factor(season, levels = c("Spring", "Fall")))
 
+
   # Filter years
-  trawldat <- dplyr::filter(trawldat,
-                            est_year >= 1970,
-                            est_year < 2020)
+  trawldat <- dplyr::filter(
+    .data = trawldat,
+    est_year >= 1970,
+    est_year < 2020)
 
   # Drop NA Biomass and Abundance Records
-  trawldat <- dplyr::filter(trawldat,
-                            !is.na(biomass_kg),
-                            !is.na(abundance))
+  trawldat <- dplyr::filter(
+    .data = trawldat,
+    !is.na(biomass_kg),
+    !is.na(abundance))
 
   # Exclude the Skrimps
-  trawldat <-  dplyr::filter(trawldat, svspp %not in% c(285:299, 305, 306, 307, 316, 323, 910:915, 955:961))
+  trawldat <-  dplyr::filter(
+    .data = trawldat,
+    svspp %not in% c(285:299, 305, 306, 307, 316, 323, 910:915, 955:961))
 
   # Exclude the unidentified fish
   trawldat <- dplyr::filter(trawldat, svspp %not in% c(0, 978, 979, 980, 998))
 
-  # # Only the Albatross and Henry Bigelow? - eliminates 1989-1991
+
+  # # Restrict to only the Albatross and Henry Bigelow? - eliminates 1989-1991
   # trawldat_t <- dplyr::filter(trawldat, svvessel %in% c("AL", "HB"))
 
 
@@ -328,11 +346,11 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent", ma
   # Get the abundance value for each sex
   # arrived at by summing across each length
   abundance_check <- dplyr::group_by(trawldat, !!!rlang::syms(abundance_groups))
-  abundance_check <- dplyr::summarise(abundance_check,
-      abund_actual = sum(numlen),
-      n_len_class  = dplyr::n_distinct(length_cm),
-      .groups      = "keep")
-  abundance_check <- dplyr::ungroup(abundance_check)
+  abundance_check <- dplyr::summarise(
+    .data = abundance_check,
+    abund_actual = sum(numlen),
+    n_len_class  = dplyr::n_distinct(length_cm),
+    .groups      = "drop")
 
 
   # Get the ratio between the original abundance column
@@ -365,16 +383,18 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent", ma
 
   # Record of unique station catches:
   # One row for every species * sex * length_cm, combination in the data
-  trawl_lens <- dplyr::filter(survdat_processed,
-                  is.na(length_cm) == FALSE,
-                  is.na(numlen) == FALSE,
-                  numlen_adj > 0)
+  trawl_lens <- dplyr::filter(
+    .data = survdat_processed,
+    is.na(length_cm) == FALSE,
+    is.na(numlen) == FALSE,
+    numlen_adj > 0)
 
 
   # Do we want to just keep all the station info here as well?
   # question to answer is whether any other columns repeat,
   # or if these are the only ones
-  trawl_clean <- dplyr::distinct(trawl_lens,
+  trawl_clean <- dplyr::distinct(
+    .data = trawl_lens,
     id, svspp, comname, catchsex, abundance, n_len_class,
     length_cm, numlen, numlen_adj, biomass_kg, .keep_all = TRUE)
 
@@ -401,17 +421,17 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent", ma
 
 ######################################################_
 
-
-# testing data
-# survdat_clean <- survdat_prep(survdat_source = "2020")
-
-#' @title Add species length weight information, calculate expected biomass
+#' @title Add species length weight information to cleaned SURVDAT trawl data
+#'
+#' @description calculate expected biomass-at-length for species based on
+#' published length-weight relationships.
 #'
 #' @param survdat_clean Survdat data, after usual preparations are completed.
 #' These include removal of old strata, labeling of areas of interest, and inclusion
 #' of the annual effort in each.
 #' @param cutoff Flag for whether to remove species that have shown poor fit
 #' when compared to biomass data from the nmfs survey.
+#' @param box_location String indicating value to pass to `boxpath_switch`
 #'
 #' @return survdat dataframe containing paired length-weight relationship details for species
 #' @export
@@ -419,34 +439,48 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent", ma
 #' @examples
 #' # not run
 #' # add_lw_info(survdat_clean = survdat_clean, cutoff = T)
-add_lw_info <- function(survdat_clean, cutoff = FALSE){
+add_lw_info <- function(survdat_clean, cutoff = FALSE, box_location = "root|cloudstorage"){
 
 
   #### 1. Match Species to LW Coefficients  ####
 
-  # This table is a combined table of wigley and fishbase L-W coefficients
-  nmfs_path <- path_fun(box_group = "RES_Data", subfolder = "NMFS_trawl")
+  # Switch for mac users with different box storage location
+  path_fun <- boxpath_switch(box_location = box_location)
+
+  ####  Resource Paths
+  nmfs_path   <- path_fun(box_group = "RES_Data", subfolder = "NMFS_trawl")
   lw_key_path <- paste0(nmfs_path, "length_weight_keys/fishbase_wigley_combined_key.csv")
+
+  # This table is a combined table of wigley and fishbase L-W coefficients
   lw_combined <- readr::read_csv(lw_key_path, col_types = readr::cols())
   lw_combined <- dplyr::mutate(lw_combined,
-                  svspp = stringr::str_pad(svspp, 3, "left", "0"),
-                  season = stringr::str_to_title(season))
+                               svspp = stringr::str_pad(svspp, 3, "left", "0"),
+                               season = stringr::str_to_title(season))
 
 
   # Do a priority pass with the dplyr::filter(lw_combined, source == "wigley)
   # merge on comname, season, and catchsex
   wigley_coefficients <- dplyr::filter(lw_combined, source == "wigley")
   wigley_coefficients <- dplyr::select(wigley_coefficients,
-      source, season, svspp, comname, scientific_name, spec_class,
-      hare_group, fishery, catchsex, a, b, ln_a)
+                                       source, season, svspp, comname, scientific_name, spec_class,
+                                       hare_group, fishery, catchsex, a, b, ln_a)
 
 
   # Do a second pass with the dplyr::filter(lw_combined, source == "fishbase")
   # merge on common names only
   fishbase_coefficients <- dplyr::filter(lw_combined, source == "fishbase")
   fishbase_coefficients <- dplyr::select(fishbase_coefficients,
-      source, -svspp, comname, scientific_name, spec_class,
-      hare_group, fishery, a, b, ln_a)
+                                         source, -svspp, comname, scientific_name, spec_class,
+                                         hare_group, fishery, a, b, ln_a)
+
+
+  # Mismatched svspp codes
+  wigley_lookup <- function(x){unique(wigley_coefficients$svspp[which(wigley_coefficients$comname == x)])}
+  survdat_clean <- dplyr::mutate(
+    .data = survdat_clean,
+    svspp = dplyr::if_else(comname == "scup", wigley_lookup("scup"), svspp))
+
+
 
 
   # First Pass - Wigley
@@ -457,8 +491,8 @@ add_lw_info <- function(survdat_clean, cutoff = FALSE){
 
   # Second Pass - Fishbase, for the stragglers if any
   pass_2 <- dplyr::filter(survdat_clean,
-                  comname %not in% wigley_coefficients$comname,
-                  svspp %not in% pass_1$svspp)
+                          comname %not in% wigley_coefficients$comname,
+                          svspp %not in% pass_1$svspp)
   pass_2 <- dplyr::inner_join(pass_2, fishbase_coefficients)
 
 
@@ -466,14 +500,14 @@ add_lw_info <- function(survdat_clean, cutoff = FALSE){
   trawl_weights <- dplyr::bind_rows(pass_1, pass_2)
   trawl_weights <- dplyr::arrange(trawl_weights, est_year, season)
   trawl_weights <- dplyr::mutate(trawl_weights,
-      b             = as.numeric(b),
-      a             = as.numeric(a),
-      a             = ifelse(is.na(a) & !is.na(ln_a), exp(ln_a), a),
-      ln_a          = ifelse(is.na(ln_a), log(a), ln_a),  # log of a used if ln_a is isn't already there (some fish just had ln_a reported)
-      llen          = log(length_cm),
-      ind_log_wt    = ln_a + (b * llen),
-      ind_weight_kg = exp(ind_log_wt),                # weight of an individual in size class
-      sum_weight_kg = ind_weight_kg * numlen_adj)     # Individual weight * adjusted numlen
+                                 b             = as.numeric(b),
+                                 a             = as.numeric(a),
+                                 a             = ifelse(is.na(a) & !is.na(ln_a), exp(ln_a), a),
+                                 ln_a          = ifelse(is.na(ln_a), log(a), ln_a),  # log of a used if ln_a is isn't already there (some fish just had ln_a reported)
+                                 llen          = log(length_cm),
+                                 ind_log_wt    = ln_a + (b * llen),
+                                 ind_weight_kg = exp(ind_log_wt),                # weight of an individual in size class
+                                 sum_weight_kg = ind_weight_kg * numlen_adj)     # Individual weight * adjusted numlen
   trawl_weights <- tidyr::drop_na(trawl_weights, ind_weight_kg)
   trawl_weights <- dplyr::select(trawl_weights, -ind_log_wt, -llen)
 
@@ -599,6 +633,17 @@ add_lw_info <- function(survdat_clean, cutoff = FALSE){
 # test_lw        <- add_lw_info(survdat_clean = test_survdat)
 # test_lw_cutoff <- add_lw_info(survdat_clean = test_survdat, cutoff = T)
 
+
+
+######################################################__####
+
+######################################################_
+
+
+# testing data
+# survdat_clean <- survdat_prep(survdat_source = "2020")
+
+
 ######################################################__####
 
 ######################################################_
@@ -611,7 +656,7 @@ add_lw_info <- function(survdat_clean, cutoff = FALSE){
 #' to the survey station locations.
 #'
 #' @param trawldat Survdat data with decdeg_beglat and decdeg_beglon coordinates
-#' @param mac_os String indicating value to pass to `os_fun_switch`
+#' @param box_location String indicating value to pass to `boxpath_switch`
 #'
 #' @description Uses Sean Lucey's "poststrat" function to overlay EPU's. Tried to
 #' replace it with sf steps, but it wasn't worth the effort. This function exists to
@@ -623,8 +668,11 @@ add_lw_info <- function(survdat_clean, cutoff = FALSE){
 #' @examples
 #' #' # not run
 #' # add_epu_info(trawldat = survdat_lw)
-add_epu_info <- function(trawldat, mac_os = "pre_mojave"){
+add_epu_info <- function(trawldat, box_location = "root|cloudstorage"){
 
+
+  # Switch for mac users with different box storage location
+  path_fun <- boxpath_switch(box_location = box_location)
 
   #### EPU assignment for survdat stations - function from Sean Luceys "RSurvey" repo
   # This section assigns EPU's via overlay using Sean Lucey's code,
@@ -714,7 +762,7 @@ add_epu_info <- function(trawldat, mac_os = "pre_mojave"){
 #'
 #' @param survdat_weights Input dataframe, produced by add_lw_info
 #' @param include_epu Flag for calculating the EPU rates in addition to the stratum regions we use.
-#' @param mac_os String indicating value to pass to `os_fun_switch`
+#' @param box_location String indicating value to pass to `boxpath_switch`
 #'
 #' @return survdat df with fields for area stratified values
 #' @export
@@ -722,12 +770,12 @@ add_epu_info <- function(trawldat, mac_os = "pre_mojave"){
 #' @examples
 #' # not run
 #' # add_area_stratification(survdat_weights = survdat_lw, include_epu = F)
-add_area_stratification <- function(survdat_weights, include_epu = F, mac_os = "pre_mojave"){
+add_area_stratification <- function(survdat_weights, include_epu = F, box_location = "root|cloudstorage"){
 
   # https://noaa-edab.github.io/survdat/articles/calc_strat_mean.html
 
-  # Switch for Mojave users or other mac versions with CloudStorage folder
-  path_fun <- os_fun_switch(mac_os = mac_os)
+  # Switch for mac users with different box storage location
+  path_fun <- boxpath_switch(box_location = box_location)
 
 
   ####  1. Import supplemental files  ####

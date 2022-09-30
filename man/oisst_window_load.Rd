@@ -4,7 +4,11 @@
 \alias{oisst_window_load}
 \title{Access OISST via Data Window of lat/lon/time}
 \usage{
-oisst_window_load(data_window, anomalies = FALSE, mac_os = "not_mojave")
+oisst_window_load(
+  data_window,
+  anomalies = FALSE,
+  box_location = "default_boxpath|cloudstorage"
+)
 }
 \arguments{
 \item{data_window}{dataframe with columns for lat, lon, & time indicating the extent of
@@ -13,7 +17,7 @@ the data desired.}
 \item{anomalies}{Boolean indication of whether to return observed sst or anomalies.
 Default = TRUE.}
 
-\item{mac_os}{String indicating value to pass to `os_fun_switch`}
+\item{box_location}{String indicating value to pass to `boxpath_switch`}
 }
 \value{
 Raster stack of OISSTv2 data using desired dimensions to crop

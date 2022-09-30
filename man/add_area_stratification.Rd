@@ -7,7 +7,7 @@
 add_area_stratification(
   survdat_weights,
   include_epu = F,
-  mac_os = "pre_mojave"
+  box_location = "root|cloudstorage"
 )
 }
 \arguments{
@@ -15,7 +15,7 @@ add_area_stratification(
 
 \item{include_epu}{Flag for calculating the EPU rates in addition to the stratum regions we use.}
 
-\item{mac_os}{String indicating value to pass to `os_fun_switch`}
+\item{box_location}{String indicating value to pass to `boxpath_switch`}
 }
 \value{
 survdat df with fields for area stratified values
