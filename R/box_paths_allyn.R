@@ -122,6 +122,10 @@ box_path <- function(box_group = NULL, subfolder = NULL){
 
   # Base root to box
   box_root <- paste0(normalizePath("~/"), "/Box/")
+  
+  # Base root to box (for windows)
+  # fixes direction of slash and removes "/Documents" from path name
+  if(.Platform$OS.type=="windows"){box_root<-paste0(stringr::str_sub(normalizePath("~/",winslash="/"),end=-11),"/Box/")}
 
   # check if box group is valid:
   group_valid <- tolower(box_group) %in% c("res", "res_data", "res data", "mills", "mills lab", "mills_lab", "ccel", "nsf okn", "okn", "root")
