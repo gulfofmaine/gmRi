@@ -56,7 +56,7 @@ theme_gmri <- function(base_size = 10,
 
       # Legend Elements
       legend.background = ggplot2::element_rect(),
-      legend.position   = "top",
+      legend.position   = "bottom",
       legend.direction  = "horizontal",
       legend.box        = "vertical",
       legend.title      = ggplot2::element_text(size = 9),
@@ -77,7 +77,6 @@ theme_gmri <- function(base_size = 10,
       plot.caption  = ggplot2::element_text(size = 7.2,
                                             margin = ggplot2::margin(t = 20),
                                             color = "gray40"),
-      #plot.margin  = ggplot2::unit(c(1, 1, 1, 1), "lines"),
       plot.margin   = ggplot2::unit(c(1, 1, 2, 1), "lines"),
 
       # Facet Details
@@ -153,7 +152,7 @@ map_theme <- function(...){
 # # getting path to fonts from gmRi package, should work for any user:
 # gmri_font_paths <- paste0(system.file("stylesheets", package = "gmRi"), "/Fonts/")
 #
-# # Adding  the fonts is another challenge after that
+# # Adding the fonts is another challenge after that
 # sysfonts::font_add("http://fast.fonts.net/t/1.css?apiType=css&projectid=806f61f6-d695-4965-a878-820b50bc0269")
 #
 # # doesn't work

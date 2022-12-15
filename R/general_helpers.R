@@ -83,8 +83,7 @@ as_fahrenheit <- function(temp_c, data_type = "temperature"){
 
 
 
-#' @title Convert Daily Stack to Monthly Means
-#'
+#' @title Convert a Named Daily Raster to Monthly Means Stack
 #'
 #' @description Takes a stack of daily data with names of "XYYYY.MM.DD" and
 #' returns monthly averages.

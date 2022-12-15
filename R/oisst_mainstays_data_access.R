@@ -406,7 +406,7 @@ get_timeseries_paths <- function(
 #' #    box_location = "default_boxpath|cloudstorage)
 oisst_access_timeseries <- function(
     region_family = "gmri",
-    poly_name = "gulf of maine",
+    poly_name = "apershing gulf of maine",
     box_location = "default_boxpath|cloudstorage"){
 
 
@@ -454,7 +454,7 @@ oisst_access_timeseries <- function(
     "gmri focus areas"            = paste0(source_path, "regional_timeseries/gmri_sst_focal_areas/"),
     "gmri focal areas"            = paste0(source_path, "regional_timeseries/gmri_sst_focal_areas/"),
     "gulf of maine"               = paste0(source_path, "regional_timeseries/gmri_sst_focal_areas/"),
-    "gmri"               = paste0(source_path, "regional_timeseries/gmri_sst_focal_areas/"),
+    "gmri"                        = paste0(source_path, "regional_timeseries/gmri_sst_focal_areas/"),
     "nelme regions"               = paste0(source_path, "regional_timeseries/NELME_regions/"),
     "gom physio regions"          = paste0(source_path, "regional_timeseries/GulfOfMainePhysioRegions/"))
 
