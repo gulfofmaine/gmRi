@@ -988,7 +988,7 @@ get_survdat_tows <- function(survdat_clean) {
   # Get unique tows
   survdat_tows <- survdat_clean %>%
     dplyr::distinct(id, est_towdate, est_year, est_month, est_day, season, svvessel, decdeg_beglat, decdeg_beglon, survey_area, avgdepth, surftemp, surfsalin, bottemp, botsalin) %>%
-    filter(!is.na(decdeg_beglat) & !is.na(decdeg_beglon))
+    dplyr::filter(!is.na(decdeg_beglat) & !is.na(decdeg_beglon))
 
   # Return it
   return(survdat_tows)
@@ -1023,34 +1023,34 @@ make_survdat_occu <- function(survdat_clean, species_keep){
   #### 1. Filter SURVDAT to species of interest based on character or numeric vector `species_keep` and aggregate abundance and biomass data for these species at each tow location   ####
   if (all(is.character(species_keep))) {
     presence_data <- survdat_clean %>%
-      filter(., comname %in% species_keep) %>%
-      group_by(., id, svspp, comname) %>%
-      summarise(
+      dplyr::filter(., comname %in% species_keep) %>%
+      dplyr::group_by(., id, svspp, comname) %>%
+      dplyr::summarise(
         sum_abundance = sum(abundance),
         sum_biomass_kg = ifelse(length(unique(biomass_kg == 1)), unique(biomass_kg), sum(biomass_kg))
       ) %>%
-      mutate(presence = ifelse(sum_abundance > 0, 1, 0)) %>% # should all be 1s
+      dplyr::mutate(presence = ifelse(sum_abundance > 0, 1, 0)) %>% # should all be 1s
       # presence = 1 if abundance >=1, presence = 0 if abundance = 0
       dplyr::select(id, svspp, comname, presence, sum_abundance, sum_biomass_kg) %>%
-      ungroup()
+      dplyr::ungroup()
   } else {
     presence_data <- survdat_clean %>%
-      filter(., svspp %in% species_keep) %>%
-      group_by(., id, svspp, comname) %>%
-      summarise(
+      dplyr::filter(., svspp %in% species_keep) %>%
+      dplyr::group_by(., id, svspp, comname) %>%
+      dplyr::summarise(
         sum_abundance = sum(abundance),
         sum_biomass_kg = ifelse(length(unique(biomass_kg == 1)), unique(biomass_kg), sum(biomass_kg))
       ) %>%
-      mutate(presence = ifelse(sum_abundance > 0, 1, 0)) %>% # should all be 1s
+      dplyr::mutate(presence = ifelse(sum_abundance > 0, 1, 0)) %>% # should all be 1s
       # presence = 1 if abundance >=1, presence = 0 if abundance = 0
-      select(id, svspp, comname, presence, sum_abundance, sum_biomass_kg) %>%
-      ungroup()
+      dplyr::select(id, svspp, comname, presence, sum_abundance, sum_biomass_kg) %>%
+      dplyr::ungroup()
   }
   
   #### 2. Create dataframe with all possible tow/species combinations   ####
   # Create a dataframe of all possible survey ID/species combinations
   all_ID_SPEC_possibilities <- tibble::tibble(id = rep(unique(survdat_clean$id), length(unique(presence_data$svspp)))) %>%
-    mutate(svspp = rep(unique(presence_data$svspp), length(unique(survdat_clean$id))),
+    dplyr::mutate(svspp = rep(unique(presence_data$svspp), length(unique(survdat_clean$id))),
     comname = rep(unique(presence_data$comname), length(unique(survdat_clean$id)))) %>%
     dplyr::arrange(id)
   
@@ -1059,9 +1059,9 @@ make_survdat_occu <- function(survdat_clean, species_keep){
   survdat_occu<- all_ID_SPEC_possibilities %>% 
     dplyr::left_join(presence_data, by = c("id", "svspp", "comname")) %>%                           
     #populate "possibilities" dataset with presence data                       
-    mutate(presence = ifelse(is.na(presence) == T, 0, presence)) %>%     
-    mutate(sum_biomass_kg = ifelse(is.na(sum_biomass_kg) == T, 0.000, sum_biomass_kg)) %>%  
-    mutate(sum_abundance = ifelse(is.na(sum_abundance) == T, 0, sum_abundance)) %>%  
+    dplyr::mutate(presence = ifelse(is.na(presence) == T, 0, presence)) %>%     
+    dplyr::mutate(sum_biomass_kg = ifelse(is.na(sum_biomass_kg) == T, 0.000, sum_biomass_kg)) %>%  
+    dplyr::mutate(sum_abundance = ifelse(is.na(sum_abundance) == T, 0, sum_abundance)) %>%  
     dplyr::select(id, svspp, comname, presence, sum_abundance, sum_biomass_kg) 
  
   # Return it
