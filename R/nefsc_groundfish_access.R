@@ -1023,40 +1023,34 @@ make_survdat_occu <- function(survdat_clean, species_keep){
   #### 1. Filter SURVDAT to species of interest based on character or numeric vector `species_keep` and aggregate abundance and biomass data for these species at each tow location   ####
   if (all(is.character(species_keep))) {
     presence_data <- survdat_clean %>%
-      dplyr::filter(., comname %in% species_keep) %>%
-      dplyr::group_by(., id, svspp, comname) %>%
-      dplyr::summarise(
-        sum_abundance = sum(abundance),
-        sum_biomass_kg = ifelse(length(unique(biomass_kg == 1)), unique(biomass_kg), sum(biomass_kg))
-      ) %>%
-      dplyr::mutate(presence = ifelse(sum_abundance > 0, 1, 0)) %>% # should all be 1s
-      # presence = 1 if abundance >=1, presence = 0 if abundance = 0
-      dplyr::select(id, svspp, comname, presence, sum_abundance, sum_biomass_kg) %>%
-      dplyr::ungroup()
+      dplyr::filter(., comname %in% species_keep)
   } else {
     presence_data <- survdat_clean %>%
-      dplyr::filter(., svspp %in% species_keep) %>%
+      dplyr::filter(., comname %in% species_keep)
+  }
+  
+  presence_data<- presence_data %>%
       dplyr::group_by(., id, svspp, comname) %>%
       dplyr::summarise(
         sum_abundance = sum(abundance),
-        sum_biomass_kg = ifelse(length(unique(biomass_kg == 1)), unique(biomass_kg), sum(biomass_kg))
+        sum_biomass_kg = sum(unique(biomass_kg))
       ) %>%
-      dplyr::mutate(presence = ifelse(sum_abundance > 0, 1, 0)) %>% # should all be 1s
-      # presence = 1 if abundance >=1, presence = 0 if abundance = 0
-      dplyr::select(id, svspp, comname, presence, sum_abundance, sum_biomass_kg) %>%
-      dplyr::ungroup()
-  }
+      dplyr::mutate(presence = ifelse(sum_abundance > 0, 1, 0)) %>% # should all be 1s, presence = 1 if abundance >=1, presence = 0 if abundance = 0
+        dplyr::select(id, svspp, comname, presence, sum_abundance, sum_biomass_kg) %>%
+        dplyr::ungroup()
+      
   
   #### 2. Create dataframe with all possible tow/species combinations   ####
   # Create a dataframe of all possible survey ID/species combinations
-  all_ID_SPEC_possibilities <- tibble::tibble(id = rep(unique(survdat_clean$id), length(unique(presence_data$svspp)))) %>%
-    dplyr::mutate(svspp = rep(unique(presence_data$svspp), length(unique(survdat_clean$id))),
-    comname = rep(unique(presence_data$comname), length(unique(survdat_clean$id)))) %>%
-    dplyr::arrange(id)
+  all_spp <- survdat_clean %>% distinct(comname, svspp)
+  all_id_spec_possibilites <- survdat_clean %>%
+   tidyr::expand(id, comname) %>%
+   left_join(all_spp, by = "comname") %>%
+   dplyr::filter(., comname %in% presence_data$comname)
+
   
-  
-  #### 2. Join all possible tow/species dataframe with presence data and impute absences   ####
-  survdat_occu<- all_ID_SPEC_possibilities %>% 
+  #### 3. Join all possible tow/species dataframe with presence data and impute absences   ####
+  survdat_occu<- all_id_spec_possibilites %>% 
     dplyr::left_join(presence_data, by = c("id", "svspp", "comname")) %>%                           
     #populate "possibilities" dataset with presence data                       
     dplyr::mutate(presence = ifelse(is.na(presence) == T, 0, presence)) %>%     
