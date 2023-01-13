@@ -955,9 +955,120 @@ add_area_stratification <- function(survdat_weights, include_epu = F, box_locati
 
 
 
-######################################################_
+###################################################### _
 
 # # Tests
 # strat_biomass <- add_area_stratification(survdat_weights = test_lw, include_epu = F)
 # strat_bio_epu <- add_area_stratification(survdat_weights = test_lw, include_epu = T)
 
+###################################################### __####
+
+###################################################### _
+
+#' @title Get unique tows from cleaned SURVDAT trawl data
+#'
+#' @description extract the unique tows (lat, long, time) from the cleaned SURVDAT traw data, which can then be enhanced with other environmental covariates (e.g., OISST).
+#'
+#' @param survdat_clean Survdat data, after usual preparations are completed.
+#' These include removal of old strata, labeling of areas of interest, and inclusion
+#' of the annual effort in each.
+#' @param box_location String indicating value to pass to `boxpath_switch`
+#'
+#' @return survdat trawl dataframe containing one row for every unique tow
+#' @export
+#'
+#' @examples
+#' # not run
+#' # get_survdat_tows(survdat_clean = survdat_clean)
+get_survdat_tows <- function(survdat_clean) {
+
+
+  #### 1. Filter SURVDAT to unique tows and keep columns of interest   ####
+
+  # Get unique tows
+  survdat_tows <- survdat_clean %>%
+    dplyr::distinct(id, est_towdate, est_year, est_month, est_day, season, svvessel, decdeg_beglat, decdeg_beglon, survey_area, avgdepth, surftemp, surfsalin, bottemp, botsalin) %>%
+    dplyr::filter(!is.na(decdeg_beglat) & !is.na(decdeg_beglon))
+
+  # Return it
+  return(survdat_tows)
+}
+
+###################################################### _
+
+# # Tests
+# survdat_tows <- get_survdat_tows(survdat_clean = survdat_clean)
+
+###################################################### __####
+
+###################################################### _
+#' @title make SURVDAT tidy occupancy dataset
+#'
+#' @description make a tidy occupancy dataset from the cleaned SURVDAT dataset, where each row represents a unique tow - species - occupancy record for every species in species_keep. In creating this occupancy dataset, we take the total biomass or abundance across sex/sizes and impute "absence" observations, such that there is a record for every species in `species_keep` at every unique tow.
+#'
+#' @param survdat_clean Survdat data, after usual preparations are completed.
+#' These include removal of old strata, labeling of areas of interest, and inclusion
+#' of the annual effort in each.
+#' @param species_keep Vector of character species names or vector of numeric species codes to filter SURVDAT['comname'] (if character), or SURVDAT['svspp'] (if numeric)
+#'
+#' @return tidy occupancy dataframe containing one row for every unique tow-species
+#' @export
+#'
+#' @examples
+#' # not run
+#' # make_survdat_occu(survdat_clean = survdat_clean, species_keep = c("atlantic cod", "offshore hake"))
+make_survdat_occu <- function(survdat_clean, species_keep){
+
+
+  #### 1. Filter SURVDAT to species of interest based on character or numeric vector `species_keep` and aggregate abundance and biomass data for these species at each tow location   ####
+  if (all(is.character(species_keep))) {
+    presence_data <- survdat_clean %>%
+      dplyr::filter(., comname %in% species_keep)
+  } else {
+    presence_data <- survdat_clean %>%
+      dplyr::filter(., comname %in% species_keep)
+  }
+  
+  presence_data<- presence_data %>%
+      dplyr::group_by(., id, svspp, comname) %>%
+      dplyr::summarise(
+        sum_abundance = sum(abundance),
+        sum_biomass_kg = sum(unique(biomass_kg))
+      ) %>%
+      dplyr::mutate(presence = ifelse(sum_abundance > 0, 1, 0)) %>% # should all be 1s, presence = 1 if abundance >=1, presence = 0 if abundance = 0
+        dplyr::select(id, svspp, comname, presence, sum_abundance, sum_biomass_kg) %>%
+        dplyr::ungroup()
+      
+  
+  #### 2. Create dataframe with all possible tow/species combinations   ####
+  # Create a dataframe of all possible survey ID/species combinations
+  all_spp <- survdat_clean %>% distinct(comname, svspp)
+  all_id_spec_possibilites <- survdat_clean %>%
+   tidyr::expand(id, comname) %>%
+   left_join(all_spp, by = "comname") %>%
+   dplyr::filter(., comname %in% presence_data$comname)
+
+  
+  #### 3. Join all possible tow/species dataframe with presence data and impute absences   ####
+  survdat_occu<- all_id_spec_possibilites %>% 
+    dplyr::left_join(presence_data, by = c("id", "svspp", "comname")) %>%                           
+    #populate "possibilities" dataset with presence data                       
+    dplyr::mutate(presence = ifelse(is.na(presence) == T, 0, presence)) %>%     
+    dplyr::mutate(sum_biomass_kg = ifelse(is.na(sum_biomass_kg) == T, 0.000, sum_biomass_kg)) %>%  
+    dplyr::mutate(sum_abundance = ifelse(is.na(sum_abundance) == T, 0, sum_abundance)) %>%  
+    dplyr::select(id, svspp, comname, presence, sum_abundance, sum_biomass_kg) 
+ 
+  # Return it
+  return(survdat_occu)
+  
+}
+
+######################################################_
+
+# # Tests
+# survdat_occu_chr <- make_survdat_occu(survdat_clean = survdat_clean, species_keep = c("atlantic cod", "american lobster"))
+# survdat_occu_num<- make_survdat_occu(survdat_clean = survdat_clean, species_kep = c(105, 73))
+
+######################################################__####
+
+######################################################_
