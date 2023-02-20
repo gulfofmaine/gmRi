@@ -8,7 +8,7 @@
 #### a netcdf/raster object or a table may be desired
 ####
 #### Data is stored on ~/Box/RES_Data/OISST/oisst_mainstays
-#### Acccess to this folder required for these paths to work.
+#### Access to this folder required for these paths to work.
 
 
 
@@ -16,8 +16,6 @@
 ####  Research Access Paths  ####
 
 #' @title Establish Research Box Paths
-#'
-#'
 #' @description Returns list of box resource paths for quick access to commonly accessed
 #' resources. Includes the Mills lab, Res data, knowledge graph data, and oisst mainstays.
 #'

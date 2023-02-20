@@ -2,7 +2,7 @@
 % Please edit documentation in R/nefsc_groundfish_access.R
 \name{gmri_survdat_prep}
 \alias{gmri_survdat_prep}
-\title{Load survdat file with standard data filters, keep all columns}
+\title{Tidy the Survdat Dataset}
 \usage{
 gmri_survdat_prep(
   survdat = NULL,
@@ -21,9 +21,54 @@ gmri_survdat_prep(
 Returns a dataframe filtered and tidy-ed for size spectrum analysis.
 }
 \description{
-Processing function to prepare survdat data for size spectra analyses.
-Options to select various survdat pulls, or provide your own as a dataframe
-from the environment if available.
+Processing function to tidy/prepare the "survdat" groundfish survey dataset received
+from the Northeast Fisheries Science Center. This function performs all common steps done when
+preparing the data for any analyses that rely on abundance or biomass by species and the details
+of where/when they were caught.
+
+This function will by default load the most up-to-date version of the dataset that has been
+received from the NEFSC using survdat = NULL. Optionally, users may provide a dataframe
+from the environment to be prepared using the same steps.
+
+The processing steps performed by this function include:
+
+ - loading a specific survdat dataset: "most recent" loads the most current and complete dataset.
+ "bigelow" returns data sampled only by the RV bigelow, in its raw form, with no adjustments to
+ catch that transform numbers to be more consistent with the RV albatross. "bio" loads the
+ biological dataset, which contains additional details that require follow-up lab procedures like
+ age information
+
+ - Flag and create any columns that are missing or inconsistent with how the dataset has been
+ sent over time. Messages will appear in the terminal to accompany any columns created or modified
+
+ -  Perform column formatting: length and biomass are renamed to be unit specific length_cm &
+ biomass_kg. Survey stratum numbers are pulled from the longer stratum field, these are used to
+ match up to the fields of the shapefiles for them. comname values are converted to be all
+ lowercase. The id field is formatted to not read as scientific, svspp is treated as a string.
+
+ - Perform row filtering: eliminate stratum that are no longer sampled or sampled inconsistently
+ (values less than 01010 or greater than 01760 removed, in addition to 1310, 1320, 1330, 1350,
+ 1410, 1420, & 1490). Seasons are limited to Spring and Fall, the two primary sampling seasons,
+ years are limited to 1970-2020. Any rows without abundance or biomass information are dropped.
+ Select species codes are also removed (0, 285-299, 305, 306, 307, 316, 323, 910-915, 955-961,
+ 978, 979, 980, 998)
+
+ - Perform spatial filters: Data is kept for all strata within these major regional definitions:
+ "Georges Bank" = 13-23, "Gulf of Maine" = 24-40, "Southern New England"  01-12,
+ "Mid-Atlantic Bight" = 61-76.
+
+ - Perform numlen (numbers at length) adjustment: numlen is not adjusted to correct for the
+ change in survey vessels and gear that happened in 2008. These values consequently are not
+ equal to the overall abundance of a species, nor total biomass of a species which are
+ systematically adjusted to adjust for the gear change.
+
+ Because of this and also some instances of bad data, there are cases where more/less fishes are
+ measured than initially tallied* in the abundance field. This section ensures that the numlen
+ totals for a station & species are equal to abundance column (which has been adjusted already
+ for the gear change.)
+
+ - Remove any duplicate records: One final step is the verification that any duplicated records
+ are removed.
 }
 \examples{
 # not run

@@ -2,7 +2,7 @@
 % Please edit documentation in R/general_helpers.R
 \name{make_monthly}
 \alias{make_monthly}
-\title{Convert Daily Stack to Monthly Means}
+\title{Convert a Named Daily Raster to Monthly Means Stack}
 \usage{
 make_monthly(daily_ras)
 }
