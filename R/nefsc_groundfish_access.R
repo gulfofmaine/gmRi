@@ -46,8 +46,7 @@
 #'
 #'  - Perform row filtering: eliminate stratum that are no longer sampled or sampled inconsistently
 #'  (values less than 01010 or greater than 01760 removed, in addition to 1310, 1320, 1330, 1350,
-#'  1410, 1420, & 1490). Seasons are limited to Spring and Fall, the two primary sampling seasons,
-#'  years are limited to 1970-2020. Any rows without abundance or biomass information are dropped.
+#'  1410, 1420, & 1490). Any rows without abundance or biomass information are dropped.
 #'  Select species codes are also removed (0, 285-299, 305, 306, 307, 316, 323, 910-915, 955-961,
 #'  978, 979, 980, 998)
 #'
@@ -290,17 +289,6 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent", bo
     stratum != 1420,
     stratum != 1490)
 
-
-  # Filter to just Spring and Fall
-  trawldat <- dplyr::filter(trawldat, season %in% c("Spring", "Fall"))
-  trawldat <- dplyr::mutate(trawldat, season = factor(season, levels = c("Spring", "Fall")))
-
-
-  # Filter years
-  trawldat <- dplyr::filter(
-    .data = trawldat,
-    est_year >= 1970,
-    est_year < 2020)
 
   # Drop NA Biomass and Abundance Records
   trawldat <- dplyr::filter(

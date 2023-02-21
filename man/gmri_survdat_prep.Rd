@@ -48,8 +48,7 @@ The processing steps performed by this function include:
 
  - Perform row filtering: eliminate stratum that are no longer sampled or sampled inconsistently
  (values less than 01010 or greater than 01760 removed, in addition to 1310, 1320, 1330, 1350,
- 1410, 1420, & 1490). Seasons are limited to Spring and Fall, the two primary sampling seasons,
- years are limited to 1970-2020. Any rows without abundance or biomass information are dropped.
+ 1410, 1420, & 1490). Any rows without abundance or biomass information are dropped.
  Select species codes are also removed (0, 285-299, 305, 306, 307, 316, 323, 910-915, 955-961,
  978, 979, 980, 998)
 
