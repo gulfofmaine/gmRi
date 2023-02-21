@@ -802,7 +802,8 @@ add_epu_info <- function(trawldat, box_location = "root|cloudstorage"){
 #' the total areas of their respective strata.
 #'
 #' Area-stratified catch rates are calculated independently for each species, every year, within
-#' each strata.
+#' each strata, and by each season. i.e. 1982 spring cpue of acadian redfish informs the
+#' area-stratified catch of acadian redfish in spring of 1982.
 #'
 #' Constants for the area-towed and the catchability coefficient are as followed:
 #' - Area covered by an albatross standard tow in km2 = 0.0384
