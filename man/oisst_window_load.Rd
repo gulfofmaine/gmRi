@@ -7,6 +7,7 @@
 oisst_window_load(
   data_window,
   anomalies = FALSE,
+  climate_ref = "1982-2011",
   box_location = "default_boxpath|cloudstorage"
 )
 }
@@ -16,6 +17,8 @@ the data desired.}
 
 \item{anomalies}{Boolean indication of whether to return observed sst or anomalies.
 Default = TRUE.}
+
+\item{climate_ref}{String indicating the climatology to use for anomaly option "yyyy-yyyy" format, options are "1982-2011" or "1991-2020"}
 
 \item{box_location}{String indicating value to pass to `boxpath_switch`}
 }
