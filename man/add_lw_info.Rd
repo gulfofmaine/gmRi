@@ -22,6 +22,17 @@ survdat dataframe containing paired length-weight relationship details for speci
 \description{
 calculate expected biomass-at-length for species based on
 published length-weight relationships.
+
+Species are matched against a spreadsheet containing length and weight information from 2
+sources. The first source is the length-weight relationships detailed in Wigley et al. 2003:
+"Length-weight relationships for 74 fish species collected during NEFSC research vessel bottom
+trawl surveys, 1992-99".
+
+The second source for matching growth details to species is fishbase. These values are known to
+be potentially less accurate or less regionally specific.
+
+Pairings are first checked against the Wigley paper, and then by fishbase, to provide preference
+to the more regionally focused source.
 }
 \examples{
 # not run

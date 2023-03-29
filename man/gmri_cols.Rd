@@ -4,12 +4,10 @@
 \alias{gmri_cols}
 \title{Retrieve GMRI Hex Color(s)}
 \usage{
-gmri_cols(..., as_char = FALSE)
+gmri_cols(...)
 }
 \arguments{
 \item{...}{Character names of official GMRI colors}
-
-\item{as_char}{Boolean T/F determining how the values should be returned. Character values can be passed directly in places a color hexcode is desired.}
 }
 \description{
 Return hex codes in return for named GMRI colors.

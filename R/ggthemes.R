@@ -7,7 +7,6 @@
 
 
 
-# Building a GMRI theme based on Wall street Journal and NYTimes theme
 # base settings from {ggthemes}
 #' @title GMRI ggplot2 theme for blog-style plots
 #'
@@ -56,7 +55,7 @@ theme_gmri <- function(base_size = 10,
 
       # Legend Elements
       legend.background = ggplot2::element_rect(),
-      legend.position   = "top",
+      legend.position   = "bottom",
       legend.direction  = "horizontal",
       legend.box        = "vertical",
       legend.title      = ggplot2::element_text(size = 9),
@@ -65,7 +64,7 @@ theme_gmri <- function(base_size = 10,
       # Panel/Grid Setup
       panel.grid         = ggplot2::element_line(colour = NULL,
                                                  linetype = 3,
-                                                 size = 0.3,
+                                                 linewidth = 0.3,
                                                  color = "gray80"),
       panel.grid.major   = ggplot2::element_line(colour = "black"),
       panel.grid.major.x = ggplot2::element_blank(),
@@ -77,7 +76,6 @@ theme_gmri <- function(base_size = 10,
       plot.caption  = ggplot2::element_text(size = 7.2,
                                             margin = ggplot2::margin(t = 20),
                                             color = "gray40"),
-      #plot.margin  = ggplot2::unit(c(1, 1, 1, 1), "lines"),
       plot.margin   = ggplot2::unit(c(1, 1, 2, 1), "lines"),
 
       # Facet Details
@@ -85,7 +83,7 @@ theme_gmri <- function(base_size = 10,
       strip.background = ggplot2::element_rect(
         color = "white",
         fill = facet_hex,
-        size = 1,
+        linewidth = 1,
         linetype="solid")) +
     # Add any additional theme calls to tweak on the fly
     ggplot2::theme(...)
@@ -153,7 +151,7 @@ map_theme <- function(...){
 # # getting path to fonts from gmRi package, should work for any user:
 # gmri_font_paths <- paste0(system.file("stylesheets", package = "gmRi"), "/Fonts/")
 #
-# # Adding  the fonts is another challenge after that
+# # Adding the fonts is another challenge after that
 # sysfonts::font_add("http://fast.fonts.net/t/1.css?apiType=css&projectid=806f61f6-d695-4965-a878-820b50bc0269")
 #
 # # doesn't work

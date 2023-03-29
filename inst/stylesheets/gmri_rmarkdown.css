@@ -68,47 +68,46 @@
 
 /* Level 1 Headers */
 h1 { text-align: left;
-	 margin: 10px 0 15px 0; 
-	 font-size: 38px; 
+	 margin: 10px 0 15px 0;
+	 margin-top: 40px;
+	 font-size: 38px;
 	 font-family: Avenir;
-} 
+}
 
 
 /* Headers 2 - 6 */
-h2, h3, h4, h5, h6 { 
-	color: #333333; 
-	margin: 20px 0 5px 0; 
+h2, h3, h4, h5, h6 {
+	color: #333333;
+	margin: 20px 0 5px 0;
 	text-align: left;
 	font-family: Avenir;}
 
 
 /* Sizing/font For Each Header Type */
-h2 { font-size: 24px; }
-h3 { font-size: 20px; }
-h4 { font-size: 18px; }
-h5 { font-size: 16px; font-weight: normal; color: #3069aa; text-decoration: underline;}
-h6 { font-size: 14px; font-weight: normal; color: #3069aa; }
+h2, .h2 { font-size: 24px; margin-top: 40px;}
+h3, .h3 { font-size: 20px; margin-top: 40px;}
+h4, .h4 { font-size: 18px;}
+h5 { font-size: 16px; margin-top: 40px;font-weight: normal; color: #3069aa; text-decoration: underline;}
+h6 { font-size: 14px; margin-top: 40px;font-weight: normal; color: #3069aa; }
 
 
 /* Paragraph Text */
-p, ol { margin-top: 10px; 
+p, ol { margin-top: 10px;
 	font-family: 'Raleway', sans-serif;}
+
+/* Figure & Table Captions */
+figure, figcaption, .figure-caption {font-size: 12px; color: #5a6570}
+caption {font-size: 12px; color: #5a6570}
 
 
 /* Title Author and Date Headers */
 h1.title.toc-ignore {margin-top: 10px;}
 h4.author, h4.date {
 	color: rgb(0,115,109);
-	margin-top: 0px; 
-	margin-bottom: 5px; 
+	margin-top: 0;
+	margin-bottom: 5px;
 	font-size: 12px;}
 
-
-
-/* Add Spacing Above Headers */
-h1, .h1, h2, .h2, h3, .h3 {
-    margin-top: 40px;
-}
 
 
 /* Links */
@@ -155,20 +154,19 @@ a {
 
 
 /* Second Level Tabs - Active */
-.nav.nav-tabs > li.active  > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
+.nav-tabs > li.active  > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
     color: #fff;
     background-color: rgb(83,83,83) ;
     }
 
 /* Second Level Tabs - Inactive */
-.nav.nav-tabs > li  > a, .nav-tabs > li > a:hover, .nav-tabs > li > a:focus {
+.nav-tabs > li  > a, .nav-tabs > li > a:hover, .nav-tabs > li > a:focus {
     color: rgb(83,83,83);
     background-color: #fff;
     }
 
 
 
-/********** End Core Style Sheet **********/
 /********** End Core Style Sheet **********/
 
 

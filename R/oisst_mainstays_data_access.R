@@ -8,7 +8,7 @@
 #### a netcdf/raster object or a table may be desired
 ####
 #### Data is stored on ~/Box/RES_Data/OISST/oisst_mainstays
-#### Acccess to this folder required for these paths to work.
+#### Access to this folder required for these paths to work.
 
 
 
@@ -16,8 +16,6 @@
 ####  Research Access Paths  ####
 
 #' @title Establish Research Box Paths
-#'
-#'
 #' @description Returns list of box resource paths for quick access to commonly accessed
 #' resources. Includes the Mills lab, Res data, knowledge graph data, and oisst mainstays.
 #'
@@ -406,7 +404,7 @@ get_timeseries_paths <- function(
 #' #    box_location = "default_boxpath|cloudstorage)
 oisst_access_timeseries <- function(
     region_family = "gmri",
-    poly_name = "gulf of maine",
+    poly_name = "apershing gulf of maine",
     box_location = "default_boxpath|cloudstorage"){
 
 
@@ -454,7 +452,7 @@ oisst_access_timeseries <- function(
     "gmri focus areas"            = paste0(source_path, "regional_timeseries/gmri_sst_focal_areas/"),
     "gmri focal areas"            = paste0(source_path, "regional_timeseries/gmri_sst_focal_areas/"),
     "gulf of maine"               = paste0(source_path, "regional_timeseries/gmri_sst_focal_areas/"),
-    "gmri"               = paste0(source_path, "regional_timeseries/gmri_sst_focal_areas/"),
+    "gmri"                        = paste0(source_path, "regional_timeseries/gmri_sst_focal_areas/"),
     "nelme regions"               = paste0(source_path, "regional_timeseries/NELME_regions/"),
     "gom physio regions"          = paste0(source_path, "regional_timeseries/GulfOfMainePhysioRegions/"))
 
@@ -548,6 +546,7 @@ oisst_access_timeseries <- function(
 #' the data desired.
 #' @param anomalies Boolean indication of whether to return observed sst or anomalies.
 #' Default = TRUE.
+#' @param climate_ref String indicating the climatology to use for anomaly option "yyyy-yyyy" format, options are "1982-2011" or "1991-2020"
 #' @param box_location String indicating value to pass to `boxpath_switch`
 #'
 #' @return Raster stack of OISSTv2 data using desired dimensions to crop
@@ -560,7 +559,7 @@ oisst_access_timeseries <- function(
 #'#                           lat = c(42,44),
 #'#                           time = as.Date(c("2016-08-01", "2020-12-31")))
 #'
-oisst_window_load <- function(data_window, anomalies = FALSE, box_location = "default_boxpath|cloudstorage"){
+oisst_window_load <- function(data_window, anomalies = FALSE, climate_ref = "1982-2011", box_location = "default_boxpath|cloudstorage"){
 
   # Switch for Mojave users or other mac versions with CloudStorage folder
   path_fun <- boxpath_switch(box_location = box_location)
@@ -579,11 +578,22 @@ oisst_window_load <- function(data_window, anomalies = FALSE, box_location = "de
 
     # Accessing Anomalies
   } else if(anomalies == TRUE){
-    file_names <- list.files(stringr::str_c(oisst_path, "annual_anomalies/1982to2011_climatology"))
-    file_paths <- stringr::str_c(oisst_path, "annual_anomalies/1982to2011_climatology/", file_names)
-    file_paths <- file_paths[stringr::str_detect(file_paths, ".nc")]     # No .zarr files
-    file_years <- stringr::str_sub(file_paths, -7, -4)                   # Yr Labels
+
+    # Check that an available climatology is used
+    ref_ops <- c("1982-2011", "1991-2020")
+    if(climate_ref %in% ref_ops == FALSE){stop("Error: climate_ref must be one of either '1982-2011' or '1991-2020'.")}
+
+    # Choose folder to match climatology
+    ref_folder <- switch(climate_ref,
+      "1982-2011" = "annual_anomalies/1982to2011_climatology",
+      "1991-2020" = "annual_anomalies/1991to2020_climatology")
+    anom_folder <- stringr::str_c(oisst_path, ref_folder)
+    file_names <- list.files(anom_folder)
+    file_paths <- stringr::str_c(anom_folder, "/", file_names)
+    file_paths <- file_paths[stringr::str_detect(file_paths, ".nc")]       # No .zarr files
+    file_years <- stringr::str_sub(file_paths, -7, -4)                     # Yr Labels
     file_paths <- stats::setNames(file_paths, file_years)
+    #return(file_names)
   }
 
 
@@ -612,7 +622,7 @@ oisst_window_load <- function(data_window, anomalies = FALSE, box_location = "de
   } else {
     message("Time dimension not of class 'Date', all years returned.")
     time_min <- as.Date("1981-01-01")
-    time_max <- as.Date("2020-12-31")
+    time_max <- as.Date("2023-12-31")
   }
 
 
