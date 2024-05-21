@@ -3,15 +3,17 @@
 
 ####  Colors  ####
 gmri_colors <- c(
-  `orange`    =  "#EA4F12",
-  `yellow`    =  "#EACA00",
-  `gmri green`=  "#ABB400",
-  `dark green`=  "#3B4620",
-  `green`     =  "#407331",
-  `teal`      =  "#00736D",
-  `gmri blue` =  "#00608A",
-  `light gray`=  "#E9E9E9",
-  `dark gray` =  "#535353"
+  `orange`     =  "#EA4F12",
+  `yellow`     =  "#EACA00",
+  `gmri green` =  "#ABB400",
+  `light green`=  "#ABB400",
+  `dark green` =  "#3B4620",
+  `green`      =  "#407331",
+  `teal`       =  "#00736D",
+  `blue`       =  "#00608A",
+  `gmri blue`  =  "#00608A",
+  `light gray` =  "#E9E9E9",
+  `dark gray`  =  "#535353"
 )
 
 
@@ -22,7 +24,6 @@ gmri_colors <- c(
 #' green, teal, gmri blue, light gray, & dark gray.
 #'
 #' @param ... Character names of official GMRI colors
-#' @param as_char Boolean T/F determining how the values should be returned. Character values can be passed directly in places a color hexcode is desired.
 #' @export
 #'
 #' @examples
@@ -40,23 +41,21 @@ gmri_colors <- c(
 #' ggplot2::ggplot(mtcars, ggplot2::aes(hp, mpg)) +
 #'   ggplot2::geom_point(color = gmri_cols("gmri blue"), size = 4, alpha = .8)
 #'
-gmri_cols <- function(...,  as_char = FALSE) {
+gmri_cols <- function(...) {
   cols <- c(...)
 
-  if (as_char == FALSE) {
-   if (is.null(cols))
+  if (is.null(cols)){
       return (gmri_colors)
-  }
-
-  if (as_char == TRUE) {
-    if (is.null(cols))
-      return (as.character(gmri_colors))
   }
 
 
   # If nothing is entered into the function return them all
-  gmri_colors[cols]
+  return_cols <- gmri_colors[cols]
+  names(return_cols) <- NULL
+  return_cols
 }
+
+
 
 
 
@@ -64,14 +63,19 @@ gmri_cols <- function(...,  as_char = FALSE) {
 gmri_palettes <- list(
   # Main palette
   `main`  = gmri_cols("gmri blue", "green", "gmri green",  "yellow", "orange"),
+
   # Cool palette
   `cool`  = gmri_cols("gmri blue", "dark green", "teal"),
+
   # Hot palette
   `hot`   = gmri_cols("gmri green", "yellow", "orange"),
+
   # Mixed palette
   `mixed` = gmri_cols("orange", "yellow", "gmri green", "dark green", "green", "teal", "gmri blue"),
+
   # Gray
   `gray`  = gmri_cols("light gray", "dark gray"),
+
   # Grey for british people
   `grey`  = gmri_cols("light gray", "dark gray")
 )

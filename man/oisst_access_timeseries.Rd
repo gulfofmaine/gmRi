@@ -6,7 +6,7 @@
 \usage{
 oisst_access_timeseries(
   region_family = "gmri",
-  poly_name = "gulf of maine",
+  poly_name = "apershing gulf of maine",
   box_location = "default_boxpath|cloudstorage"
 )
 }

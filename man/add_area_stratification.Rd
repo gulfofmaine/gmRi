@@ -21,9 +21,18 @@ add_area_stratification(
 survdat df with fields for area stratified values
 }
 \description{
-Take the survdat data paired with length weight relationships and
-return estimates of area stratified catch rates and their expected abundances and
-biomasses when applied to the total areas of stratum.
+Take the survdat data which has been cleaned with gmRi::gmri_survdat_prep, that is
+paired with length weight relationships using gmRi::add_lw_info and estimate the area stratified
+catch rates and their expected abundances and biomasses when those catch rates are applied to
+the total areas of their respective strata.
+
+Area-stratified catch rates are calculated independently for each species, every year, within
+each strata, and by each season. i.e. 1982 spring cpue of acadian redfish informs the
+area-stratified catch of acadian redfish in spring of 1982.
+
+Constants for the area-towed and the catchability coefficient are as followed:
+- Area covered by an albatross standard tow in km2 = 0.0384
+- Catchability coefficient - ideally should change for species guilds: q = 1
 }
 \examples{
 # not run
