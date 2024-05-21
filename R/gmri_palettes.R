@@ -3,17 +3,17 @@
 
 ####  Colors  ####
 gmri_colors <- c(
-  `orange`    =  "#EA4F12",
-  `yellow`    =  "#EACA00",
-  `gmri green`=  "#ABB400",
-  `green`=  "#ABB400",
-  `dark green`=  "#3B4620",
-  `green`     =  "#407331",
-  `teal`      =  "#00736D",
-  `blue` =  "#00608A",
-  `gmri blue` =  "#00608A",
-  `light gray`=  "#E9E9E9",
-  `dark gray` =  "#535353"
+  `orange`     =  "#EA4F12",
+  `yellow`     =  "#EACA00",
+  `gmri green` =  "#ABB400",
+  `light green`=  "#ABB400",
+  `dark green` =  "#3B4620",
+  `green`      =  "#407331",
+  `teal`       =  "#00736D",
+  `blue`       =  "#00608A",
+  `gmri blue`  =  "#00608A",
+  `light gray` =  "#E9E9E9",
+  `dark gray`  =  "#535353"
 )
 
 

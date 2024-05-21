@@ -11,3 +11,5 @@ doc/www
 
 # Testing Space
 testing/
+inst/stylesheets/Avenir.ttc
+inst/stylesheets/Font/

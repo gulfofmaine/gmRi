@@ -21,12 +21,20 @@
 #'
 #' @examples ggplot2::ggplot(mtcars) + theme_gmri()
 theme_gmri <- function(base_size = 10,
-                       base_family = "sans",
+                       base_family  = "sans",
                        title_family = "sans",
-                       facet_color = "teal",
+                       facet_color  = "teal",
                        ...) {
-  # Color from gmRi palette, sets background color
-  facet_hex <- gmri_cols()[facet_color]
+
+  # Color from gmRi palette, sets background color for facet strips
+  if(facet_color %in% c(
+    "orange", "yellow", "gmri green", "light green", "dark green",
+    "green", "teal", "blue", "gmri blue", "light gray", "dark gray")){
+    facet_hex <- gmri_cols()[facet_color]
+  } else {
+    facet_hex <- facet_color
+  }
+
 
   # Set up theme
   gmri_ggtheme <- ggthemes::theme_foundation(
@@ -36,9 +44,10 @@ theme_gmri <- function(base_size = 10,
 
       # Major Elements
       line = ggplot2::element_line(linetype = 1, colour = "black"),
-      rect = ggplot2::element_rect(fill = "transparent",
-                                   linetype = 0,
-                                   colour = NA),
+      rect = ggplot2::element_rect(
+        fill = "transparent",
+        linetype = 0,
+        colour = NA),
       text  = ggplot2::element_text(colour = "black"),
       title = ggplot2::element_text(family = title_family, size = 12),
 
@@ -55,17 +64,15 @@ theme_gmri <- function(base_size = 10,
 
       # Legend Elements
       legend.background = ggplot2::element_rect(),
-      legend.position   = "bottom",
-      legend.direction  = "horizontal",
-      legend.box        = "vertical",
       legend.title      = ggplot2::element_text(size = 9),
       legend.text       = ggplot2::element_text(size = 9),
 
       # Panel/Grid Setup
-      panel.grid         = ggplot2::element_line(colour = NULL,
-                                                 linetype = 3,
-                                                 linewidth = 0.3,
-                                                 color = "gray80"),
+      panel.grid = ggplot2::element_line(
+        colour = NULL,
+        linetype = 3,
+        linewidth = 0.3,
+        color = "gray80"),
       panel.grid.major   = ggplot2::element_line(colour = "black"),
       panel.grid.major.x = ggplot2::element_blank(),
       panel.grid.minor   = ggplot2::element_blank(),
@@ -81,10 +88,11 @@ theme_gmri <- function(base_size = 10,
       # Facet Details
       strip.text = ggplot2::element_text(color = "white", face = "bold", size = 11),
       strip.background = ggplot2::element_rect(
-        color = "white",
+        color = "transparent",
         fill = facet_hex,
         linewidth = 1,
         linetype="solid")) +
+
     # Add any additional theme calls to tweak on the fly
     ggplot2::theme(...)
 
