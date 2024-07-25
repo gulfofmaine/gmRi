@@ -3,25 +3,26 @@
 
 ####  Colors  ####
 gmri_colors <- c(
-  `orange`     =  "#EA4F12",
-  `yellow`     =  "#EACA00",
-  `gmri green` =  "#ABB400",
-  `light green`=  "#ABB400",
-  `dark green` =  "#3B4620",
-  `green`      =  "#407331",
-  `teal`       =  "#00736D",
-  `blue`       =  "#00608A",
-  `gmri blue`  =  "#00608A",
-  `light gray` =  "#E9E9E9",
-  `dark gray`  =  "#535353"
+`seafood purple`     = "#773891",
+`midnight blue`      = "#363b45",
+`dark blue`          = "#004966",
+`gmri blue`          = "#00608a",
+`ecosystems cyan`    = "#07a3b7",
+`blue economy teal`  = "#057872",
+`moss green`         = "#38431d",
+`warm yellow`        = "#ebcb27",
+`lv orange`          = "#ea4f12",
+`climate change red` = "#b94a40",
+`light gray`         = "#E9E9E9",
+`dark gray`          = "#535353"
 )
-
 
 #' @title Retrieve GMRI Hex Color(s)
 #'
 #' @description Return hex codes in return for named GMRI colors.
-#' Available options are: orange, yellow, gmri_green, dark green,
-#' green, teal, gmri blue, light gray, & dark gray.
+#' Available options are: seafood purple, midnight blue, dark blue, gmri blue,
+#' ecosystems cyan, blue economy teal, moss green, warm yellow, lv orange, climate
+#' change red, light gray, & dark gray.
 #'
 #' @param ... Character names of official GMRI colors
 #' @export
@@ -32,7 +33,7 @@ gmri_colors <- c(
 #' gmri_cols("gmri blue")
 #'
 #' #Multiple colors
-#' gmri_cols("gmri blue", "gmri green")
+#' gmri_cols("gmri blue", "moss green")
 #'
 #' #Get the whole list of colors
 #' gmri_cols()
@@ -62,16 +63,16 @@ gmri_cols <- function(...) {
 ####  Palettes  ####
 gmri_palettes <- list(
   # Main palette
-  `main`  = gmri_cols("gmri blue", "green", "gmri green",  "yellow", "orange"),
+  `main`  = gmri_cols("gmri blue", "blue economy teal", "moss green", "warm yellow", "lv orange"),
 
   # Cool palette
-  `cool`  = gmri_cols("gmri blue", "dark green", "teal"),
+  `cool`  = gmri_cols("midnight blue", "gmri blue", "moss green", "ecosystem cyan"),
 
   # Hot palette
-  `hot`   = gmri_cols("gmri green", "yellow", "orange"),
+  `hot`   = gmri_cols("warm yellow", "lv orange", "climate change red"),
 
   # Mixed palette
-  `mixed` = gmri_cols("orange", "yellow", "gmri green", "dark green", "green", "teal", "gmri blue"),
+  `mixed` = gmri_cols("lv orange", "warm yellow", "moss green", "gmri blue", "dark blue", "seafood purple"),
 
   # Gray
   `gray`  = gmri_cols("light gray", "dark gray"),

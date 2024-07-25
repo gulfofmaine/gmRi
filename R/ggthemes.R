@@ -23,13 +23,14 @@
 theme_gmri <- function(base_size = 10,
                        base_family  = "sans",
                        title_family = "sans",
-                       facet_color  = "teal",
+                       facet_color  = "blue economy teal",
                        ...) {
 
   # Color from gmRi palette, sets background color for facet strips
   if(facet_color %in% c(
-    "orange", "yellow", "gmri green", "light green", "dark green",
-    "green", "teal", "blue", "gmri blue", "light gray", "dark gray")){
+    "seafood purple", "midnight blue", "dark blue", "gmri blue", "ecosystems cyan",
+    "blue economy teal", "moss green", "warm yellow", "lv orange", "climate change red",
+    "light gray", "dark gray")){
     facet_hex <- gmri_cols()[facet_color]
   } else {
     facet_hex <- facet_color
