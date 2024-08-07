@@ -82,7 +82,7 @@ shared.path <- function(os.use = "unix",
       # If group is specified use switch() to set it
       if (!is.null(group)) {
       path.out <- switch(tolower(group),
-        "res data"                   = paste0("C:/Users/", user.name, "/Box/RES_Data/",  folder),
+        "res data"                   = paste0("C:/Users/", user.name, "/RES_Data/",  folder),
         "res_data"                   = paste0("C:/Users/", user.name, "/Box/RES_Data/",  folder),
         "res"                        = paste0("C:/Users/", user.name, "/Box/RES_Data/",  folder),
         "mills lab"                  = paste0("C:/Users/", user.name, "/Box/Mills Lab/", folder),
@@ -122,7 +122,7 @@ box_path <- function(box_group = NULL, subfolder = NULL){
 
   # Base root to box
   box_root <- paste0(normalizePath("~/"), "/Box/")
-  
+
   # Base root to box (for windows)
   # fixes direction of slash and removes "/Documents" from path name
   if(.Platform$OS.type=="windows"){box_root<-paste0(stringr::str_sub(normalizePath("~/",winslash="/"),end=-11),"/Box/")}
@@ -214,7 +214,6 @@ cs_path <- function(box_group = NULL, subfolder = NULL){
 }
 
 
-
 #' @title Box Path Switcher for Mac Storage Location
 #'
 #' @description Toggles the root location of Box cloud storage based on whether a box was mounted
@@ -232,7 +231,7 @@ cs_path <- function(box_group = NULL, subfolder = NULL){
 boxpath_switch <- function(box_location = "base"){
 
   # Toggle function to use based on how Box is mounted on computer
-  path_fun <- ifelse(tolower(box_location) %in% c("cloudstorage", "mojave"),
+  path_fun <- ifelse(tolower(box_location) %in% c("cloudstorage", "sonoma"), # updated from mojave
                      gmRi::cs_path,
                      gmRi::box_path)
   return(path_fun)

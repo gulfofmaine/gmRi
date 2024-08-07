@@ -107,9 +107,9 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent", bo
     "2020"        = paste0(nmfs_path,  "SURVDAT_archived/Survdat_Nye_Aug 2020.RData"),
     "2021"        = paste0(nmfs_path,  "SURVDAT_archived/survdat_slucey_01152021.RData"),
     "bigelow"     = paste0(nmfs_path,  "SURVDAT_current/survdat_Bigelow_slucey_01152021.RData"),
-    "most recent" = paste0(nmfs_path,  "SURVDAT_current/NEFSC_BTS_all_seasons_03032021.RData"),
+    "most recent" = paste0(nmfs_path,  "SURVDAT_current/survdat_lw.rds"),
+    # "most recent" = paste0(nmfs_path,  "SURVDAT_current/NEFSC_BTS_all_seasons_03032021.RData"),
     "bio"         = paste0(nmfs_path,  "SURVDAT_current/NEFSC_BTS_2021_bio_03192021.RData") )
-
 
 
   # If providing a starting point for survdat pass it in:
@@ -119,8 +119,9 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent", bo
   } else if(is.null(survdat) == TRUE){
 
     # If not then load using the correct path
-    load(survdat_path)
-    survdat <- as.data.frame(survdat)
+    # load(survdat_path)
+    # survdat <- as.data.frame(survdat)
+    survdat <- readRDS(survdat_path)
 
 
     # Bigelow data doesn't load in as "survdat"
@@ -131,7 +132,7 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent", bo
 
     # Most recent pulls load a list containing survdat
     if(survdat_source %in% c("bio", "most recent")){
-      survdat <- survey$survdat
+      survdat <- survdat$survdat
       survdat <- as.data.frame(survdat)}
 
     # clean names up for convenience
@@ -299,10 +300,10 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent", bo
   # Exclude the Skrimps
   trawldat <-  dplyr::filter(
     .data = trawldat,
-    svspp %not in% c(285:299, 305, 306, 307, 316, 323, 910:915, 955:961))
+    !svspp %in% c(285:299, 305, 306, 307, 316, 323, 910:915, 955:961)) # originally %not in%
 
   # Exclude the unidentified fish
-  trawldat <- dplyr::filter(trawldat, svspp %not in% c(0, 978, 979, 980, 998))
+  trawldat <- dplyr::filter(trawldat, !svspp %in% c(0, 978, 979, 980, 998))  # originally %not in%
 
 
   # # Restrict to only the Albatross and Henry Bigelow? - eliminates 1989-1991
@@ -438,13 +439,10 @@ gmri_survdat_prep <- function(survdat = NULL, survdat_source = "most recent", bo
 }
 
 
-
-
 ######################################################_
 
 # Test
-# test_survdat <- gmri_survdat_prep(survdat_source = "most recent")
-
+#test_survdat <- gmri_survdat_prep(survdat_source = "most recent", box_location = "CloudStorage")
 
 
 ######################################################__####
@@ -1077,7 +1075,7 @@ make_survdat_occu <- function(survdat_clean, species_keep){
     presence_data <- survdat_clean %>%
       dplyr::filter(., comname %in% species_keep)
   }
-  
+
   presence_data<- presence_data %>%
       dplyr::group_by(., id, svspp, comname) %>%
       dplyr::summarise(
@@ -1087,8 +1085,8 @@ make_survdat_occu <- function(survdat_clean, species_keep){
       dplyr::mutate(presence = ifelse(sum_abundance > 0, 1, 0)) %>% # should all be 1s, presence = 1 if abundance >=1, presence = 0 if abundance = 0
         dplyr::select(id, svspp, comname, presence, sum_abundance, sum_biomass_kg) %>%
         dplyr::ungroup()
-      
-  
+
+
   #### 2. Create dataframe with all possible tow/species combinations   ####
   # Create a dataframe of all possible survey ID/species combinations
   all_spp <- survdat_clean %>% distinct(comname, svspp)
@@ -1097,19 +1095,19 @@ make_survdat_occu <- function(survdat_clean, species_keep){
    left_join(all_spp, by = "comname") %>%
    dplyr::filter(., comname %in% presence_data$comname)
 
-  
+
   #### 3. Join all possible tow/species dataframe with presence data and impute absences   ####
-  survdat_occu<- all_id_spec_possibilites %>% 
-    dplyr::left_join(presence_data, by = c("id", "svspp", "comname")) %>%                           
-    #populate "possibilities" dataset with presence data                       
-    dplyr::mutate(presence = ifelse(is.na(presence) == T, 0, presence)) %>%     
-    dplyr::mutate(sum_biomass_kg = ifelse(is.na(sum_biomass_kg) == T, 0.000, sum_biomass_kg)) %>%  
-    dplyr::mutate(sum_abundance = ifelse(is.na(sum_abundance) == T, 0, sum_abundance)) %>%  
-    dplyr::select(id, svspp, comname, presence, sum_abundance, sum_biomass_kg) 
- 
+  survdat_occu<- all_id_spec_possibilites %>%
+    dplyr::left_join(presence_data, by = c("id", "svspp", "comname")) %>%
+    #populate "possibilities" dataset with presence data
+    dplyr::mutate(presence = ifelse(is.na(presence) == T, 0, presence)) %>%
+    dplyr::mutate(sum_biomass_kg = ifelse(is.na(sum_biomass_kg) == T, 0.000, sum_biomass_kg)) %>%
+    dplyr::mutate(sum_abundance = ifelse(is.na(sum_abundance) == T, 0, sum_abundance)) %>%
+    dplyr::select(id, svspp, comname, presence, sum_abundance, sum_biomass_kg)
+
   # Return it
   return(survdat_occu)
-  
+
 }
 
 ######################################################_
@@ -1121,3 +1119,4 @@ make_survdat_occu <- function(survdat_clean, species_keep){
 ######################################################__####
 
 ######################################################_
+

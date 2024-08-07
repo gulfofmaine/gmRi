@@ -63,7 +63,7 @@ gmri_cols <- function(...) {
 ####  Palettes  ####
 gmri_palettes <- list(
   # Main palette
-  `main`  = gmri_cols("gmri blue", "blue economy teal", "moss green", "warm yellow", "lv orange"),
+  `main`  = gmri_cols("gmri blue", "ecosytem cyan", "moss green", "warm yellow", "lv orange"),
 
   # Cool palette
   `cool`  = gmri_cols("midnight blue", "gmri blue", "moss green", "ecosystem cyan"),
