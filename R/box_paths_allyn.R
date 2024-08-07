@@ -82,7 +82,7 @@ shared.path <- function(os.use = "unix",
       # If group is specified use switch() to set it
       if (!is.null(group)) {
       path.out <- switch(tolower(group),
-        "res data"                   = paste0("C:/Users/", user.name, "/RES_Data/",  folder),
+        "res data"                   = paste0("C:/Users/", user.name, "/Box/RES_Data/",  folder),
         "res_data"                   = paste0("C:/Users/", user.name, "/Box/RES_Data/",  folder),
         "res"                        = paste0("C:/Users/", user.name, "/Box/RES_Data/",  folder),
         "mills lab"                  = paste0("C:/Users/", user.name, "/Box/Mills Lab/", folder),
