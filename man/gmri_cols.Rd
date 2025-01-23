@@ -11,8 +11,9 @@ gmri_cols(...)
 }
 \description{
 Return hex codes in return for named GMRI colors.
-Available options are: orange, yellow, gmri_green, dark green,
-green, teal, gmri blue, light gray, & dark gray.
+Available options are: seafood purple, midnight blue, dark blue, gmri blue,
+ecosystems cyan, blue economy teal, moss green, warm yellow, lv orange, climate
+change red, light gray, & dark gray.
 }
 \examples{
 
@@ -20,7 +21,7 @@ green, teal, gmri blue, light gray, & dark gray.
 gmri_cols("gmri blue")
 
 #Multiple colors
-gmri_cols("gmri blue", "gmri green")
+gmri_cols("gmri blue", "moss green")
 
 #Get the whole list of colors
 gmri_cols()

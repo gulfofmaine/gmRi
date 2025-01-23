@@ -8,7 +8,7 @@ theme_gmri(
   base_size = 10,
   base_family = "sans",
   title_family = "sans",
-  facet_color = "teal",
+  facet_color = "blue economy teal",
   ...
 )
 }
