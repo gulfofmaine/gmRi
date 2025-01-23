@@ -1019,7 +1019,6 @@ add_area_stratification <- function(survdat_weights, include_epu = F, box_locati
 #' @param survdat_clean Survdat data, after usual preparations are completed.
 #' These include removal of old strata, labeling of areas of interest, and inclusion
 #' of the annual effort in each.
-#' @param box_location String indicating value to pass to `boxpath_switch`
 #'
 #' @return survdat trawl dataframe containing one row for every unique tow
 #' @export
