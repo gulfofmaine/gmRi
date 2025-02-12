@@ -9,6 +9,7 @@ gmri_colors <- c(
 `gmri blue`          = "#00608a",
 `ecosystems cyan`    = "#07a3b7",
 `blue economy teal`  = "#057872",
+`kelp green`         = "#ABB400",
 `moss green`         = "#38431d",
 `warm yellow`        = "#ebcb27",
 `lv orange`          = "#ea4f12",
